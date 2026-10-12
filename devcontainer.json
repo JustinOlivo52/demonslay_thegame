@@ -1,0 +1,12 @@
+{
+  "name": "DemonSlay development",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-24-bookworm",
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "DemonSlay game",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "postCreateCommand": "npm ci"
+}
