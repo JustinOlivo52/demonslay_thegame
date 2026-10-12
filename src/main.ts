@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { RULES as R, inSwordArc } from './combat';
+import { RES, SLAYER, KATANA, DEMON, drawSlayer, drawKatana, drawDemon, type SlayerFrame, type DemonFrame } from './art';
 import './style.css';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
@@ -11,22 +12,14 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 
 const W = 1000, H = 620;
 const SERIF = 'Marcellus, Georgia, serif', SANS = '"DM Sans", sans-serif', KANJI = '"Noto Serif JP", "Hiragino Mincho ProN", serif';
-const PS = 1.45, DS = 1.65;
+const PLAYER_FEET = 34, DEMON_FEET = 40, CS = 1.2, TAU = Math.PI * 2;
 const LANTERNS = [{x: 30, y: 325}, {x: 970, y: 325}];
 
 type Mode = 'ready' | 'playing' | 'paused' | 'lost' | 'won';
 type Particle = {x: number; y: number; vx: number; vy: number; life: number; max: number; size: number; color: number; drag: number; gravity: number; glow: boolean};
 type Petal = {x: number; y: number; vx: number; vy: number; rot: number; spin: number; color: number};
-type Ghost = {x: number; y: number; facing: number; life: number};
+type Ghost = {x: number; y: number; facing: number; life: number; frame: string};
 type Floater = {text: Phaser.GameObjects.Text; life: number};
-type Pose = {facing: number; bob: number; step: number; tint: number; amount: number; alpha: number};
-
-// Blend two 0xRRGGBB colours; used for hit flashes, dodge tint and ghosts.
-function mix(a: number, b: number, t: number): number {
-  if (t <= 0) return a;
-  const k = Math.min(1, t), ch = (s: number) => Math.round(((a >> s) & 255) + (((b >> s) & 255) - ((a >> s) & 255)) * k);
-  return (ch(16) << 16) | (ch(8) << 8) | ch(0);
-}
 
 // Deterministic random numbers so the painted scenery is identical on every load.
 function seeded(seed: number) {
@@ -137,7 +130,6 @@ function paintHurt(ctx: CanvasRenderingContext2D) {
 
 class Arena extends Phaser.Scene {
   private under!: Phaser.GameObjects.Graphics;
-  private actors!: Phaser.GameObjects.Graphics;
   private over!: Phaser.GameObjects.Graphics;
   private glow!: Phaser.GameObjects.Graphics;
   private top!: Phaser.GameObjects.Graphics;
@@ -159,6 +151,8 @@ class Arena extends Phaser.Scene {
   private clock = 0; private walk = 0; private moving = false; private demonWalk = 0;
   private hitFlash = 0; private hurtFx = 0; private ehpShown = R.enemyHealth; private deathFade = 0; private endDelay = 0; private ghostTimer = 0; private overlayAlpha = 0;
   private particles: Particle[] = []; private petals: Petal[] = []; private ghosts: Ghost[] = []; private floaters: Floater[] = [];
+  private player!: Phaser.GameObjects.Image; private katana!: Phaser.GameObjects.Image; private arm!: Phaser.GameObjects.Graphics;
+  private demonSprite!: Phaser.GameObjects.Image; private ghostPool: Phaser.GameObjects.Image[] = []; private demonEyes: Record<string, [number, number][]> = {};
   private playerFlash = 0; private clawLife = 0; private clawAt = {x: 0, y: 0};
   constructor() {super('Arena');}
   create() {
@@ -168,8 +162,13 @@ class Arena extends Phaser.Scene {
       return this.add.image(0, 0, key).setOrigin(0).setDepth(depth);
     };
     layer('ground', paintGround, 0);
+    this.paintCharacters();
     this.under = this.add.graphics().setDepth(1);
-    this.actors = this.add.graphics().setDepth(2);
+    for (let i = 0; i < 10; i++) this.ghostPool.push(this.add.image(0, 0, 'slayer-idle-0').setOrigin(0.5, SLAYER.feet / SLAYER.h).setScale(CS / RES).setVisible(false));
+    this.player = this.add.image(0, 0, 'slayer-idle-0').setOrigin(0.5, SLAYER.feet / SLAYER.h).setScale(CS / RES);
+    this.arm = this.add.graphics();
+    this.katana = this.add.image(0, 0, 'katana').setOrigin(KATANA.grip / KATANA.w, 0.5).setScale(CS / RES);
+    this.demonSprite = this.add.image(0, 0, 'demon-walk-0').setOrigin(DEMON.center / DEMON.w, DEMON.feet / DEMON.h).setScale(CS / RES);
     this.over = this.add.graphics().setDepth(3);
     this.glow = this.add.graphics().setDepth(4).setBlendMode(Phaser.BlendModes.ADD);
     layer('foreground', paintForeground, 5);
@@ -190,6 +189,26 @@ class Arena extends Phaser.Scene {
     document.querySelector('#retry')!.addEventListener('click', () => this.reset());
     window.addEventListener('blur', () => {if(this.mode==='playing'){this.mode='paused';this.sync();}});
     this.sync(); this.draw();
+  }
+  private paintCharacters() {
+    const paint = (key: string, w: number, h: number, draw: (ctx: CanvasRenderingContext2D) => void) => {
+      const texture = this.textures.createCanvas(key, w * RES, h * RES)!, ctx = texture.getContext();
+      ctx.scale(RES, RES); draw(ctx); texture.refresh();
+    };
+    const slayer = (key: string, frame: SlayerFrame) => paint(key, SLAYER.w, SLAYER.h, ctx => drawSlayer(ctx, frame));
+    const demon = (key: string, frame: DemonFrame) => paint(key, DEMON.w, DEMON.h, ctx => {this.demonEyes[key] = drawDemon(ctx, frame);});
+    for (let i = 0; i < 4; i++) {const a = i / 4 * TAU; slayer(`slayer-idle-${i}`, {step: 0, bob: Math.sin(a) * 0.5, lean: 0, flutter: Math.sin(a), sway: Math.sin(a)});}
+    for (let i = 0; i < 8; i++) {
+      const a = i / 8 * TAU;
+      slayer(`slayer-walk-${i}`, {step: Math.sin(a), bob: -Math.abs(Math.sin(a)) * 1.4, lean: 0.06, flutter: 2 + 1.5 * Math.sin(2 * a), sway: -Math.sin(a) * 2.5});
+      demon(`demon-walk-${i}`, {step: Math.sin(a), arms: 'hang', breath: Math.sin(2 * a) * 0.6, mouth: false});
+    }
+    slayer('slayer-dodge', {step: 0.9, bob: 0, lean: 0.28, flutter: 7, sway: 5});
+    for (let i = 0; i < 2; i++) {
+      demon(`demon-raise-${i}`, {step: 0, arms: 'raise', breath: 0, mouth: true});
+      demon(`demon-slump-${i}`, {step: 0, arms: 'slump', breath: i * 1.4, mouth: i === 1});
+    }
+    paint('katana', KATANA.w, KATANA.h, drawKatana);
   }
   private reset() {
     this.p={x:300,y:340};this.e={x:700,y:340};this.hp=R.health;this.stamina=R.stamina;this.ehp=R.enemyHealth;
@@ -246,7 +265,7 @@ class Arena extends Phaser.Scene {
     this.cameras.main.shake(70,0.0025);
     for(let i=0;i<16;i++){const a=this.angle+(Math.random()-0.5)*1.6,s=140+Math.random()*260;this.burst(this.e.x,this.e.y-22,Math.cos(a)*s,Math.sin(a)*s,0.22+Math.random()*0.25,1.5+Math.random()*2.5,i%3===0?0xff5a6e:0xfff0d2,6,0,true);}
     for(let i=0;i<6;i++){const a=this.angle+(Math.random()-0.5)*1.2,s=80+Math.random()*120;this.burst(this.e.x,this.e.y-16,Math.cos(a)*s,Math.sin(a)*s,0.4+Math.random()*0.3,2.5,0x5c0c1e,4,260,false);}
-    this.floatText(this.e.x+38+(Math.random()-0.5)*14,this.e.y-58,String(R.swordDamage),'#fff2da','#4a0f1d',24);
+    this.floatText(this.e.x+42+(Math.random()-0.5)*14,this.e.y-66,String(R.swordDamage),'#fff2da','#4a0f1d',24);
   }
   private onDemonDefeated() {
     this.deathFade=0.9;this.endDelay=1.4;
@@ -258,9 +277,9 @@ class Arena extends Phaser.Scene {
   }
   private onDemonStrike(inReach:boolean, evaded:boolean) {
     this.clawLife=0.38;this.clawAt={...this.target};
-    if(inReach&&evaded)this.floatText(this.p.x,this.p.y-70,'EVADED','#bff3e6','#0d2a26',16);
+    if(inReach&&evaded)this.floatText(this.p.x,this.p.y-80,'EVADED','#bff3e6','#0d2a26',16);
     else if(inReach){
-      this.hurtFx=1;this.playerFlash=0.25;this.floatText(this.p.x+30,this.p.y-62,String(-R.enemyDamage),'#ff9aa6','#3a0711',24);
+      this.hurtFx=1;this.playerFlash=0.25;this.floatText(this.p.x+32,this.p.y-70,String(-R.enemyDamage),'#ff9aa6','#3a0711',24);
       for(let i=0;i<12;i++){const a=Math.random()*Math.PI*2,s=60+Math.random()*160;this.burst(this.p.x,this.p.y-10,Math.cos(a)*s,Math.sin(a)*s,0.3+Math.random()*0.2,2+Math.random()*2,0xd8324a,5,200,false);}
       if(this.mode==='lost')this.endDelay=1.1;
     }
@@ -279,7 +298,7 @@ class Arena extends Phaser.Scene {
     this.hitFlash=Math.max(0,this.hitFlash-dt);this.hurtFx=Math.max(0,this.hurtFx-dt*1.8);this.deathFade=Math.max(0,this.deathFade-dt);this.endDelay=Math.max(0,this.endDelay-dt);this.clawLife=Math.max(0,this.clawLife-dt);this.playerFlash=Math.max(0,this.playerFlash-dt);
     if(this.mode==='won'||this.mode==='lost')this.swing=Math.max(0,this.swing-dt);
     this.ehpShown=this.ehpShown>this.ehp?Math.max(this.ehp,this.ehpShown-dt*70):this.ehp;
-    if(this.dodge>0){this.ghostTimer-=dt;if(this.ghostTimer<=0){this.ghostTimer=0.03;this.ghosts.push({x:this.p.x,y:this.p.y,facing:Math.cos(this.angle)<0?-1:1,life:0.24});}}
+    if(this.dodge>0){this.ghostTimer-=dt;if(this.ghostTimer<=0){this.ghostTimer=0.03;this.ghosts.push({x:this.p.x,y:this.p.y,facing:Math.cos(this.angle)<0?-1:1,life:0.24,frame:'slayer-dodge'});}}
     for(const g of this.ghosts)g.life-=dt;
     this.ghosts=this.ghosts.filter(g=>g.life>0);
     for(const q of this.particles){q.life-=dt;q.vx*=1-Math.min(1,q.drag*dt);q.vy=q.vy*(1-Math.min(1,q.drag*dt))+q.gravity*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;}
@@ -307,8 +326,8 @@ class Arena extends Phaser.Scene {
 
   // ---- Drawing ---------------------------------------------------------------
   private draw() {
-    const u=this.under,g=this.actors,o=this.over,l=this.glow,t=this.top,c=this.clock;
-    u.clear();g.clear();o.clear();l.clear();t.clear();
+    const u=this.under,o=this.over,l=this.glow,t=this.top,c=this.clock;
+    u.clear();o.clear();l.clear();t.clear();
     for(const [i,lantern] of LANTERNS.entries()){
       const f=0.85+0.1*Math.sin(c*9+i*2)+0.05*Math.sin(c*23+i);
       for(let k=0;k<6;k++){l.fillStyle(0xffa850,0.05*f);l.fillCircle(lantern.x,lantern.y-10,18+k*16*f);}
@@ -317,32 +336,53 @@ class Arena extends Phaser.Scene {
     if(this.enemyState==='windup')this.drawTelegraph(u);
     if(this.clawLife>0)this.drawClaw(o,l);
     const facing=Math.cos(this.angle)<0?-1:1, demonFacing=this.p.x<this.e.x?-1:1;
-    const shadow=(x:number,y:number,w:number,dy:number)=>{u.fillStyle(0x05070d,0.45);u.fillEllipse(x,y+dy,w,w*0.36);};
-    if(this.enemyState!=='dead'||this.deathFade>0)shadow(this.e.x,this.e.y,64,21*DS);
-    shadow(this.p.x,this.p.y,46,21*PS);
+    const pFeet=this.p.y+PLAYER_FEET, eFeet=this.e.y+DEMON_FEET, pDepth=2+pFeet/1000;
+    const shadow=(x:number,y:number,w:number)=>{u.fillStyle(0x05070d,0.45);u.fillEllipse(x,y,w,w*0.36);};
+    const demonShown=this.enemyState!=='dead'||this.deathFade>0;
+    if(demonShown)shadow(this.e.x,eFeet,68);
+    shadow(this.p.x,pFeet,46);
     if(this.mode==='playing'&&this.stamina<99.5){
       const low=this.stamina<R.dodgeCost;
-      u.lineStyle(3,0x0b0e18,0.5);u.strokeCircle(this.p.x,this.p.y+28,26);
-      u.lineStyle(3,low?0xd2465a:0x8fd3c4,0.85);u.beginPath();u.arc(this.p.x,this.p.y+28,26,-Math.PI/2,-Math.PI/2+Math.PI*2*this.stamina/100);u.strokePath();
+      u.lineStyle(3,0x0b0e18,0.5);u.strokeCircle(this.p.x,pFeet,27);
+      u.lineStyle(3,low?0xd2465a:0x8fd3c4,0.85);u.beginPath();u.arc(this.p.x,pFeet,27,-Math.PI/2,-Math.PI/2+TAU*this.stamina/100);u.strokePath();
     }
-    for(const gh of this.ghosts)this.slayer(g,gh.x,gh.y,{facing:gh.facing,bob:0,step:0,tint:0x9fd8ff,amount:1,alpha:gh.life/0.24*0.4});
-    const drawDemon=()=>{
-      if(this.enemyState==='dead'&&this.deathFade===0)return;
+    this.ghostPool.forEach((img,i)=>{
+      const gh=this.ghosts[i];
+      if(!gh){img.setVisible(false);return;}
+      img.setVisible(true).setTexture(gh.frame).setPosition(gh.x,gh.y+PLAYER_FEET).setFlipX(gh.facing<0).setTintFill(0x9fd8ff).setAlpha(gh.life/0.24*0.45).setDepth(pDepth-0.001);
+    });
+    // Demon sprite, hit flash, ash fade and eye glow.
+    this.demonSprite.setVisible(demonShown);
+    if(demonShown){
       const dead=this.enemyState==='dead',shake=this.enemyState==='windup'?Math.sin(c*70)*1.3:0;
-      const pose=this.enemyState==='windup'?'raise':this.enemyState==='recovery'?'slump':'idle';
-      this.demon(g,l,this.e.x+shake,this.e.y,pose,{facing:demonFacing,bob:pose==='idle'?Math.sin(this.demonWalk)*1.5:0,step:Math.sin(this.demonWalk),tint:dead?0x8a7e86:0xffffff,amount:dead?1-this.deathFade/0.9*0.6:this.hitFlash/0.14,alpha:dead?this.deathFade/0.9:1});
-    };
-    const drawPlayer=()=>{
-      const lost=this.mode==='lost'&&this.hp===0, bob=this.moving?Math.abs(Math.sin(this.walk))*-2:Math.sin(c*2.4)*0.6;
-      const pose:Pose={facing,bob,step:this.moving?Math.sin(this.walk):0,tint:this.playerFlash>0?0xffffff:0x9fe2ff,amount:this.playerFlash>0?this.playerFlash/0.25:this.dodge>0?0.35:0,alpha:1};
-      if(lost){this.slayer(g,this.p.x,this.p.y,pose,true);return;}
+      const frame=this.enemyState==='windup'?`demon-raise-${Math.floor(c*12)%2}`:this.enemyState==='chase'?`demon-walk-${Math.floor(this.demonWalk/TAU*8)%8}`:`demon-slump-${Math.floor(c*3)%2}`;
+      this.demonSprite.setTexture(frame).setPosition(this.e.x+shake,eFeet).setFlipX(demonFacing<0).setDepth(2+eFeet/1000).setAlpha(dead?this.deathFade/0.9:1);
+      if(dead)this.demonSprite.setTint(0x9a8e96);else if(this.hitFlash>0)this.demonSprite.setTintFill(0xffffff);else this.demonSprite.clearTint();
+      if(!dead&&this.hitFlash===0){
+        const glow=this.enemyState==='recovery'?0.18:0.55;
+        for(const [lx,ly] of this.demonEyes[frame]){const x=this.e.x+shake+demonFacing*(lx-DEMON.center)*CS,y=eFeet-(DEMON.feet-ly)*CS;l.fillStyle(0xff2a3c,glow);l.fillCircle(x,y,2.2);l.fillStyle(0xff2a3c,glow*0.35);l.fillCircle(x,y,5);}
+        if(this.enemyState==='windup'){const p=0.5+0.5*Math.sin(c*16);for(let k=0;k<4;k++){l.fillStyle(0xd0203a,0.05+0.04*p);l.fillCircle(this.e.x,this.e.y-14,40+k*14);}}
+      }
+    }
+    // Slayer sprite, sword arm and katana.
+    const lost=this.mode==='lost'&&this.hp===0;
+    const frame=this.dodge>0?'slayer-dodge':this.moving?`slayer-walk-${Math.floor(this.walk/TAU*8)%8}`:`slayer-idle-${Math.floor(c*3)%4}`;
+    this.player.setTexture(lost?'slayer-idle-0':frame).setFlipX(facing<0).setDepth(pDepth).setRotation(lost?-facing*Math.PI/2:0).setPosition(this.p.x+(lost?facing*12:0),pFeet-(lost?6:0));
+    if(this.playerFlash>0)this.player.setTintFill(0xffffff);else if(this.dodge>0)this.player.setTint(0xc8ecff);else this.player.clearTint();
+    this.arm.clear();this.arm.setVisible(!lost);this.katana.setVisible(!lost);
+    if(!lost){
       const blade=this.swing>0?this.angle-1.15+2.3*(1-Math.pow(this.swing/0.15,2)):this.angle+0.5*facing;
-      const behind=Math.sin(blade)<-0.2;
-      if(behind)this.sword(g,l,this.p.x,this.p.y+bob,facing,blade);
-      this.slayer(g,this.p.x,this.p.y,pose);
-      if(!behind)this.sword(g,l,this.p.x,this.p.y+bob,facing,blade);
-    };
-    if(this.e.y<this.p.y){drawDemon();drawPlayer();}else{drawPlayer();drawDemon();}
+      const dx=Math.cos(blade),dy=Math.sin(blade),behind=dy<-0.2;
+      const sx=this.p.x+facing*SLAYER.shoulder.x*CS,sy=pFeet+SLAYER.shoulder.y*CS,hx=sx+dx*15,hy=sy+dy*15,cx=sx+dx*10.5,cy=sy+dy*10.5;
+      const a=this.arm;
+      a.lineStyle(10,0x140d1a);a.lineBetween(sx,sy,hx,hy);
+      a.lineStyle(7,0x5a4790);a.lineBetween(sx,sy,cx,cy);
+      a.lineStyle(7,0xddd0f3);a.lineBetween(cx,cy,hx-dx*1.5,hy-dy*1.5);
+      a.fillStyle(0x140d1a);a.fillCircle(hx,hy,4);a.fillStyle(0xf3d4b9);a.fillCircle(hx,hy,3);
+      a.setDepth(pDepth+(behind?-0.0002:0.0002));
+      this.katana.setPosition(hx,hy).setRotation(blade).setFlipY(facing<0).setDepth(pDepth+(behind?-0.0003:0.0001));
+      if(this.swing>0){l.lineStyle(4,0x7cc8ff,0.5);l.lineBetween(hx+dx*12,hy+dy*12,hx+dx*KATANA.length*CS,hy+dy*KATANA.length*CS);}
+    }
     if(this.swing>0){
       const a=this.swing/0.15;
       this.crescent(o,this.p.x,this.p.y,this.angle,80,18,0xe8f7ff,0.75*a);
@@ -352,7 +392,7 @@ class Arena extends Phaser.Scene {
     for(const q of this.particles){const a=Math.min(1,q.life/q.max*1.6);(q.glow?l:o).fillStyle(q.color,a);(q.glow?l:o).fillCircle(q.x,q.y,q.size*(0.5+0.5*q.life/q.max));}
     for(const q of this.petals){o.save();o.translateCanvas(q.x,q.y);o.rotateCanvas(q.rot);o.fillStyle(q.color,0.75);o.fillEllipse(0,0,8,3.8);o.restore();}
     if(this.enemyState!=='dead'){
-      const x=this.e.x,y=this.e.y-86,w=80,seg=w/(R.enemyHealth/R.swordDamage);
+      const x=this.e.x,y=this.e.y-98,w=80,seg=w/(R.enemyHealth/R.swordDamage);
       o.fillStyle(0x0a0d16,0.9);o.fillRect(x-w/2-2,y-2,w+4,9);
       o.fillStyle(0xf3d9c8,0.85);o.fillRect(x-w/2,y,w*this.ehpShown/R.enemyHealth,5);
       o.fillStyle(0xd2384f);o.fillRect(x-w/2,y,w*this.ehp/R.enemyHealth,5);
@@ -387,81 +427,6 @@ class Arena extends Phaser.Scene {
     const outer:Phaser.Types.Math.Vector2Like[]=[],inner:Phaser.Types.Math.Vector2Like[]=[];
     for(let i=0;i<=20;i++){const t=i/20,a=angle-1.15+2.3*t,w=thick*Math.sin(Math.PI*t)*(0.35+0.65*t);outer.push({x:x+Math.cos(a)*r,y:y+Math.sin(a)*r});inner.push({x:x+Math.cos(a)*(r-w),y:y+Math.sin(a)*(r-w)});}
     g.fillStyle(color,alpha);g.fillPoints(outer.concat(inner.reverse()),true);
-  }
-  private sword(g:Phaser.GameObjects.Graphics,l:Phaser.GameObjects.Graphics,x:number,y:number,facing:number,a:number) {
-    const k=PS,hx=x+facing*11*k,hy=y+5*k,cx=Math.cos(a)*k,cy=Math.sin(a)*k,nx=-Math.sin(a)*k,ny=Math.cos(a)*k;
-    g.lineStyle(4.5*k,0x231c2b);g.lineBetween(hx-cx*8,hy-cy*8,hx+cx*3,hy+cy*3);
-    g.fillStyle(0xd9cfc0);for(const j of [-6,-3])g.fillCircle(hx+cx*j,hy+cy*j,1.3*k);
-    g.fillStyle(0xc9a55c);g.fillCircle(hx+cx*4,hy+cy*4,3.6*k);g.fillStyle(0x2a2016);g.fillCircle(hx+cx*4,hy+cy*4,1.4*k);
-    const b0={x:hx+cx*6,y:hy+cy*6},tip={x:hx+cx*44,y:hy+cy*44};
-    g.fillStyle(0xaec4d6);g.fillPoints([{x:b0.x+nx*1.8,y:b0.y+ny*1.8},{x:tip.x+nx*0.6,y:tip.y+ny*0.6},tip,{x:b0.x-nx*1.4,y:b0.y-ny*1.4}],true);
-    g.lineStyle(1.2,0xffffff,0.9);g.lineBetween(b0.x+nx*1.1,b0.y+ny*1.1,tip.x,tip.y);
-    if(this.swing>0){l.lineStyle(4,0x7cc8ff,0.5);l.lineBetween(b0.x,b0.y,tip.x,tip.y);}
-  }
-  // Original slayer recruit: corps-style black uniform, white belt and leg wraps, wisteria haori, tied-back hair.
-  private slayer(g:Phaser.GameObjects.Graphics,x:number,y:number,o:Pose,down=false) {
-    const c=(v:number)=>mix(v,o.tint,o.amount),a=o.alpha,l=Math.max(0,o.step)*3,r=Math.max(0,-o.step)*3;
-    g.save();g.translateCanvas(x,y+o.bob);
-    if(down){g.translateCanvas(0,16*PS);g.rotateCanvas(-o.facing*Math.PI/2);g.translateCanvas(0,-16*PS);}
-    g.scaleCanvas(o.facing*PS,PS);
-    g.fillStyle(c(0x1a1f2c),a);g.fillRect(-8,7-l,7,13);g.fillRect(1,7-r,7,13);
-    g.fillStyle(c(0xe4ddcd),a);g.fillRect(-8,13-l,7,5);g.fillRect(1,13-r,7,5);
-    g.fillStyle(c(0x121018),a);g.fillRect(-9,19-l,8,3);g.fillRect(1,19-r,8,3);
-    g.lineStyle(3.5,c(0x17121c),a);g.lineBetween(-3,5,-21,14);g.lineStyle(3.5,c(0xc9a55c),a);g.lineBetween(-5,6,-6,6.5);
-    g.fillStyle(c(0x1c2235),a);g.fillRect(-10,-11,20,20);
-    g.fillStyle(c(0x2b3350),a);g.fillRect(-2,-11,4,15);
-    g.fillStyle(c(0xebe6d8),a);g.fillRect(-10,4,20,3);
-    g.fillStyle(c(0xc9a55c),a);g.fillRect(-1,-7,2,2);g.fillRect(-1,-2,2,2);
-    g.fillStyle(c(0x5b4876),a);
-    g.fillPoints([{x:-15,y:-11},{x:-5,y:-11},{x:-6,y:17},{x:-17,y:17}],true);
-    g.fillPoints([{x:5,y:-11},{x:15,y:-11},{x:17,y:17},{x:6,y:17}],true);
-    g.fillRect(-19,-9,6,15);g.fillRect(13,-9,6,15);
-    g.fillStyle(c(0xc6b3e6),a);g.fillRect(-17,13,11,4);g.fillRect(6,13,11,4);g.fillRect(-19,4,6,2);g.fillRect(13,4,6,2);
-    g.fillStyle(c(0x3a2c52),a);for(let i=0;i<3;i++){g.fillTriangle(-17+i*4,17,-15+i*4,13.5,-13+i*4,17);g.fillTriangle(6+i*4,17,8+i*4,13.5,10+i*4,17);}
-    g.fillStyle(c(0xe6c4a2),a);g.fillRect(-18,6,4,4);g.fillRect(14,6,4,4);
-    g.fillStyle(c(0x231a26),a);g.fillTriangle(-6,-24,-3,-22,-14,-8);g.fillTriangle(-6,-24,-9,-22,-16,-10);
-    g.fillStyle(c(0xe9caa9),a);g.fillRoundedRect(-7,-25,14,14,3);
-    g.fillStyle(c(0x231a26),a);g.fillRoundedRect(-8,-29,16,7,3);g.fillRect(-8,-24,4,8);g.fillTriangle(2,-23,8,-23,8,-19);
-    g.fillStyle(c(0xb03a48),a);g.fillRect(-9,-25,3,3);
-    g.fillStyle(c(0x2b1517),a);g.fillRect(1,-19,2,3);g.fillRect(5,-19,2,3);
-    g.restore();
-  }
-  private demon(g:Phaser.GameObjects.Graphics,l:Phaser.GameObjects.Graphics,x:number,y:number,pose:'idle'|'raise'|'slump',o:Pose) {
-    const c=(v:number)=>mix(v,o.tint,o.amount),a=o.alpha,s=DS,sink=pose==='slump'?4:pose==='raise'?-3:0,step=o.step*2.5;
-    g.save();g.translateCanvas(x,y+o.bob+sink);g.scaleCanvas(o.facing*s,s);
-    g.fillStyle(c(0x9c899b),a);g.fillRect(-8,8+Math.max(0,step),6,12);g.fillRect(2,8+Math.max(0,-step),6,12);
-    g.fillStyle(c(0xe7dccb),a);for(const fx of [-8,2]){g.fillTriangle(fx-1,20,fx+2,20,fx,23);g.fillTriangle(fx+3,20,fx+6,20,fx+5,23);}
-    g.fillStyle(c(0x34192b),a);g.fillPoints([{x:-12,y:-12},{x:12,y:-12},{x:16,y:15},{x:-16,y:15}],true);
-    for(let i=0;i<6;i++)g.fillTriangle(-16+i*5.4,15,-11+i*5.4,15,-13.5+i*5.4,19+(i%2)*3);
-    g.fillStyle(c(0x5b2b42),a);for(const [px,py] of [[-7,-6],[6,-3],[-3,10],[9,9],[-11,6]])g.fillCircle(px,py,1.6);
-    g.fillStyle(c(0x7e1f31),a);g.fillRect(-12,1,24,5);g.fillStyle(c(0x2a0c16),a);g.fillRect(-2,1,4,5);
-    const skin=c(0xc4b1be),claw=c(0xefe6d6),vein=c(0x8e2a44);
-    if(pose==='raise'){
-      g.fillStyle(skin,a);g.fillRect(-20,-32,5,22);g.fillRect(15,-32,5,22);
-      g.fillStyle(vein,a);g.fillRect(-18,-26,1,10);g.fillRect(17,-24,1,9);
-      g.fillStyle(claw,a);for(const ax of [-20,15])for(let k=0;k<3;k++)g.fillTriangle(ax+k*2,-32,ax+1.5+k*2,-32,ax-1+k*2.5,-41);
-    } else {
-      const drop=pose==='slump'?5:0;
-      g.fillStyle(skin,a);g.fillRect(-18,-10+drop,5,17);g.fillRect(13,-10+drop,5,17);
-      g.fillStyle(vein,a);g.fillRect(-16,-6+drop,1,9);g.fillRect(15,-5+drop,1,8);
-      g.fillStyle(claw,a);for(const ax of [-18,13])for(let k=0;k<3;k++)g.fillTriangle(ax+k*2,7+drop,ax+1.5+k*2,7+drop,ax+k*2.2,14+drop);
-    }
-    g.fillStyle(c(0x3a0f1d),a);g.fillRect(-12,-13,24,3);
-    g.fillStyle(c(0xc9b6c3),a);g.fillRoundedRect(-8,-29,16,16,4);
-    g.fillStyle(c(0x1b1021),a);g.fillRoundedRect(-9,-32,18,6,3);
-    g.fillTriangle(-9,-28,-5,-28,-12,-10);g.fillTriangle(5,-28,9,-28,12,-11);g.fillTriangle(-5,-32,1,-32,-2,-37);
-    g.fillStyle(c(0xebe0cc),a);g.fillTriangle(-8,-30,-4,-31,-13,-44);g.fillTriangle(3,-31,7,-30,11,-45);
-    g.fillStyle(c(0xa3203a),a);g.fillRect(-6,-19,1,5);g.fillRect(6,-19,1,5);g.fillRect(-1,-27,2,3);
-    const eye=pose==='slump'?0x8a2a35:0xff3344;
-    g.fillStyle(mix(eye,o.tint,o.amount),a);g.fillRect(-1,-23,3,2);g.fillRect(4,-23,3,2);
-    g.fillStyle(c(0x14060b),a);g.fillRect(0,-23,1,2);g.fillRect(5,-23,1,2);
-    g.fillStyle(c(0x2a0c16),a);g.fillRect(0,-17,7,2);
-    g.fillStyle(claw,a);g.fillTriangle(0,-17,2,-17,1,-14);g.fillTriangle(5,-17,7,-17,6,-14);
-    g.restore();
-    if(o.alpha<1||o.amount>=1)return;
-    const ey=y+o.bob+sink-22*s,glow=pose==='slump'?0.15:0.45;
-    for(const lx of [0.5,5.5]){l.fillStyle(0xff2a3c,glow);l.fillCircle(x+o.facing*s*lx,ey,2.6);l.fillStyle(0xff2a3c,glow*0.35);l.fillCircle(x+o.facing*s*lx,ey,5);}
-    if(pose==='raise'){const p=0.5+0.5*Math.sin(this.clock*16);for(let k=0;k<4;k++){l.fillStyle(0xd0203a,0.05+0.04*p);l.fillCircle(x,y-14,40+k*14);}}
   }
 }
 
