@@ -1,6 +1,6 @@
 # Nightfall — V1 combat prototype
 
-Personal Demon Slayer-inspired fan-game project. TypeScript, Phaser 3 and Vite. All current game artwork is drawn in code; no external character artwork is bundled.
+Personal Demon Slayer-inspired fan-game project. TypeScript, Phaser 3 and Vite. Characters are original AI-generated illustrations animated in code; scenery and effects are drawn in code. See [art direction](docs/ART-DIRECTION.md).
 
 ## Run
 

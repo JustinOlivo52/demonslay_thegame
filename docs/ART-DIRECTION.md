@@ -5,7 +5,7 @@ Nightfall is an original game inspired by Demon Slayer: Kimetsu no Yaiba. It bor
 ## Pipeline
 
 1. Generate **one full-body illustration per character** with an AI image tool, using the prompts below.
-2. The images go in `art/source/`. Each is cut into parts (head, torso, upper and lower arms, legs, haori, hair) and animated in code as a cutout rig, the way many 2D games animate. Because every frame comes from one image, the character stays consistent.
+2. The images go in `art/source/`. `python3 scripts/build_art.py` (needs Pillow) cuts them into sprites in `public/art/` and writes the rig measurements to `src/rig.ts`. The slayer is split into body and two legs; the demon animates as one piece through body motion (lurching walk, rear-back wind-up, lunge, slump). Because every frame comes from one image, the character stays consistent.
 3. Weapons are separate images, so the sword can rotate with the mouse and change blade colour per breathing style.
 4. Effects (sword trails, breathing forms, ash, blood, petals) stay code-drawn in a woodblock-print style.
 

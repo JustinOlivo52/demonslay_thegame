@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { RULES as R, inSwordArc } from './combat';
-import { RES, SLAYER, KATANA, DEMON, drawSlayer, drawKatana, drawDemon, type SlayerFrame, type DemonFrame } from './art';
+import { RIG } from './rig';
 import './style.css';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
@@ -8,17 +8,19 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 <main><section class="intro"><div><p class="eyebrow">THE FIRST STEP TO HASHIRA</p><h1>Find your footing.</h1><p>A moonlit training ground beneath the wisteria. One demon. Your sword.</p></div><div class="checkpoint"><span class="dot"></span> Combat playtest <small>Movement · timing · survival</small></div></section>
 <div class="layout"><section class="game-panel"><div class="arena-heading"><span>01 — WISTERIA TRAINING GROUNDS</span><span>NIGHT / PRACTICE</span></div><div id="game" tabindex="0" aria-label="Combat arena. WASD to move, mouse to aim, click or J to attack, Space to dodge, Escape to pause."></div><div class="arena-footer"><span id="status" role="status">Enter the arena to begin.</span><span id="score">DEMONS DEFEATED 00</span></div></section>
 <aside><p class="eyebrow">YOUR LOADOUT</p><h2>Slayer recruit</h2><p class="muted">Level 1 · Combat foundation</p><div class="resource"><div>Vitality <span id="hp">100 / 100</span></div><progress id="health" max="100" value="100"></progress></div><div class="resource"><div>Stamina <span id="sp">100 / 100</span></div><progress id="stamina" max="100" value="100"></progress></div><hr><p class="eyebrow">CONTROLS</p><dl><dt><kbd>W A S D</kbd></dt><dd>Move</dd><dt><kbd>MOUSE</kbd></dt><dd>Aim</dd><dt><kbd>CLICK</kbd> / <kbd>J</kbd></dt><dd>Sword attack</dd><dt><kbd>SPACE</kbd></dt><dd>Dodge · 28 stamina</dd><dt><kbd>ESC</kbd></dt><dd>Pause</dd></dl><button id="start">Enter the arena <span>↗</span></button><button id="retry" class="secondary">Reset encounter</button><p class="tip">Watch for the red warning circle. When the closing ring reaches the centre, the demon strikes.</p></aside></div>
-<section class="notes"><div><p class="eyebrow">PLAYTEST 01</p><h3>Does the fight feel right?</h3></div><p>Try moving diagonally, dodging a strike, and attacking from different angles. Then tell us what feels responsive, confusing, or unfair.</p><span>Next checkpoint<br><strong>Breathing forms</strong></span></section></main><footer>Personal fan-game prototype · Original placeholder artwork <span>Keyboard + mouse required</span></footer>`;
+<section class="notes"><div><p class="eyebrow">PLAYTEST 01</p><h3>Does the fight feel right?</h3></div><p>Try moving diagonally, dodging a strike, and attacking from different angles. Then tell us what feels responsive, confusing, or unfair.</p><span>Next checkpoint<br><strong>Breathing forms</strong></span></section></main><footer>Personal fan-game prototype · Original character art <span>Keyboard + mouse required</span></footer>`;
 
 const W = 1000, H = 620;
 const SERIF = 'Marcellus, Georgia, serif', SANS = '"DM Sans", sans-serif', KANJI = '"Noto Serif JP", "Hiragino Mincho ProN", serif';
-const PLAYER_FEET = 34, DEMON_FEET = 40, CS = 1.2, TAU = Math.PI * 2;
+const PLAYER_FEET = 40, DEMON_FEET = 46, ZOOM = 1.3, TAU = Math.PI * 2;
+const MOONLIGHT = 0xe0dbec; // gentle cool tint so the illustrations sit inside the night scene
+const SL = RIG.slayer, DM = RIG.demon, KT = RIG.katana;
 const LANTERNS = [{x: 30, y: 325}, {x: 970, y: 325}];
 
 type Mode = 'ready' | 'playing' | 'paused' | 'lost' | 'won';
 type Particle = {x: number; y: number; vx: number; vy: number; life: number; max: number; size: number; color: number; drag: number; gravity: number; glow: boolean};
 type Petal = {x: number; y: number; vx: number; vy: number; rot: number; spin: number; color: number};
-type Ghost = {x: number; y: number; facing: number; life: number; frame: string};
+type Ghost = {x: number; y: number; facing: number; life: number; lean: number};
 type Floater = {text: Phaser.GameObjects.Text; life: number};
 
 // Deterministic random numbers so the painted scenery is identical on every load.
@@ -151,10 +153,14 @@ class Arena extends Phaser.Scene {
   private clock = 0; private walk = 0; private moving = false; private demonWalk = 0;
   private hitFlash = 0; private hurtFx = 0; private ehpShown = R.enemyHealth; private deathFade = 0; private endDelay = 0; private ghostTimer = 0; private overlayAlpha = 0;
   private particles: Particle[] = []; private petals: Petal[] = []; private ghosts: Ghost[] = []; private floaters: Floater[] = [];
-  private player!: Phaser.GameObjects.Image; private katana!: Phaser.GameObjects.Image; private arm!: Phaser.GameObjects.Graphics;
-  private demonSprite!: Phaser.GameObjects.Image; private ghostPool: Phaser.GameObjects.Image[] = []; private demonEyes: Record<string, [number, number][]> = {};
+  private player!: Phaser.GameObjects.Container; private body!: Phaser.GameObjects.Image; private legL!: Phaser.GameObjects.Image; private legR!: Phaser.GameObjects.Image;
+  private fallen!: Phaser.GameObjects.Image; private katana!: Phaser.GameObjects.Image; private demonSprite!: Phaser.GameObjects.Image; private ghostPool: Phaser.GameObjects.Image[] = [];
+  private strikeAnim = 0; private aim = new Phaser.Math.Vector2();
   private playerFlash = 0; private clawLife = 0; private clawAt = {x: 0, y: 0};
   constructor() {super('Arena');}
+  preload() {
+    for (const key of ['slayer-body', 'slayer-leg-l', 'slayer-leg-r', 'slayer-full', 'demon', 'katana']) this.load.image(key, `art/${key}.png`);
+  }
   create() {
     const layer = (key: string, paint: (ctx: CanvasRenderingContext2D) => void, depth: number) => {
       const texture = this.textures.createCanvas(key, W, H)!;
@@ -162,24 +168,26 @@ class Arena extends Phaser.Scene {
       return this.add.image(0, 0, key).setOrigin(0).setDepth(depth);
     };
     layer('ground', paintGround, 0);
-    this.paintCharacters();
     this.under = this.add.graphics().setDepth(1);
-    for (let i = 0; i < 10; i++) this.ghostPool.push(this.add.image(0, 0, 'slayer-idle-0').setOrigin(0.5, SLAYER.feet / SLAYER.h).setScale(CS / RES).setVisible(false));
-    this.player = this.add.image(0, 0, 'slayer-idle-0').setOrigin(0.5, SLAYER.feet / SLAYER.h).setScale(CS / RES);
-    this.arm = this.add.graphics();
-    this.katana = this.add.image(0, 0, 'katana').setOrigin(KATANA.grip / KATANA.w, 0.5).setScale(CS / RES);
-    this.demonSprite = this.add.image(0, 0, 'demon-walk-0').setOrigin(DEMON.center / DEMON.w, DEMON.feet / DEMON.h).setScale(CS / RES);
+    // Illustrated characters: the slayer is a small cutout rig (two legs under the body), the demon one sprite.
+    const part = (p: {key: string; origin: readonly number[]; x: number; y: number}, scale: number) => this.add.image(p.x, p.y, p.key).setOrigin(p.origin[0], p.origin[1]).setScale(scale);
+    for (let i = 0; i < 10; i++) this.ghostPool.push(part(SL.full, SL.scale).setVisible(false));
+    this.legL = part(SL.legL, SL.scale); this.legR = part(SL.legR, SL.scale); this.body = part(SL.body, SL.scale);
+    this.player = this.add.container(0, 0, [this.legL, this.legR, this.body]);
+    this.fallen = part(SL.full, SL.scale).setVisible(false);
+    this.katana = this.add.image(0, 0, KT.key).setOrigin(KT.origin[0], KT.origin[1]).setScale(KT.scale);
+    this.demonSprite = part(DM.full, DM.scale);
     this.over = this.add.graphics().setDepth(3);
     this.glow = this.add.graphics().setDepth(4).setBlendMode(Phaser.BlendModes.ADD);
     layer('foreground', paintForeground, 5);
-    layer('light', paintLight, 6);
-    this.hurtImage = layer('hurt', paintHurt, 7).setAlpha(0);
+    layer('light', paintLight, 6).setScrollFactor(0);
+    this.hurtImage = layer('hurt', paintHurt, 7).setAlpha(0).setScrollFactor(0);
     this.label = this.add.text(0, 0, '', {fontFamily: SANS, fontSize: '12px', fontStyle: '600', color: '#e9cbd4', stroke: '#0b0e18', strokeThickness: 4}).setOrigin(0.5).setDepth(8).setLetterSpacing(1.5);
     this.top = this.add.graphics().setDepth(9);
-    this.shade = this.add.rectangle(W / 2, H / 2, W, H, 0x060912, 0.66).setDepth(10);
-    this.bigKanji = this.add.text(W / 2, 300, '', {fontFamily: KANJI, fontSize: '260px', fontStyle: '700', color: '#b49be0'}).setOrigin(0.5).setDepth(10);
-    this.title = this.add.text(W / 2, 290, '', {fontFamily: SERIF, fontSize: '42px', color: '#f1eadb'}).setOrigin(0.5).setDepth(10).setLetterSpacing(4);
-    this.subtitle = this.add.text(W / 2, 344, '', {fontFamily: SANS, fontSize: '15px', color: '#c3b8d8'}).setOrigin(0.5).setDepth(10).setLetterSpacing(1);
+    this.shade = this.add.rectangle(W / 2, H / 2, W, H, 0x060912, 0.66).setDepth(10).setScrollFactor(0);
+    this.bigKanji = this.add.text(W / 2, 300, '', {fontFamily: KANJI, fontSize: '260px', fontStyle: '700', color: '#b49be0'}).setOrigin(0.5).setDepth(10).setScrollFactor(0);
+    this.title = this.add.text(W / 2, 290, '', {fontFamily: SERIF, fontSize: '42px', color: '#f1eadb'}).setOrigin(0.5).setDepth(10).setLetterSpacing(4).setScrollFactor(0);
+    this.subtitle = this.add.text(W / 2, 344, '', {fontFamily: SANS, fontSize: '15px', color: '#c3b8d8'}).setOrigin(0.5).setDepth(10).setLetterSpacing(1).setScrollFactor(0);
     const rand = seeded(99);
     for (let i = 0; i < 22; i++) this.petals.push({x: rand() * W, y: rand() * H, vx: 14 + rand() * 18, vy: 22 + rand() * 20, rot: rand() * 6, spin: (rand() - 0.5) * 4, color: [0xc6a8ee, 0xa985dc, 0xe2d2f7][i % 3]});
     this.keys = this.input.keyboard!.addKeys('W,A,S,D,SPACE,ESC,J') as typeof this.keys;
@@ -188,33 +196,14 @@ class Arena extends Phaser.Scene {
     document.querySelector('#start')!.addEventListener('click', () => {if(this.mode === 'playing')this.mode='paused';else if(this.mode === 'paused')this.mode='playing';else this.reset();this.sync();});
     document.querySelector('#retry')!.addEventListener('click', () => this.reset());
     window.addEventListener('blur', () => {if(this.mode==='playing'){this.mode='paused';this.sync();}});
+    this.cameras.main.setZoom(ZOOM).setBounds(0, 0, W, H).startFollow(this.player, false, 0.12, 0.12, 0, 40);
     this.sync(); this.draw();
-  }
-  private paintCharacters() {
-    const paint = (key: string, w: number, h: number, draw: (ctx: CanvasRenderingContext2D) => void) => {
-      const texture = this.textures.createCanvas(key, w * RES, h * RES)!, ctx = texture.getContext();
-      ctx.scale(RES, RES); draw(ctx); texture.refresh();
-    };
-    const slayer = (key: string, frame: SlayerFrame) => paint(key, SLAYER.w, SLAYER.h, ctx => drawSlayer(ctx, frame));
-    const demon = (key: string, frame: DemonFrame) => paint(key, DEMON.w, DEMON.h, ctx => {this.demonEyes[key] = drawDemon(ctx, frame);});
-    for (let i = 0; i < 4; i++) {const a = i / 4 * TAU; slayer(`slayer-idle-${i}`, {step: 0, bob: Math.sin(a) * 0.5, lean: 0, flutter: Math.sin(a), sway: Math.sin(a)});}
-    for (let i = 0; i < 8; i++) {
-      const a = i / 8 * TAU;
-      slayer(`slayer-walk-${i}`, {step: Math.sin(a), bob: -Math.abs(Math.sin(a)) * 1.4, lean: 0.06, flutter: 2 + 1.5 * Math.sin(2 * a), sway: -Math.sin(a) * 2.5});
-      demon(`demon-walk-${i}`, {step: Math.sin(a), arms: 'hang', breath: Math.sin(2 * a) * 0.6, mouth: false});
-    }
-    slayer('slayer-dodge', {step: 0.9, bob: 0, lean: 0.28, flutter: 7, sway: 5});
-    for (let i = 0; i < 2; i++) {
-      demon(`demon-raise-${i}`, {step: 0, arms: 'raise', breath: 0, mouth: true});
-      demon(`demon-slump-${i}`, {step: 0, arms: 'slump', breath: i * 1.4, mouth: i === 1});
-    }
-    paint('katana', KATANA.w, KATANA.h, drawKatana);
   }
   private reset() {
     this.p={x:300,y:340};this.e={x:700,y:340};this.hp=R.health;this.stamina=R.stamina;this.ehp=R.enemyHealth;
     this.swing=0;this.swordCooldown=0;this.dodge=0;this.dodgeCooldown=0;this.hurt=0;this.enemyTimer=0;this.enemyState='chase';this.mode='playing';
     this.hitFlash=0;this.hurtFx=0;this.ehpShown=R.enemyHealth;this.deathFade=0;this.endDelay=0;this.clawLife=0;this.overlayAlpha=0;this.playerFlash=0;
-    this.particles=[];this.ghosts=[];for(const f of this.floaters)f.text.destroy();this.floaters=[];
+    this.particles=[];this.ghosts=[];this.strikeAnim=0;this.demonSprite.setCrop();for(const f of this.floaters)f.text.destroy();this.floaters=[];
     this.sync();
     document.querySelector<HTMLElement>('#game')!.focus();
   }
@@ -228,10 +217,11 @@ class Arena extends Phaser.Scene {
     }
   }
   update(_time:number, delta:number) {
+    const pointer=this.input.activePointer;this.cameras.main.getWorldPoint(pointer.x,pointer.y,this.aim);
     const dt=Math.min(delta/1000,0.04);
     if(Phaser.Input.Keyboard.JustDown(this.keys.ESC)) {if(this.mode==='playing')this.mode='paused';else if(this.mode==='paused')this.mode='playing';}
     if(this.mode==='playing'){
-      this.angle=Phaser.Math.Angle.Between(this.p.x,this.p.y,this.input.activePointer.x,this.input.activePointer.y);
+      this.angle=Phaser.Math.Angle.Between(this.p.x,this.p.y,this.aim.x,this.aim.y);
       this.swordCooldown=Math.max(0,this.swordCooldown-dt);this.swing=Math.max(0,this.swing-dt);this.hurt=Math.max(0,this.hurt-dt);this.dodgeCooldown=Math.max(0,this.dodgeCooldown-dt);
       const move=new Phaser.Math.Vector2(Number(this.keys.D.isDown)-Number(this.keys.A.isDown),Number(this.keys.S.isDown)-Number(this.keys.W.isDown)).normalize();
       this.moving=move.length()>0;
@@ -268,15 +258,15 @@ class Arena extends Phaser.Scene {
     this.floatText(this.e.x+42+(Math.random()-0.5)*14,this.e.y-66,String(R.swordDamage),'#fff2da','#4a0f1d',24);
   }
   private onDemonDefeated() {
-    this.deathFade=0.9;this.endDelay=1.4;
-    for(let i=0;i<150;i++){const ember=Math.random()<0.25;this.burst(this.e.x+(Math.random()-0.5)*44,this.e.y-58+Math.random()*86,(Math.random()-0.5)*50,-25-Math.random()*70,1+Math.random()*1.3,1.5+Math.random()*2.5,ember?0xff8a4a:[0x9a8d94,0xc4b8bd,0x6d5f66][i%3],0.6,-10,ember);}
+    this.deathFade=1.1;this.endDelay=1.5;
+    for(let i=0;i<40;i++){const ember=Math.random()<0.25;this.burst(this.e.x+(Math.random()-0.5)*44,this.e.y-58+Math.random()*86,(Math.random()-0.5)*50,-25-Math.random()*70,1+Math.random()*1.3,1.5+Math.random()*2.5,ember?0xff8a4a:[0x9a8d94,0xc4b8bd,0x6d5f66][i%3],0.6,-10,ember);}
   }
   private onDodge() {
     this.ghostTimer=0;
     for(let i=0;i<10;i++){const a=Math.atan2(-this.dodgeVector.y,-this.dodgeVector.x)+(Math.random()-0.5)*1.4,s=40+Math.random()*80;this.burst(this.p.x,this.p.y+29,Math.cos(a)*s,Math.sin(a)*s*0.5,0.35+Math.random()*0.2,3+Math.random()*3,0x8c8a92,5,0,false);}
   }
   private onDemonStrike(inReach:boolean, evaded:boolean) {
-    this.clawLife=0.38;this.clawAt={...this.target};
+    this.clawLife=0.38;this.clawAt={...this.target};this.strikeAnim=0.3;
     if(inReach&&evaded)this.floatText(this.p.x,this.p.y-80,'EVADED','#bff3e6','#0d2a26',16);
     else if(inReach){
       this.hurtFx=1;this.playerFlash=0.25;this.floatText(this.p.x+32,this.p.y-70,String(-R.enemyDamage),'#ff9aa6','#3a0711',24);
@@ -295,10 +285,15 @@ class Arena extends Phaser.Scene {
     this.clock+=dt;
     if(this.moving)this.walk+=dt*13;
     if(this.enemyState==='chase'&&this.mode==='playing')this.demonWalk+=dt*9;
-    this.hitFlash=Math.max(0,this.hitFlash-dt);this.hurtFx=Math.max(0,this.hurtFx-dt*1.8);this.deathFade=Math.max(0,this.deathFade-dt);this.endDelay=Math.max(0,this.endDelay-dt);this.clawLife=Math.max(0,this.clawLife-dt);this.playerFlash=Math.max(0,this.playerFlash-dt);
+    this.hitFlash=Math.max(0,this.hitFlash-dt);this.hurtFx=Math.max(0,this.hurtFx-dt*1.8);this.deathFade=Math.max(0,this.deathFade-dt);this.endDelay=Math.max(0,this.endDelay-dt);this.clawLife=Math.max(0,this.clawLife-dt);this.playerFlash=Math.max(0,this.playerFlash-dt);this.strikeAnim=Math.max(0,this.strikeAnim-dt);
     if(this.mode==='won'||this.mode==='lost')this.swing=Math.max(0,this.swing-dt);
     this.ehpShown=this.ehpShown>this.ehp?Math.max(this.ehp,this.ehpShown-dt*70):this.ehp;
-    if(this.dodge>0){this.ghostTimer-=dt;if(this.ghostTimer<=0){this.ghostTimer=0.03;this.ghosts.push({x:this.p.x,y:this.p.y,facing:Math.cos(this.angle)<0?-1:1,life:0.24,frame:'slayer-dodge'});}}
+    if(this.dodge>0){this.ghostTimer-=dt;if(this.ghostTimer<=0){this.ghostTimer=0.03;const gf=Math.cos(this.angle)<0?-1:1;this.ghosts.push({x:this.p.x,y:this.p.y,facing:gf,life:0.24,lean:gf*0.22});}}
+    if(this.enemyState==='dead'&&this.deathFade>0&&dt>0){
+      // Crumble from the head down: ash and embers lift off the dissolving edge.
+      const top=this.e.y+DEMON_FEET-DM.height,y=top+(1-this.deathFade/1.1)*DM.height;
+      for(let i=0;i<5;i++){const ember=Math.random()<0.3;this.burst(this.e.x+(Math.random()-0.5)*60,y+Math.random()*6,(Math.random()-0.5)*40,-30-Math.random()*60,0.8+Math.random()*0.9,1.4+Math.random()*2.2,ember?0xff8a4a:[0x9a8d94,0xc4b8bd,0x6d5f66][i%3],0.6,-10,ember);}
+    }
     for(const g of this.ghosts)g.life-=dt;
     this.ghosts=this.ghosts.filter(g=>g.life>0);
     for(const q of this.particles){q.life-=dt;q.vx*=1-Math.min(1,q.drag*dt);q.vy=q.vy*(1-Math.min(1,q.drag*dt))+q.gravity*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;}
@@ -339,49 +334,68 @@ class Arena extends Phaser.Scene {
     const pFeet=this.p.y+PLAYER_FEET, eFeet=this.e.y+DEMON_FEET, pDepth=2+pFeet/1000;
     const shadow=(x:number,y:number,w:number)=>{u.fillStyle(0x05070d,0.45);u.fillEllipse(x,y,w,w*0.36);};
     const demonShown=this.enemyState!=='dead'||this.deathFade>0;
-    if(demonShown)shadow(this.e.x,eFeet,68);
-    shadow(this.p.x,pFeet,46);
+    if(demonShown)shadow(this.e.x,eFeet,74);
+    shadow(this.p.x,pFeet,50);
     if(this.mode==='playing'&&this.stamina<99.5){
       const low=this.stamina<R.dodgeCost;
-      u.lineStyle(3,0x0b0e18,0.5);u.strokeCircle(this.p.x,pFeet,27);
-      u.lineStyle(3,low?0xd2465a:0x8fd3c4,0.85);u.beginPath();u.arc(this.p.x,pFeet,27,-Math.PI/2,-Math.PI/2+TAU*this.stamina/100);u.strokePath();
+      u.lineStyle(3,0x0b0e18,0.5);u.strokeCircle(this.p.x,pFeet,28);
+      u.lineStyle(3,low?0xd2465a:0x8fd3c4,0.85);u.beginPath();u.arc(this.p.x,pFeet,28,-Math.PI/2,-Math.PI/2+TAU*this.stamina/100);u.strokePath();
     }
+    const lost=this.mode==='lost'&&this.hp===0;
     this.ghostPool.forEach((img,i)=>{
       const gh=this.ghosts[i];
       if(!gh){img.setVisible(false);return;}
-      img.setVisible(true).setTexture(gh.frame).setPosition(gh.x,gh.y+PLAYER_FEET).setFlipX(gh.facing<0).setTintFill(0x9fd8ff).setAlpha(gh.life/0.24*0.45).setDepth(pDepth-0.001);
+      img.setVisible(true).setPosition(gh.x,gh.y+PLAYER_FEET).setFlipX(gh.facing<0).setRotation(gh.lean).setTintFill(0x9fd8ff).setAlpha(gh.life/0.24*0.45).setDepth(pDepth-0.001);
     });
-    // Demon sprite, hit flash, ash fade and eye glow.
+    // Demon: body motion carries the animation (lurching walk, rear-back wind-up, lunge, slump), then crumbles to ash.
     this.demonSprite.setVisible(demonShown);
     if(demonShown){
-      const dead=this.enemyState==='dead',shake=this.enemyState==='windup'?Math.sin(c*70)*1.3:0;
-      const frame=this.enemyState==='windup'?`demon-raise-${Math.floor(c*12)%2}`:this.enemyState==='chase'?`demon-walk-${Math.floor(this.demonWalk/TAU*8)%8}`:`demon-slump-${Math.floor(c*3)%2}`;
-      this.demonSprite.setTexture(frame).setPosition(this.e.x+shake,eFeet).setFlipX(demonFacing<0).setDepth(2+eFeet/1000).setAlpha(dead?this.deathFade/0.9:1);
-      if(dead)this.demonSprite.setTint(0x9a8e96);else if(this.hitFlash>0)this.demonSprite.setTintFill(0xffffff);else this.demonSprite.clearTint();
+      const st=this.enemyState,dead=st==='dead';
+      let rot=0,sx=1,sy=1,dy=0,shake=0,lunge=0;
+      if(st==='chase'){const w=this.demonWalk;rot=Math.sin(w)*0.07;dy=-Math.abs(Math.sin(w))*3;sy=1+Math.sin(w*2)*0.015;}
+      else if(st==='windup'){const p=1-this.enemyTimer/R.windup;rot=-0.16*p;sx=sy=1+0.06*p;shake=Math.sin(c*70)*1.5*p;}
+      else{rot=0.08+Math.sin(c*3)*0.015;dy=3;sy=0.97;}
+      if(this.strikeAnim>0&&!dead){const k=Math.sin(this.strikeAnim/0.3*Math.PI);rot=0.24*k;lunge=12*k;}
+      const ex=this.e.x+shake+demonFacing*lunge,ey=eFeet+dy,r=demonFacing*rot;
+      this.demonSprite.setPosition(ex,ey).setFlipX(demonFacing<0).setRotation(r).setScale(DM.scale*sx,DM.scale*sy).setDepth(2+eFeet/1000).setAlpha(1);
+      if(dead){
+        const prog=1-this.deathFade/1.1;
+        this.demonSprite.setTint(0x9a8e96).setCrop(0,prog*DM.full.height,DM.full.width,DM.full.height*(1-prog));
+      } else if(this.hitFlash>0)this.demonSprite.setTintFill(0xffffff);
+      else if(st==='windup')this.demonSprite.setTint(0xffc4c4);
+      else if(st==='recovery')this.demonSprite.setTint(0xc4bccb);
+      else this.demonSprite.setTint(MOONLIGHT);
       if(!dead&&this.hitFlash===0){
-        const glow=this.enemyState==='recovery'?0.18:0.55;
-        for(const [lx,ly] of this.demonEyes[frame]){const x=this.e.x+shake+demonFacing*(lx-DEMON.center)*CS,y=eFeet-(DEMON.feet-ly)*CS;l.fillStyle(0xff2a3c,glow);l.fillCircle(x,y,2.2);l.fillStyle(0xff2a3c,glow*0.35);l.fillCircle(x,y,5);}
-        if(this.enemyState==='windup'){const p=0.5+0.5*Math.sin(c*16);for(let k=0;k<4;k++){l.fillStyle(0xd0203a,0.05+0.04*p);l.fillCircle(this.e.x,this.e.y-14,40+k*14);}}
+        const glow=st==='recovery'?0.2:st==='windup'?0.9:0.6,cr=Math.cos(r),sr=Math.sin(r);
+        for(const [lx,ly] of DM.eyes){
+          const vx=demonFacing*lx*sx,vy=ly*sy,x=ex+vx*cr-vy*sr,y=ey+vx*sr+vy*cr;
+          l.fillStyle(0xffc23a,glow);l.fillCircle(x,y,1.4);l.fillStyle(0xff7a2a,glow*0.4);l.fillCircle(x,y,4);
+        }
+        if(st==='windup'){const p=0.5+0.5*Math.sin(c*16);for(let k=0;k<4;k++){l.fillStyle(0xd0203a,0.05+0.04*p);l.fillCircle(this.e.x,this.e.y-20,44+k*15);}}
       }
     }
-    // Slayer sprite, sword arm and katana.
-    const lost=this.mode==='lost'&&this.hp===0;
-    const frame=this.dodge>0?'slayer-dodge':this.moving?`slayer-walk-${Math.floor(this.walk/TAU*8)%8}`:`slayer-idle-${Math.floor(c*3)%4}`;
-    this.player.setTexture(lost?'slayer-idle-0':frame).setFlipX(facing<0).setDepth(pDepth).setRotation(lost?-facing*Math.PI/2:0).setPosition(this.p.x+(lost?facing*12:0),pFeet-(lost?6:0));
-    if(this.playerFlash>0)this.player.setTintFill(0xffffff);else if(this.dodge>0)this.player.setTint(0xc8ecff);else this.player.clearTint();
-    this.arm.clear();this.arm.setVisible(!lost);this.katana.setVisible(!lost);
+    // Slayer rig: body bob, swinging legs, lean into dodges and swings; katana in the front hand.
+    const swingT=this.swing>0?Math.sin((1-this.swing/0.15)*Math.PI):0;
+    const bob=this.moving?-Math.abs(Math.sin(this.walk))*2.2:Math.sin(c*2.4)*0.6;
+    const lean=(this.dodge>0?0.22:this.moving?0.04:0)+0.06*swingT;
+    const px0=this.p.x+Math.cos(this.angle)*4*swingT,py0=pFeet+Math.sin(this.angle)*2*swingT;
+    this.player.setVisible(!lost).setPosition(px0,py0).setScale(facing,1).setRotation(facing*lean).setDepth(pDepth);
+    this.body.setY(SL.body.y+bob);
+    const stride=this.moving?Math.sin(this.walk)*0.17:this.dodge>0?0.25:0;
+    this.legL.setRotation(stride);this.legR.setRotation(-stride);
+    for(const img of [this.body,this.legL,this.legR]){
+      if(this.playerFlash>0)img.setTintFill(0xffffff);else if(this.dodge>0)img.setTint(0xc8ecff);else img.setTint(MOONLIGHT);
+    }
+    this.fallen.setVisible(lost);
+    if(lost)this.fallen.setPosition(this.p.x+facing*44,pFeet).setFlipX(facing<0).setRotation(-facing*Math.PI/2).setDepth(pDepth);
+    this.katana.setVisible(!lost);
     if(!lost){
       const blade=this.swing>0?this.angle-1.15+2.3*(1-Math.pow(this.swing/0.15,2)):this.angle+0.5*facing;
-      const dx=Math.cos(blade),dy=Math.sin(blade),behind=dy<-0.2;
-      const sx=this.p.x+facing*SLAYER.shoulder.x*CS,sy=pFeet+SLAYER.shoulder.y*CS,hx=sx+dx*15,hy=sy+dy*15,cx=sx+dx*10.5,cy=sy+dy*10.5;
-      const a=this.arm;
-      a.lineStyle(10,0x140d1a);a.lineBetween(sx,sy,hx,hy);
-      a.lineStyle(7,0x5a4790);a.lineBetween(sx,sy,cx,cy);
-      a.lineStyle(7,0xddd0f3);a.lineBetween(cx,cy,hx-dx*1.5,hy-dy*1.5);
-      a.fillStyle(0x140d1a);a.fillCircle(hx,hy,4);a.fillStyle(0xf3d4b9);a.fillCircle(hx,hy,3);
-      a.setDepth(pDepth+(behind?-0.0002:0.0002));
-      this.katana.setPosition(hx,hy).setRotation(blade).setFlipY(facing<0).setDepth(pDepth+(behind?-0.0003:0.0001));
-      if(this.swing>0){l.lineStyle(4,0x7cc8ff,0.5);l.lineBetween(hx+dx*12,hy+dy*12,hx+dx*KATANA.length*CS,hy+dy*KATANA.length*CS);}
+      const dx=Math.cos(blade),dy=Math.sin(blade),cr=Math.cos(facing*lean),sr=Math.sin(facing*lean);
+      const lx=facing*SL.hand[0],ly=SL.hand[1]+bob,hx=px0+lx*cr-ly*sr,hy=py0+lx*sr+ly*cr;
+      const behind=dx*facing<-0.15;
+      this.katana.setPosition(hx,hy).setRotation(blade-facing*KT.angle).setFlipY(facing<0).setDepth(pDepth+(behind?-0.0003:0.0003));
+      if(this.swing>0){l.lineStyle(3,0x7cc8ff,0.5);l.lineBetween(hx+dx*14,hy+dy*14,hx+dx*KT.length,hy+dy*KT.length);}
     }
     if(this.swing>0){
       const a=this.swing/0.15;
@@ -392,7 +406,7 @@ class Arena extends Phaser.Scene {
     for(const q of this.particles){const a=Math.min(1,q.life/q.max*1.6);(q.glow?l:o).fillStyle(q.color,a);(q.glow?l:o).fillCircle(q.x,q.y,q.size*(0.5+0.5*q.life/q.max));}
     for(const q of this.petals){o.save();o.translateCanvas(q.x,q.y);o.rotateCanvas(q.rot);o.fillStyle(q.color,0.75);o.fillEllipse(0,0,8,3.8);o.restore();}
     if(this.enemyState!=='dead'){
-      const x=this.e.x,y=this.e.y-98,w=80,seg=w/(R.enemyHealth/R.swordDamage);
+      const x=this.e.x,y=this.e.y+DEMON_FEET-DM.height-12,w=80,seg=w/(R.enemyHealth/R.swordDamage);
       o.fillStyle(0x0a0d16,0.9);o.fillRect(x-w/2-2,y-2,w+4,9);
       o.fillStyle(0xf3d9c8,0.85);o.fillRect(x-w/2,y,w*this.ehpShown/R.enemyHealth,5);
       o.fillStyle(0xd2384f);o.fillRect(x-w/2,y,w*this.ehp/R.enemyHealth,5);
@@ -402,7 +416,7 @@ class Arena extends Phaser.Scene {
     } else this.label.setVisible(false);
     const low=this.mode==='playing'&&this.hp<=40?0.18+0.1*Math.sin(c*6):0;
     this.hurtImage.setAlpha(Math.max(this.hurtFx*0.9,low));
-    const px=this.input.activePointer.x,py=this.input.activePointer.y;
+    const px=this.aim.x,py=this.aim.y;
     t.lineStyle(1.5,0xd9c8f5,0.85);t.strokeCircle(px,py,7);
     for(let i=0;i<4;i++){const a=i*Math.PI/2+Math.PI/4;t.lineBetween(px+Math.cos(a)*10,py+Math.sin(a)*10,px+Math.cos(a)*15,py+Math.sin(a)*15);}
   }
