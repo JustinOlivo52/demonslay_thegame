@@ -52,3 +52,7 @@ Later versions are planning directions, not prerequisites or automatic additions
 4. Headquarters hub: crow missions, player training, room/save/loadout, Swordsmith Village access and mentor destinations. Expand destination content incrementally.
 
 The development sandbox remains a separate entry throughout and shares tested gameplay systems with later missions. Character preview choices still need integration into playable animation/loadouts in checkpoint 2.
+
+## Tutorial playtest milestone
+
+Character creation is approved. The condensed Final Selection tutorial now implements the three lesser-demon lessons, Hand Demon encounter, checkpoint progression, potion healing and passing/crow scene for owner playtesting. It reuses one forest region. The explorable Corps hub remains the next checkpoint. Tune trial pacing and animation from Justin's feedback before expanding the world or adding live AI services.

@@ -2,20 +2,20 @@
 
 ## Justin
 
-- [ ] Playtest character creation and the first forest encounter from this branch in Codespaces.
-- [ ] Review pixel art, motion, clue discovery, combat difficulty and the finisher window.
-- [ ] Approve the first forest slice before adding the next tutorial encounters.
+- [ ] Playtest character creation and the complete condensed Final Selection tutorial on the review branch.
+- [ ] Review Water/Flame controls, healing, finishing, boss tells, difficulty, checkpoint retry/reload and the crow scene.
+- [ ] Send browser/device, steps and expected/actual results for bugs.
+- [ ] Approve the tutorial checkpoint before building the Corps hub.
 - [ ] Audio assets later; sound remains deferred.
 
-## Implementation
+## Development after feedback
 
-- [ ] Improve directional sprites, foot alignment and in-between poses.
-- [ ] Give Water Wheel dedicated somersault frames and Flame its own final choreography.
-- [ ] Expand Final Selection with additional tutorial encounters and consumables.
-- [ ] Build the Hand Demon boss, passing scene and crow introduction.
-- [ ] Build the Corps hub and room/loadout flow after the trial checkpoint.
+- [ ] Fix tutorial playtest blockers and tune difficulty.
+- [ ] Improve sprite alignment, directional sets and dedicated Water Wheel/Flame/finisher animation.
+- [ ] Build Corps headquarters, crow assignments, training, room/save/loadout and mentor/Swordsmith access.
+- [ ] Add XP, inventory and upgrade economy at their checkpoints.
 - [ ] Define blocking rules before implementing them.
-- [ ] Add validated AI backstory and mission generation through a backend; use fallbacks and persist seeds.
-- [ ] Retain the developer sandbox for independent feature testing.
+- [ ] Connect validated AI origins and mission scenarios through a backend, with fallback content and saved seeds.
+- [ ] Retain the independent developer sandbox for testing.
 
-See report.md, CHECKPOINT-01.md, CHECKPOINT-02-FOREST.md and DEMON-POOL.md for current scope and known limits.
+Current handoff: TUTORIAL-PLAYTEST.md and report.md. No live AI service or audio is required to play this build.
