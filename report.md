@@ -88,3 +88,9 @@ Validation: build and all seven test files pass. Automated browser playthroughs 
 See PLAYTEST-REVISION-01.md. Added smaller actors/wider movement space, faster movement, separate regional layouts, five melee patterns, a buffered three-cut sword chain, visible form navigation and independent Breath, plus a 28-frame generated run/dodge sheet. Training has a capacity hook but no playable progression yet. Character creator remains unchanged.
 
 Validation: build and eight test files pass. Browser input checks verified combo damage, both form-navigation methods and independent Breath. Full Water and fixed-seed Flame playthroughs cleared all four fights, persisted crow completion and had no page errors. Healing, boss full recovery and checkpoint retry supplies passed. New run/dodge art rendered without page errors. Developer demo retreat was bounded after a double-strike encounter exposed an overly defensive demo policy.
+
+## Playtest revision 02 — direct forms and connected training
+
+Number keys, numpad and numbered cards now cast directly; Q repeats the selected form. Physical keydown handling and action-edge buffering avoid missed short taps. A connected four-region scrolling training world replaces panel transitions, with automatic combat lessons and no mandatory investigation. Victories save immediately; cleared checkpoints resume travel and allow backtracking. Recruit/demon/boss sizes are 80/96/144. The approved creator and pixel-art direction are preserved.
+
+Validation: build and 20 tests across nine files pass. Browser checks covered actual form damage and row/numpad/card inputs for Water and Flame, three keyboard-traversed links, backtracking, travel pause/resume and the crow ending. Route checks used cleared/downed fixtures. A separate full Water combat run completed every fight and transition without health shortcuts or page errors, saved its crow and passed healing, boss recovery and retry-supply checks. See PLAYTEST-REVISION-02.md.

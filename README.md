@@ -44,3 +44,7 @@ See [team report](report.md), [roadmap](docs/ROADMAP.md), [art direction](docs/A
 ## Latest personal-playtest revision
 
 See PLAYTEST-REVISION-01.md for faster movement, smaller actors, extra run/dodge poses, three-cut sword combos, visible form cards with Breath, distinct melee patterns and four tutorial regions. TUTORIAL-PLAYTEST.md has current controls.
+
+## Playtest revision 02
+
+Forms now cast directly from 1/2, numpad or their cards. The training route connects the four clearings through a scrolling world; no investigation is required. Victories save immediately and the next lesson begins after walking into its area. See PLAYTEST-REVISION-02.md.

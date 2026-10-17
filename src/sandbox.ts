@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import {TRAINING_WIDTH,regionOffset,regionEntry,trainingSpawn,trainingDemon,moveTraining,createTrainingScenery} from './training-world';
 import {MELEE_PATTERNS,meleeFor,meleeHits,type MeleeId} from './encounters';
 import {TUTORIAL_STAGES,RUN_KEY,profileKey,readRun,advanceRun,newRun,heal} from './tutorial';
 import RUN_REGIONS from './recruit-run-regions.json';
@@ -28,7 +29,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 if(IS_SELECTION&&PROFILE){
  document.querySelector('.build')!.textContent='FINAL SELECTION / FIRST FOREST SLICE';
  document.querySelector('.arena-heading span:last-child')!.textContent='NIGHT / SELECTION';
- document.querySelector('.checkpoint')!.textContent='Explore · investigate · survive';
+ document.querySelector('.checkpoint')!.textContent='Train · travel · survive';
  document.querySelector('.notes>span')!.textContent='Next checkpoint: Corps headquarters';
  document.querySelector('.intro h1')!.textContent='Beyond the wisteria.';
  document.querySelector('.intro p:not(.eyebrow)')!.textContent='Mount Fujikasane · The first night of Final Selection';
@@ -39,10 +40,10 @@ if(IS_SELECTION&&PROFILE){
  document.querySelector('#start')!.textContent='Enter the forest';
  document.querySelectorAll<HTMLOptionElement>('#form-select option').forEach((option,i)=>{option.textContent=`${i+1} · ${STARTERS[PROFILE.style].forms[i]}`;});
  const objectives=document.createElement('section');objectives.className='lab';
- objectives.innerHTML='<p class="eyebrow">FINAL SELECTION · TUTORIAL</p><h3 id="trial-objective">Follow the forest trail</h3><p id="trial-hint" role="status">WASD to move. Find the broken cord, then press E to inspect it.</p><p>Mouse / J: sword · Space: dodge<br>1 / 2: choose form · Q: use form<br>F: finish · Esc: pause</p><p id="trial-form"></p><a href="./">Return to your recruit ↗</a>';
+ objectives.innerHTML='<p class="eyebrow">FINAL SELECTION · TUTORIAL</p><h3 id="trial-objective">Follow the training path</h3><p id="trial-hint" role="status">WASD to move. Reach the open clearing to begin training.</p><p>Mouse / J: sword · Space: dodge<br>1 / 2 or click: cast form · Q: repeat<br>F: finish · Esc: pause</p><p id="trial-form"></p><a href="./">Return to your recruit ↗</a>';
  document.querySelector('aside')!.prepend(objectives);
  document.querySelector('.notes h3')!.textContent='Your first night in the forest.';
- document.querySelector('.notes p:not(.eyebrow)')!.textContent='Follow the trail, survive three lesser-demon lessons, face the Hand Demon, and receive your Kasugai crow at dawn.';
+ document.querySelector('.notes p:not(.eyebrow)')!.textContent='Follow the training route, survive three lesser-demon lessons, face the Hand Demon, and receive your Kasugai crow at dawn.';
  document.querySelector('.tip')!.textContent='Ordinary attacks are signaled by the demon’s pose. Dodge, use your breathing forms, and press F when it is vulnerable.';
 }
 
@@ -50,12 +51,12 @@ if(IS_SELECTION&&PROFILE){
  document.body.classList.add('forest-play');
  const nav=document.createElement('div');nav.className='forest-nav';nav.innerHTML='<a href="./">夜 &nbsp; NIGHTFALL</a><span>FINAL SELECTION · THE FIRST NIGHT</span><div id="forest-actions"></div>';document.querySelector('main')!.prepend(nav);
  for(const id of ['start','retry'])document.querySelector('#forest-actions')!.append(document.querySelector('#'+id)!);
- const hud=document.createElement('div');hud.className='forest-hud';hud.innerHTML='<div class="forest-vitals"><p id="forest-recruit"></p><div id="vital-bars"></div></div><div id="forest-objectives"></div><div class="forest-dock"><div id="forest-slots"></div><p id="forest-controls">WASD Move · Mouse Aim · J / Click Sword · Space Dodge · E Inspect · H Potion · F Finish · Esc Pause</p></div>';document.querySelector('.game-panel')!.append(hud);
+ const hud=document.createElement('div');hud.className='forest-hud';hud.innerHTML='<div class="forest-vitals"><p id="forest-recruit"></p><div id="vital-bars"></div></div><div id="forest-objectives"></div><div class="forest-dock"><div id="forest-slots"></div><p id="forest-controls">WASD Move · Mouse Aim · J / Click Combo · Space Dodge · 1 / 2 Forms · H Potion · F Finish · Esc Pause</p></div>';document.querySelector('.game-panel')!.append(hud);
  document.querySelector('#forest-recruit')!.textContent=`${PROFILE.name} · Level 1`;
  document.querySelectorAll('aside .resource').forEach(node=>document.querySelector('#vital-bars')!.append(node));
  document.querySelector('#forest-objectives')!.append(document.querySelector('#trial-objective')!,document.querySelector('#trial-hint')!);
  document.querySelector('#forest-slots')!.append(document.querySelector('#trial-form')!);
- document.querySelector('#trial-hint')!.textContent='Follow the winding trail. Look for signs left by other candidates.';
+ document.querySelector('#trial-hint')!.textContent='Follow the training path. Practice forms with 1 / 2 or the cards below.';
 }
 
 function initialEncounter(){
@@ -204,12 +205,17 @@ class Arena extends Phaser.Scene {
   private run=readRun((()=>{try{return localStorage.getItem(RUN_KEY);}catch{return null;}})(),PROFILE?profileKey(PROFILE):'sandbox');
   private get stage(){return TUTORIAL_STAGES[Math.min(this.run.stage,3)];}
   private get isBoss(){return IS_SELECTION&&this.run.stage===3;}
-  private areaStage=-1;
+  private presses=new Set<string>();
+  private consumePress(key:string){const down=this.presses.has(key);this.presses.delete(key);return down;}
+  private resumeMode:'playing'|'won'='playing';
+  private pendingForm:{id:WaterId;time:number;autoAim:boolean}|null=null;
+  private get traveling(){return IS_SELECTION&&this.mode==='won'&&!this.isBoss&&!this.run.passed&&this.endDelay===0;}
+  private get unlockedStage(){return Math.min(3,this.run.stage+(this.mode==='won'||(this.mode==='paused'&&this.resumeMode==='won')?1:0));}
   private patternId:MeleeId='claw';private enemyAngle=0;private strikeElapsed=0;private enemyHits=new Set<number>();
   private get pattern(){return MELEE_PATTERNS[this.patternId];}
   private get area(){return TRIAL_AREAS[Math.min(this.run.stage,3)];}
-  private get actorSize(){return IS_SELECTION?94:150;}
-  private get demonSize(){return IS_SELECTION?112:168;}
+  private get actorSize(){return IS_SELECTION?80:150;}
+  private get demonSize(){return IS_SELECTION?96:168;}
   private maxBreath=breathCapacity();private breath=this.maxBreath;
   private combo=-1;private comboWindow=0;private queuedSlash=false;private slash:{index:number;elapsed:number;hit:boolean;angle:number}|null=null;
   private lastMove=new Phaser.Math.Vector2(1,0);
@@ -240,7 +246,7 @@ class Arena extends Phaser.Scene {
   private technique: {id: WaterId; elapsed: number; angle: number; hit: boolean; damage: number; reach: number} | null = null;
   private formCooldowns = {surface: 0, wheel: 0};
   private tuning = {surface: {damage: 35, reach: 95, stamina: 20, cooldown: 1.4}, wheel: {damage: 45, reach: 70, stamina: 32, cooldown: 2.5}};
-  private labMessage = 'Q to cast · 1 / 2 to select a form';
+  private labMessage = '1 / 2 or click to cast · Q repeats';
   private pixelHead!: Phaser.GameObjects.Sprite;
   private finishTest = new URLSearchParams(location.search).has('finishTest');
   private pixelDemon!: Phaser.GameObjects.Sprite;
@@ -290,14 +296,14 @@ class Arena extends Phaser.Scene {
     this.profileActor=this.add.sprite(0,0,'profile-idle',0).setOrigin(0.5,0.96).setDisplaySize(150,150).setVisible(false);
     const boss=this.textures.get('hand-demon'),bossImage=boss.getSourceImage() as HTMLImageElement;
     const bw=Math.floor(bossImage.width/4);for(let i=0;i<4;i++)boss.add(i,0,i*bw,0,bw,bossImage.height);boss.setFilter(Phaser.Textures.FilterMode.NEAREST);
-    this.bossSprite=this.add.sprite(0,0,'hand-demon',0).setOrigin(0.5,0.94).setDisplaySize(165,165).setVisible(false);
-    this.bossHead=this.add.sprite(0,0,'hand-demon',0).setOrigin(0.5,0.94).setDisplaySize(165,165).setVisible(false);
+    this.bossSprite=this.add.sprite(0,0,'hand-demon',0).setOrigin(0.5,0.94).setDisplaySize(144,144).setVisible(false);
+    this.bossHead=this.add.sprite(0,0,'hand-demon',0).setOrigin(0.5,0.94).setDisplaySize(144,144).setVisible(false);
     const layer = (key: string, paint: (ctx: CanvasRenderingContext2D) => void, depth: number) => {
       const texture = this.textures.createCanvas(key, W, H)!;
       paint(texture.getContext()); texture.refresh();
       return this.add.image(0, 0, key).setOrigin(0).setDepth(depth);
     };
-    layer('ground', IS_SELECTION?ctx=>paintForest(ctx,Math.min(this.run.stage,3)):paintGround, 0);this.areaStage=Math.min(this.run.stage,3);
+    if(IS_SELECTION)createTrainingScenery((key,paint,x,width,depth)=>{const texture=this.textures.createCanvas(key,width,H)!;paint(texture.getContext());texture.refresh();this.add.image(x,0,key).setOrigin(0).setDepth(depth);});else layer('ground',paintGround,0);
     this.under = this.add.graphics().setDepth(1);
     // Illustrated characters: the slayer is a small cutout rig (two legs under the body), the demon one sprite.
     const part = (p: {key: string; origin: readonly number[]; x: number; y: number}, scale: number) => this.add.image(p.x, p.y, p.key).setOrigin(p.origin[0], p.origin[1]).setScale(scale);
@@ -309,7 +315,7 @@ class Arena extends Phaser.Scene {
     this.demonSprite = part(DM.full, DM.scale);
     this.over = this.add.graphics().setDepth(3);
     this.glow = this.add.graphics().setDepth(4).setBlendMode(Phaser.BlendModes.ADD);
-    layer('foreground', IS_SELECTION?paintForestForeground:paintForeground, 5);
+    if(!IS_SELECTION)layer('foreground',paintForeground,5);
     layer('light', paintLight, 6).setScrollFactor(0);
     this.hurtImage = layer('hurt', paintHurt, 7).setAlpha(0).setScrollFactor(0);
     this.interactLabel=this.add.text(0,0,'',{fontFamily:SANS,fontSize:'12px',color:'#f1e7c9',backgroundColor:'#102326',padding:{x:9,y:7}}).setOrigin(0.5,1).setDepth(9).setVisible(false);
@@ -321,8 +327,17 @@ class Arena extends Phaser.Scene {
     this.subtitle = this.add.text(W / 2, 344, '', {fontFamily: SANS, fontSize: '15px', color: '#c3b8d8'}).setOrigin(0.5).setDepth(10).setLetterSpacing(1).setScrollFactor(0);
     const rand = seeded(99);
     for (let i = 0; i < 22; i++) this.petals.push({x: rand() * W, y: rand() * H, vx: 14 + rand() * 18, vy: 22 + rand() * 20, rot: rand() * 6, spin: (rand() - 0.5) * 4, color: [0xc6a8ee, 0xa985dc, 0xe2d2f7][i % 3]});
-    this.keys = this.input.keyboard!.addKeys('W,A,S,D,SPACE,ESC,J,Q,F,E,H,ENTER,ONE,TWO') as typeof this.keys;
-    this.input.keyboard!.addCapture(['SPACE','W','A','S','D']);
+    this.keys = this.input.keyboard!.addKeys('W,A,S,D,SPACE,ESC,J,Q,F,E,H,ENTER,ONE,TWO,NUMPAD_ONE,NUMPAD_TWO') as typeof this.keys;
+    window.addEventListener('keydown',event=>{
+      const target=event.target as HTMLElement|null;
+      if(event.repeat||target?.matches('input,textarea,select,[contenteditable=true]'))return;
+      const id=event.code==='Digit1'||event.code==='Numpad1'?'surface':event.code==='Digit2'||event.code==='Numpad2'?'wheel':event.code==='KeyQ'?this.selectedForm:null;
+      if(id&&this.mode==='playing'){event.preventDefault();this.requestForm(id);}
+      if(event.code==='Escape'&&(this.mode==='playing'||this.mode==='paused'||(IS_SELECTION&&this.mode==='won'&&!this.run.passed))){event.preventDefault();this.togglePause();}
+      const action=({KeyJ:'J',KeyF:'F',KeyH:'H',KeyE:'E',Space:'SPACE',Enter:'ENTER'} as Record<string,string>)[event.code];
+      if(action&&(this.mode==='playing'||(action==='ENTER'&&this.mode==='won'))){event.preventDefault();this.presses.add(action);}
+    });
+    this.input.keyboard!.addCapture(['SPACE','W','A','S','D','ONE','TWO','NUMPAD_ONE','NUMPAD_TWO','Q']);
     const rosterPanel=document.createElement('details');
     rosterPanel.innerHTML='<summary>Demon encounter pool · levels 1–5</summary><label>Archetype <select id="demon-choice"><option value="random">Random appearance</option>'+DEMON_ARCHETYPES.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')+'</select></label><label>Level <input id="demon-level" type="number" min="1" max="5" value="1" step="1"></label><button id="new-demon" class="secondary">Generate new encounter</button><p>Replay keeps this target. New encounter rolls a seed. No Blood Demon Arts at these levels.</p>';
     document.querySelector(IS_SELECTION?'.lab[hidden]':'.lab')!.append(rosterPanel);
@@ -345,27 +360,27 @@ class Arena extends Phaser.Scene {
     if(IS_SELECTION){
       const slots=document.querySelector('#forest-slots')!;
       const cards=document.createElement('div');cards.className='form-cards';cards.innerHTML=['surface','wheel'].map((id,i)=>`<button type=button class=form-card id=form-${id} aria-pressed=${i===0}><kbd>${i+1}</kbd><strong>${PROFILE?STARTERS[PROFILE.style].forms[i]:WATER_FORMS[id as WaterId].name}</strong><span class=form-meta></span></button>`).join('')+'<button type=button id=cast-equipped>Q · Use selected form</button>';slots.append(cards);
-      for(const id of ['surface','wheel'] as const)document.querySelector('#form-'+id)!.addEventListener('click',()=>{this.selectForm(id);document.querySelector<HTMLElement>('#game')!.focus();});
-      document.querySelector('#cast-equipped')!.addEventListener('click',()=>{this.castForm();document.querySelector<HTMLElement>('#game')!.focus();});
+      for(const id of ['surface','wheel'] as const)document.querySelector('#form-'+id)!.addEventListener('click',()=>{this.requestForm(id,true);document.querySelector<HTMLElement>('#game')!.focus();});
+      document.querySelector('#cast-equipped')!.addEventListener('click',()=>{this.requestForm(this.selectedForm,true);document.querySelector<HTMLElement>('#game')!.focus();});
       const feedback=document.createElement('p');feedback.id='combat-feedback';feedback.setAttribute('role','status');slots.append(feedback);
     }
-    document.querySelector('#start')!.addEventListener('click', () => {if(this.mode === 'playing')this.mode='paused';else if(this.mode === 'paused')this.mode='playing';else this.reset();this.sync();});
+    document.querySelector('#start')!.addEventListener('click',()=>this.togglePause());
     document.querySelector('#retry')!.addEventListener('click', () => this.reset());
-    window.addEventListener('blur', () => {if(this.mode==='playing'){this.mode='paused';this.sync();}});
-    this.cameras.main.setZoom(ZOOM).setBounds(0, 0, W, H).startFollow(this.player, false, 0.12, 0.12, 0, 40);
+    window.addEventListener('blur', () => {if(this.mode==='playing'||this.traveling)this.togglePause();});
+    this.cameras.main.setZoom(ZOOM).setBounds(0, 0, IS_SELECTION?TRAINING_WIDTH:W, H).startFollow(this.player, false, 0.12, 0.12, 0, 40);
     if(this.demoMode){this.trainingDummy=false;document.querySelector<HTMLInputElement>('#dummy')!.checked=false;this.showHitboxes=false;document.querySelector<HTMLInputElement>('#hitboxes')!.checked=false;this.reset();}
     if(this.finishTest)(window as unknown as {finishLab: unknown}).finishLab={
       reset:()=>this.reset(),
       teleport:(x:number,y:number)=>{this.p={x,y};},
       hurt:()=>{this.hp=40;},
-      next:()=>this.continueTrial(),
+      next:()=>this.continueTrial(true),
       down:()=>{this.ehp=0;this.downDemon();},
       near:()=>{this.p={x:this.e.x-50,y:this.e.y};},
       target:(x:number,y:number)=>{this.e={x,y};},dummy:(value:boolean)=>{this.trainingDummy=value;},
       far:()=>{this.p={x:54,y:74};},
       finish:()=>this.finishDemon(),
-      pause:()=>{this.mode='paused';},resume:()=>{this.mode='playing';},
-      state:()=>({run:this.run,potions:this.potionCount,playerHealth:this.hp,position:{...this.p},enemyPosition:{...this.e},breath:this.breath,maxBreath:this.maxBreath,stamina:this.stamina,combo:this.combo,slash:this.slash,pattern:this.patternId,area:this.area.name,selectedForm:this.selectedForm,technique:this.technique,shrine:this.shrineRead,encounter:this.encounter,clues:this.trialClues,combat:this.trialCombat,profile:PROFILE,enemy:this.enemyState,hp:this.ehp,timer:this.finishRemaining,mode:this.mode,wins:this.wins,execution:this.executionFlash,ash:this.deathFade})
+      pause:()=>{this.resumeMode=this.mode==='won'?'won':'playing';this.mode='paused';},resume:()=>{this.mode=this.resumeMode;},
+      state:()=>({run:this.run,potions:this.potionCount,playerHealth:this.hp,position:{...this.p},enemyPosition:{...this.e},breath:this.breath,maxBreath:this.maxBreath,stamina:this.stamina,combo:this.combo,slash:this.slash,pattern:this.patternId,area:this.area.name,cameraX:this.cameras.main.scrollX,unlockedStage:this.unlockedStage,pendingForm:this.pendingForm,selectedForm:this.selectedForm,technique:this.technique,shrine:this.shrineRead,encounter:this.encounter,clues:this.trialClues,combat:this.trialCombat,profile:PROFILE,enemy:this.enemyState,hp:this.ehp,timer:this.finishRemaining,mode:this.mode,wins:this.wins,execution:this.executionFlash,ash:this.deathFade})
     };
     if(IS_SELECTION){this.trainingDummy=false;this.showHitboxes=false;}
     if(IS_SELECTION){
@@ -376,7 +391,7 @@ class Arena extends Phaser.Scene {
       const crow=document.querySelector<HTMLCanvasElement>('#crow-portrait')!.getContext('2d')!;
       crow.fillStyle='#696153';crow.fillRect(4,34,40,3);crow.fillStyle='#171e29';crow.fillRect(16,15,19,17);crow.fillRect(9,6,14,14);crow.fillRect(7,9,18,9);crow.fillRect(31,25,10,8);crow.fillRect(35,29,10,5);crow.fillStyle='#344351';crow.fillRect(18,17,12,4);crow.fillRect(21,22,11,3);crow.fillStyle='#0b141e';crow.fillRect(23,15,5,14);crow.fillStyle='#b0a174';crow.fillRect(3,13,7,3);crow.fillStyle='#e6d4a7';crow.fillRect(12,10,2,2);crow.fillStyle='#6f736d';crow.fillRect(20,30,2,5);crow.fillRect(28,30,2,5);
       document.querySelector('#replay-trial')!.addEventListener('click',()=>{this.run=newRun(PROFILE?profileKey(PROFILE):'');this.saveRun();this.reset();});
-      this.potionCount=this.run.potions;if(this.run.passed)this.showPassed();
+      this.potionCount=this.run.potions;if(this.run.passed)this.showPassed();else{this.p=trainingSpawn(this.run.stage);this.e=trainingDemon(this.run.stage);if(this.run.cleared)this.reset();this.player.setPosition(this.p.x,this.p.y+24);this.cameras.main.centerOn(this.p.x,H/2);}
     }
     this.sync(); this.draw();
   }
@@ -384,16 +399,17 @@ class Arena extends Phaser.Scene {
     if(IS_SELECTION&&this.run.passed){this.showPassed();return;}
     if(IS_SELECTION){const original=rollDemonEncounter(1,this.encounterSeed);this.encounter=rollDemonEncounter(Math.min(this.run.stage+1,5),this.encounterSeed,DEMON_ARCHETYPES[(original.archetype.column+this.run.stage)%5].id);}
     this.transitionSaved=false;this.attackCount=0;this.bossHeavy=false;this.patternId=meleeFor(this.encounter.archetype.column,this.isBoss);this.enemyHits.clear();this.strikeElapsed=0;
-    this.breath=this.maxBreath;this.combo=-1;this.comboWindow=0;this.queuedSlash=false;this.slash=null;
-    if(IS_SELECTION&&this.areaStage!==Math.min(this.run.stage,3)){const texture=this.textures.get('ground') as Phaser.Textures.CanvasTexture;paintForest(texture.getContext(),Math.min(this.run.stage,3));texture.refresh();this.areaStage=Math.min(this.run.stage,3);}
+    this.pendingForm=null;this.resumeMode='playing';this.breath=this.maxBreath;this.combo=-1;this.comboWindow=0;this.queuedSlash=false;this.slash=null;
+
     if(IS_SELECTION){this.potionCount=this.run.potions;document.querySelector<HTMLElement>('#selection-passed')?.setAttribute('hidden','');}
-    this.p=IS_SELECTION?{...this.area.spawn}:{x:300,y:340};this.e=IS_SELECTION?{...this.area.demon}:{x:this.trainingDummy?380:700,y:340};
-    if(IS_SELECTION){this.tourIndex=0;this.shrineRead=false;this.trialClues=0;this.trialCombat=false;this.trialSaved=false;this.trialText='The wisteria ends here. Follow the trail and look for signs of other candidates.';}
-    this.executionFlash=0;this.finishRemaining=0;this.technique=null;this.formCooldowns={surface:0,wheel:0};this.labMessage='Q to cast · 1 / 2 to select a form';this.hp=IS_SELECTION?this.run.health:R.health;this.stamina=R.stamina;this.ehp=this.enemyMaxHp;
+    this.p=IS_SELECTION?trainingSpawn(Math.min(this.run.stage,3)):{x:300,y:340};this.e=IS_SELECTION?trainingDemon(Math.min(this.run.stage,3)):{x:this.trainingDummy?380:700,y:340};
+    if(IS_SELECTION){this.tourIndex=0;this.shrineRead=false;this.trialClues=0;this.trialCombat=false;this.trialSaved=false;this.trialText='Follow the training path to the open clearing. No investigation is required. Press 1 / 2 or click a form card to practice.';}
+    this.executionFlash=0;this.finishRemaining=0;this.technique=null;this.formCooldowns={surface:0,wheel:0};this.labMessage='1 / 2 or click to cast · Q repeats';this.hp=IS_SELECTION?this.run.health:R.health;this.stamina=R.stamina;this.ehp=this.enemyMaxHp;
     this.swing=0;this.swordCooldown=0;this.dodge=0;this.dodgeCooldown=0;this.hurt=0;this.enemyTimer=0;this.enemyState='chase';this.mode='playing';
     this.hitFlash=0;this.hurtFx=0;this.ehpShown=this.enemyMaxHp;this.deathFade=0;this.endDelay=0;this.clawLife=0;this.overlayAlpha=0;this.playerFlash=0;
     this.particles=[];this.ghosts=[];this.strikeAnim=0;this.demonSprite.setCrop();for(const f of this.floaters)f.text.destroy();this.floaters=[];
-    if(IS_SELECTION&&this.run.stage>0){this.trialClues=2;this.trialCombat=true;this.trialText=(this.isBoss?'At a sheltered rest point, you recover at least 75 vitality and find a potion. ':'')+this.stage.lesson;}
+    if(IS_SELECTION&&this.run.stage>0){this.trialClues=0;this.trialCombat=false;this.trialText=(this.isBoss?'At a sheltered rest point, you recover at least 75 vitality and find a potion. ':'')+this.stage.lesson;}
+    if(IS_SELECTION&&this.run.cleared){this.mode='won';this.enemyState='dead';this.ehp=0;this.ehpShown=0;this.trialCombat=true;this.p={x:this.e.x+70,y:350};}
     this.sync();
     document.querySelector<HTMLElement>('#game')!.focus();
   }
@@ -402,10 +418,28 @@ class Arena extends Phaser.Scene {
     this.mode='won';this.enemyState='dead';this.deathFade=0;this.endDelay=0;this.trialCombat=false;
     const panel=document.querySelector<HTMLElement>('#selection-passed');if(panel){panel.hidden=false;document.querySelector('#passed-name')!.textContent=`${PROFILE?.name||'Recruit'} · ${PROFILE?STARTERS[PROFILE.style].name:''} · Kasugai crow received`;}
   }
-  private continueTrial(){
-    if(!IS_SELECTION||this.mode!=='won'||this.endDelay>0)return;
+  private togglePause(){
+    this.presses.clear();
+    if(this.mode==='playing'||(IS_SELECTION&&this.mode==='won'&&!this.run.passed)){this.resumeMode=this.mode;this.mode='paused';}
+    else if(this.mode==='paused')this.mode=this.resumeMode;
+    else this.reset();
+    this.sync();
+  }
+  private continueTrial(walked=false){
+    if(!IS_SELECTION||this.mode!=='won'||this.endDelay>0||(!this.isBoss&&!walked))return;
+    const position={...this.p};
     if(!this.transitionSaved){this.run=advanceRun(this.run,this.hp,this.potionCount);this.transitionSaved=true;this.saveRun();}
-    if(this.run.passed)this.showPassed();else this.reset();
+    if(this.run.passed)this.showPassed();else{this.reset();if(walked)this.p=position;}
+  }
+  private updateTravel(dt:number){
+    if(!this.traveling)return;
+    const entry=regionEntry(this.run.stage+1);
+    const direction=this.demoMode?new Phaser.Math.Vector2(entry.x+10-this.p.x,entry.y-this.p.y).normalize():new Phaser.Math.Vector2(Number(this.keys.D.isDown)-Number(this.keys.A.isDown),Number(this.keys.S.isDown)-Number(this.keys.W.isDown)).normalize();
+    this.moving=direction.length()>0;if(this.moving)this.lastMove.copy(direction);
+    this.movePlayer(direction.x*R.speed*dt,direction.y*R.speed*dt);
+    this.angle=Math.atan2(this.lastMove.y,this.lastMove.x);
+    this.breath=Math.min(this.maxBreath,this.breath+24*dt);this.stamina=Math.min(100,this.stamina+R.staminaRegen*dt);
+    if(this.p.x>=entry.x)this.continueTrial(true);
   }
   private usePotion(){
     if(this.mode!=='playing')return;const result=heal(this.hp,this.potionCount);
@@ -413,12 +447,18 @@ class Arena extends Phaser.Scene {
     this.trialText=result.used?'You drink a healing potion. +45 vitality.':this.potionCount===0?'No healing potions remain.':'Your vitality is already full.';
     if(result.used)this.floatText(this.p.x,this.p.y-75,'+45 HP','#bde9be','#143c23',18);
   }
+  private requestForm(id:WaterId,autoAim=false){
+    this.selectForm(id);
+    if(this.mode==='playing'&&!this.technique&&(this.slash||this.dodge>0||this.swordCooldown>0)){this.pendingForm={id,time:.35,autoAim};this.queuedSlash=false;this.labMessage='Form queued — finishing your current action.';return;}
+    if(autoAim&&this.trialCombat&&Math.hypot(this.e.x-this.p.x,this.e.y-this.p.y)<300)this.angle=Phaser.Math.Angle.Between(this.p.x,this.p.y,this.e.x,this.e.y);
+    this.castForm();
+  }
   private selectForm(id:WaterId){
     this.selectedForm=id;document.querySelector<HTMLSelectElement>('#form-select')!.value=id;
     for(const prop of ['damage','reach','stamina','cooldown'] as const)document.querySelector<HTMLInputElement>(`#tune-${prop}`)!.value=String(this.tuning[id][prop]);
   }
   private attack() {
-    if((IS_SELECTION&&!this.trialCombat)||this.mode!=='playing'||['downed','dead'].includes(this.enemyState)||this.technique||this.dodge>0)return;
+    if(this.mode!=='playing'||['downed','dead'].includes(this.enemyState)||this.technique||this.dodge>0)return;
     if(this.slash){this.queuedSlash=true;return;}
     if(this.swordCooldown>0)return;
     this.combo=comboIndex(this.combo,this.comboWindow);this.comboWindow=0;
@@ -445,15 +485,14 @@ class Arena extends Phaser.Scene {
   private inspectForest(){
     if(this.mode!=='playing')return;
     if(this.run.stage===0&&Math.hypot(this.p.x-FOREST_SHRINE.x,this.p.y-FOREST_SHRINE.y)<62){this.shrineRead=true;this.trialText='A small wayside shrine. Someone left a promise here: “Let us all see the dawn.” The side trail returns to the fork.';return;}
-    const clue=FOREST_CLUES[this.trialClues];
-    if(clue&&Math.hypot(this.p.x-clue.x,this.p.y-clue.y)<62){this.trialText=clue.text;this.trialClues++;if(this.trialClues===2)this.trialCombat=true;}
+
   }
   private movePlayer(dx:number,dy:number){
-    if(IS_SELECTION)moveThroughForest(this.p,dx,dy,Math.min(this.run.stage,3));
+    if(IS_SELECTION)moveTraining(this.p,dx,dy,this.unlockedStage);
     else{this.p.x=Phaser.Math.Clamp(this.p.x+dx,54,946);this.p.y=Phaser.Math.Clamp(this.p.y+dy,74,570);}
   }
   private moveEnemy(dx:number,dy:number){
-    if(IS_SELECTION)moveThroughForest(this.e,dx,dy,Math.min(this.run.stage,3));
+    if(IS_SELECTION)moveTraining(this.e,dx,dy,Math.min(this.run.stage,3));
     else {this.e.x=Phaser.Math.Clamp(this.e.x+dx,54,946);this.e.y=Phaser.Math.Clamp(this.e.y+dy,74,570);}
   }
   private downDemon() {
@@ -464,11 +503,11 @@ class Arena extends Phaser.Scene {
     if(!canFinish(this.enemyState==='downed',this.finishRemaining,Phaser.Math.Distance.Between(this.p.x,this.p.y,this.e.x,this.e.y)))return;
     this.executionFlash=0.65;this.finishRemaining=0;this.enemyState='dead';this.technique=null;this.slash=null;this.swing=0.15;
     this.mode='won';this.wins++;
+    if(IS_SELECTION){this.run={...this.run,health:this.hp,potions:this.potionCount,cleared:true};this.saveRun();}
     this.floatText(this.e.x,this.e.y-85,'DECAPITATED','#d6faff','#183544',18);
     this.onDemonDefeated();this.endDelay+=0.65;
   }
   private castForm() {
-    if(IS_SELECTION&&!this.trialCombat){this.trialText='Inspect the clues before engaging the demon.';return;}
     if(this.enemyState==='downed') {this.labMessage='Approach and press F to finish.';return;}
     if(this.mode !== 'playing') {this.labMessage='Start or resume the encounter first.';return;}
     if(this.technique || this.slash || this.dodge>0 || this.swordCooldown>0) {this.labMessage='Finish the current action first.';return;}
@@ -507,20 +546,20 @@ class Arena extends Phaser.Scene {
   update(_time:number, delta:number) {
     const pointer=this.input.activePointer;this.cameras.main.getWorldPoint(pointer.x,pointer.y,this.aim);
     const dt=Math.min(delta/1000,0.04)*(this.slowMotion ? 0.25 : 1);
-    if(Phaser.Input.Keyboard.JustDown(this.keys.ESC)) {if(this.mode==='playing')this.mode='paused';else if(this.mode==='paused')this.mode='playing';}
-    if(IS_SELECTION&&Phaser.Input.Keyboard.JustDown(this.keys.ENTER))this.continueTrial();
+
+    if(IS_SELECTION&&this.consumePress('ENTER'))this.continueTrial();
     if(this.mode==='playing'){
-      if(IS_SELECTION&&Phaser.Input.Keyboard.JustDown(this.keys.H))this.usePotion();
-      if(IS_SELECTION&&Phaser.Input.Keyboard.JustDown(this.keys.E))this.inspectForest();
+      if(IS_SELECTION&&this.consumePress('H'))this.usePotion();
+      if(IS_SELECTION&&!this.trialCombat&&this.p.x>=regionOffset(this.run.stage)+(this.run.stage===0?650:530)){this.trialCombat=true;this.trialText=this.stage.lesson;}
+      if(IS_SELECTION&&this.consumePress('E'))this.inspectForest();
       if(this.enemyState==='downed') {
         this.finishRemaining=Math.max(0,this.finishRemaining-dt);
         if(this.finishRemaining===0){this.ehp=this.enemyMaxHp;this.ehpShown=this.enemyMaxHp;this.enemyState='chase';this.labMessage='Too late — the demon fully regenerated!';this.floatText(this.e.x,this.e.y-75,'REGENERATED','#ffb6bf','#3d1522',18);}
-        else if(Phaser.Input.Keyboard.JustDown(this.keys.F))this.finishDemon();
+        else if(this.consumePress('F'))this.finishDemon();
       }
       if(!this.technique&&!this.slash)this.angle=this.demoMode ? Phaser.Math.Angle.Between(this.p.x,this.p.y,this.e.x,this.e.y) : Phaser.Math.Angle.Between(this.p.x,this.p.y,this.aim.x,this.aim.y);
       for(const id of ['surface','wheel'] as const)this.formCooldowns[id]=Math.max(0,this.formCooldowns[id]-dt);
-      for(const [key,id] of [['ONE','surface'],['TWO','wheel']] as const)if(Phaser.Input.Keyboard.JustDown(this.keys[key]))this.selectForm(id);
-      if(Phaser.Input.Keyboard.JustDown(this.keys.Q))this.castForm();
+
       this.swordCooldown=Math.max(0,this.swordCooldown-dt);this.swing=Math.max(0,this.swing-dt);this.hurt=Math.max(0,this.hurt-dt);this.dodgeCooldown=Math.max(0,this.dodgeCooldown-dt);
       let move=new Phaser.Math.Vector2(Number(this.keys.D.isDown)-Number(this.keys.A.isDown),Number(this.keys.S.isDown)-Number(this.keys.W.isDown)).normalize();
       if(this.demoMode&&(!IS_SELECTION||this.trialCombat)){
@@ -535,21 +574,22 @@ class Arena extends Phaser.Scene {
         else if(this.enemyState==='recovery'&&distance<80&&!this.technique)this.attack();
       }
       if(IS_SELECTION&&this.demoMode&&!this.trialCombat){
-        const tour=[FOREST_ROUTE[1],FOREST_ROUTE[2],FOREST_SHRINE,FOREST_ROUTE[2],FOREST_ROUTE[3],FOREST_CLUES[1]];
+        const tour=this.run.stage===0?[FOREST_ROUTE[1],FOREST_ROUTE[2],FOREST_ROUTE[3],{x:690,y:350}]:[{x:regionOffset(this.run.stage)+560,y:350}];
         const next=tour[this.tourIndex];
-        if(next){const delta=new Phaser.Math.Vector2(next.x-this.p.x,next.y-this.p.y);const near=delta.length()<=12;move=near?new Phaser.Math.Vector2():delta.normalize();if(near){this.inspectForest();this.tourIndex++;}}
+        if(next){const delta=new Phaser.Math.Vector2(next.x-this.p.x,next.y-this.p.y);const near=delta.length()<=12;move=near?new Phaser.Math.Vector2():delta.normalize();if(near)this.tourIndex++;}
       }
       this.moving=move.length()>0;
-      if(Phaser.Input.Keyboard.JustDown(this.keys.SPACE)&&!this.technique&&this.dodgeCooldown===0&&this.stamina>=R.dodgeCost){this.slash=null;this.swing=0;this.queuedSlash=false;this.comboWindow=0;this.dodge=R.dodgeDuration;this.dodgeCooldown=R.dodgeCooldown;this.stamina-=R.dodgeCost;this.dodgeVector=move.length()>0?move.clone():new Phaser.Math.Vector2(Math.cos(this.angle),Math.sin(this.angle));this.onDodge();}
+      if(this.consumePress('SPACE')&&!this.technique&&this.dodgeCooldown===0&&this.stamina>=R.dodgeCost){this.slash=null;this.swing=0;this.queuedSlash=false;this.comboWindow=0;this.dodge=R.dodgeDuration;this.dodgeCooldown=R.dodgeCooldown;this.stamina-=R.dodgeCost;this.dodgeVector=move.length()>0?move.clone():new Phaser.Math.Vector2(Math.cos(this.angle),Math.sin(this.angle));this.onDodge();}
       if(move.length()>0)this.lastMove.copy(move);
       const velocity=this.technique?move.clone().scale(R.speed*.35):this.dodge>0?this.dodgeVector.clone().scale(R.dodgeSpeed):move.scale(R.speed);
       this.movePlayer(velocity.x*dt,velocity.y*dt);
       const invulnerable=this.dodge>0;
       this.dodge=Math.max(0,this.dodge-dt);if(!invulnerable&&!this.technique)this.stamina=Math.min(100,this.stamina+R.staminaRegen*dt);
-      if(Phaser.Input.Keyboard.JustDown(this.keys.J))this.attack();
+      if(this.consumePress('J'))this.attack();
       this.comboWindow=Math.max(0,this.comboWindow-dt);
       if(!this.technique)this.breath=Math.min(this.maxBreath,this.breath+(this.moving?12:24)*dt);
       this.updateSlash(dt);this.updateTechnique(dt);
+      if(this.pendingForm){const pending=this.pendingForm;pending.time-=dt;if(pending.time<=0){this.pendingForm=null;this.labMessage='Form input expired — press its number again.';}else if(!this.slash&&!this.technique&&this.dodge===0&&this.swordCooldown===0){this.pendingForm=null;this.requestForm(pending.id,pending.autoAim);}}
       if(this.mode==='playing'&&(!IS_SELECTION||this.trialCombat)&&!this.trainingDummy){
         if(this.enemyState==='chase'){
           const distance=Phaser.Math.Distance.Between(this.p.x,this.p.y,this.e.x,this.e.y);
@@ -578,12 +618,13 @@ class Arena extends Phaser.Scene {
     } else this.moving=false;
     if(this.mode==='won')this.technique=null;
     this.animate(this.mode==='paused'?0:dt);
-    if(IS_SELECTION&&this.demoMode&&this.mode==='won'&&this.endDelay===0&&!this.run.passed)this.continueTrial();
+    this.updateTravel(this.mode==='paused'?0:dt);
+    if(IS_SELECTION&&this.demoMode&&this.mode==='won'&&this.isBoss&&this.endDelay===0&&!this.run.passed)this.continueTrial();
     if(IS_SELECTION&&this.mode==='won'&&!this.trialSaved){
       try{localStorage.setItem('nightfall.selection.slice.v1',JSON.stringify({version:1,profile:PROFILE,firstEncounterCleared:true}));this.trialSaved=true;}
       catch{this.trialText='Encounter cleared. Browser storage is unavailable, so completion was not saved.';}
     }
-    this.sync();this.draw();
+    this.sync();this.draw();this.presses.clear();
   }
 
   // ---- Combat feedback hooks -------------------------------------------------
@@ -640,19 +681,19 @@ class Arena extends Phaser.Scene {
     for(const f of this.floaters){f.life-=dt;f.text.y-=dt*46;f.text.setAlpha(Math.min(1,f.life*2.5));if(f.life<=0)f.text.destroy();}
     this.floaters=this.floaters.filter(f=>f.life>0);
     for(const q of this.petals){q.x+=(q.vx+Math.sin(this.clock*1.7+q.rot)*12)*dt;q.y+=q.vy*dt;q.rot+=q.spin*dt;if(q.y>H+10||q.x>W+10){q.y=-10;q.x=Math.random()*W*1.1-80;}}
-    const ended=(this.mode==='won'||this.mode==='lost')&&this.endDelay===0;
+    const ended=(this.mode==='lost'||(this.mode==='won'&&(!IS_SELECTION||this.isBoss)))&&this.endDelay===0;
     const target=this.mode==='ready'||this.mode==='paused'||ended?1:0;
     this.overlayAlpha=dt===0?target:Phaser.Math.Clamp(this.overlayAlpha+(target-this.overlayAlpha)*Math.min(1,dt*6),0,1);
   }
 
   private sync() {
     if(IS_SELECTION&&PROFILE){
-      const title=this.run.passed?'Final Selection passed':this.mode==='won'?(this.isBoss?'The Hand Demon falls':'Encounter cleared'):this.mode==='lost'?'Your trial is not over':this.trialClues===0?'Follow the forest trail':this.trialClues===1?'Follow the tracks uphill':this.enemyState==='downed'?'Finish the demon · F':'Face the demon';
+      const title=this.run.passed?'Final Selection passed':this.mode==='won'?(this.isBoss?'The Hand Demon falls':'Encounter cleared'):this.mode==='lost'?'Your trial is not over':!this.trialCombat?'Reach the training clearing':this.enemyState==='downed'?'Finish the demon · F':'Face the demon';
       document.querySelector('#trial-objective')!.textContent=`${Math.min(this.run.stage+1,4)} / 4 · ${this.run.stage>0&&this.mode==='playing'&&this.enemyState!=='downed'?this.stage.title:title}`;
-      const next=document.querySelector<HTMLButtonElement>('#continue-trial');if(next){next.hidden=this.mode!=='won'||this.endDelay>0||this.run.passed;next.textContent=this.isBoss?'Greet the dawn →':'Continue trial →';}
+      const next=document.querySelector<HTMLButtonElement>('#continue-trial');if(next){next.hidden=!this.isBoss||this.mode!=='won'||this.endDelay>0||this.run.passed;next.textContent=this.isBoss?'Greet the dawn →':'Continue trial →';}
       const supplies=document.querySelector('#trial-supplies');if(supplies)supplies.textContent=`H · Potion ${this.potionCount}/2 · ${this.isBoss?'Boss encounter':this.stage.title}`;
-      document.querySelector('#trial-hint')!.textContent=this.mode==='won'?'Press Continue or Enter when the ash settles. Progress saves between encounters.':this.mode==='lost'?'Retry to return to the trail entrance. Your character profile is safe.':this.enemyState==='downed'?`Get close and press F · ${this.finishRemaining.toFixed(1)}s until full recovery`:this.trialText;
-      document.querySelector('#trial-form')!.textContent=`${STARTERS[PROFILE.style].name} · Select 1 / 2 or click · Q to cast`;
+      document.querySelector('#trial-hint')!.textContent=this.mode==='won'?(this.isBoss?'Press Greet the dawn or Enter to receive your crow.':'Training cleared. Follow the lantern path east → to the next clearing. Your victory is saved.'):this.mode==='lost'?'Retry to return to the trail entrance. Your character profile is safe.':this.enemyState==='downed'?`Get close and press F · ${this.finishRemaining.toFixed(1)}s until full recovery`:this.trialText;
+      document.querySelector('#trial-form')!.textContent=`${STARTERS[PROFILE.style].name} · Press 1 / 2 or click to CAST · Q repeats`;
       for(const id of ['surface','wheel'] as const){const card=document.querySelector<HTMLButtonElement>('#form-'+id);if(!card)continue;card.setAttribute('aria-pressed',String(this.selectedForm===id));card.classList.toggle('selected',this.selectedForm===id);card.classList.toggle('unavailable',this.breath<this.tuning[id].stamina||this.formCooldowns[id]>0);card.querySelector('.form-meta')!.textContent=`${this.tuning[id].stamina} Breath · ${this.formCooldowns[id]>0?this.formCooldowns[id].toFixed(1)+'s cooldown':this.breath<this.tuning[id].stamina?'Recover Breath':'Ready'}`;}
       const feedback=document.querySelector('#combat-feedback');if(feedback)feedback.textContent=this.labMessage;
       document.querySelector('.forest-nav>span')!.textContent=`FINAL SELECTION · ${this.area.name.toUpperCase()}`;
@@ -664,9 +705,9 @@ class Arena extends Phaser.Scene {
     document.querySelector<HTMLProgressElement>('#stamina')!.value=this.stamina;document.querySelector('#sp')!.textContent=`${Math.floor(this.stamina)} / 100`;
     const messages={ready:'Enter the arena to begin.',playing:'Read the attack pose. Dodge, strike, then approach and press F to finish.',paused:'Paused — resume when you’re ready.',lost:'You fell in training. Reset and try another approach.',won:'Encounter cleared. Reset to practice again.'};
     document.querySelector('#status')!.textContent=messages[this.mode];document.querySelector('#score')!.textContent=`DEMONS DEFEATED ${String(this.wins).padStart(2,'0')}`;
-    document.querySelector('#start')!.textContent=this.mode==='playing'?'Pause encounter':this.mode==='paused'?'Resume':IS_SELECTION?'Enter forest':'Enter the arena ↗';
+    document.querySelector('#start')!.textContent=this.mode==='playing'||this.traveling?'Pause encounter':this.mode==='paused'?'Resume':IS_SELECTION?'Enter forest':'Enter the arena ↗';
     const screens:Record<Mode,[string,string,string]>={ready:['夜','THE TRAINING GROUNDS','Enter the arena to begin'],paused:['休','PAUSED','Press Esc or Resume when you’re ready'],lost:['敗','FALLEN IN TRAINING','Reset the encounter to try again'],won:['滅','ENCOUNTER CLEARED','The demon crumbles to ash. Your first step forward.'],playing:['','','']};
-    if(IS_SELECTION){screens.ready=['藤','FINAL SELECTION','Enter the forest. Investigate with E.'];screens.won=this.isBoss?['暁','THE HAND DEMON FALLS','Continue to greet the dawn and receive your crow.']:['一','ENCOUNTER CLEARED','Continue to the next lesson.'];screens.lost=['敗','RISE AND TRY AGAIN','Reset to return to the trail entrance.'];}
+    if(IS_SELECTION){screens.ready=['藤','FINAL SELECTION','Follow the training path to the open clearing.'];screens.won=this.isBoss?['暁','THE HAND DEMON FALLS','Continue to greet the dawn and receive your crow.']:['一','ENCOUNTER CLEARED','Continue to the next lesson.'];screens.lost=['敗','RISE AND TRY AGAIN','Reset to return to the trail entrance.'];}
     const [kanji,title,sub]=screens[this.mode];
     if(this.mode!=='playing'){this.bigKanji.setText(kanji);this.title.setText(title);this.subtitle.setText(sub);}
     const a=this.overlayAlpha;
@@ -701,6 +742,12 @@ class Arena extends Phaser.Scene {
     u.clear();o.clear();l.clear();t.clear();
     if(this.executionFlash>0&&this.executionFlash<0.4){o.lineStyle(6,0xecfbff,Math.min(1,this.executionFlash/0.3));o.lineBetween(this.e.x-50,this.e.y-43,this.e.x+50,this.e.y-55);l.lineStyle(12,0x77d5ff,0.5*Math.min(1,this.executionFlash/0.3));l.lineBetween(this.e.x-50,this.e.y-43,this.e.x+50,this.e.y-55);}
     this.drawTechnique(o,l);
+    if(IS_SELECTION&&!this.run.passed&&this.mode!=='won'&&!(this.mode==='paused'&&this.resumeMode==='won')){
+      const gx=regionOffset(this.run.stage)+948;
+      o.lineStyle(5,0x675373,.9);o.lineBetween(gx,295,gx,480);
+      for(let y=300;y<480;y+=13){o.fillStyle(0xb096c4,.8);o.fillRect(gx-7,y,14,5);}
+    }
+    if(this.traveling){const gx=regionOffset(this.run.stage)+890;o.lineStyle(4,0xe6d69f,.9);o.lineBetween(gx-15,390,gx+15,390);o.lineBetween(gx+15,390,gx+5,380);o.lineBetween(gx+15,390,gx+5,400);}
     for(const [i,lantern] of (IS_SELECTION?[]:LANTERNS).entries()){
       const f=0.85+0.1*Math.sin(c*9+i*2)+0.05*Math.sin(c*23+i);
       for(let k=0;k<6;k++){l.fillStyle(0xffa850,0.05*f);l.fillCircle(lantern.x,lantern.y-10,18+k*16*f);}
@@ -712,7 +759,7 @@ class Arena extends Phaser.Scene {
     const pFeet=this.p.y+(IS_SELECTION?24:PLAYER_FEET), eFeet=this.e.y+(IS_SELECTION?28:DEMON_FEET), pDepth=2+pFeet/1000;
     const shadow=(x:number,y:number,w:number)=>{u.fillStyle(0x05070d,0.45);u.fillEllipse(x,y,w,w*0.36);};
     const demonShown=this.enemyState!=='dead'||this.deathFade>0;
-    if(demonShown&&(!IS_SELECTION||this.trialCombat))shadow(this.e.x,eFeet,IS_SELECTION?43:74);
+    if(demonShown)shadow(this.e.x,eFeet,IS_SELECTION?43:74);
     shadow(this.p.x,pFeet,IS_SELECTION?30:50);
     if(this.mode==='playing'&&this.stamina<99.5){
       const low=this.stamina<R.dodgeCost;
@@ -787,9 +834,9 @@ class Arena extends Phaser.Scene {
       if(cut===1){o.lineStyle(3,accent,a);o.beginPath();o.arc(this.p.x,this.p.y,reach-10,direction+1.2,direction-1.2,true);o.strokePath();}
     }
     for(const q of this.particles){const a=Math.min(1,q.life/q.max*1.6);(q.glow?l:o).fillStyle(q.color,a);(q.glow?l:o).fillCircle(q.x,q.y,q.size*(0.5+0.5*q.life/q.max));}
-    for(const q of this.petals){o.save();o.translateCanvas(q.x,q.y);o.rotateCanvas(q.rot);o.fillStyle(q.color,0.75);o.fillEllipse(0,0,8,3.8);o.restore();}
+    for(const q of this.petals){o.save();o.translateCanvas(q.x+(IS_SELECTION?this.cameras.main.scrollX:0),q.y);o.rotateCanvas(q.rot);o.fillStyle(q.color,0.75);o.fillEllipse(0,0,8,3.8);o.restore();}
     if(this.enemyState!=='dead'){
-      const x=this.e.x,y=eFeet-(this.isBoss?143:IS_SELECTION?100:DM.height)-12,w=80,seg=w/(this.enemyMaxHp/R.swordDamage);
+      const x=this.e.x,y=eFeet-(this.isBoss?125:IS_SELECTION?85:DM.height)-12,w=80,seg=w/(this.enemyMaxHp/R.swordDamage);
       o.fillStyle(0x0a0d16,0.9);o.fillRect(x-w/2-2,y-2,w+4,9);
       o.fillStyle(0xf3d9c8,0.85);o.fillRect(x-w/2,y,w*this.ehpShown/this.enemyMaxHp,5);
       o.fillStyle(0xd2384f);o.fillRect(x-w/2,y,w*this.ehp/this.enemyMaxHp,5);
@@ -831,7 +878,7 @@ class Arena extends Phaser.Scene {
     if(this.playerFlash>0)this.pixelActor.setTintFill(0xffffff);else this.pixelActor.clearTint();
 
     if(IS_SELECTION&&PROFILE){
-      this.pixelActor.setVisible(false);this.pixelDemon.setVisible(this.trialCombat&&demonShown);this.label.setVisible(this.trialCombat&&this.enemyState!=='dead');
+      this.pixelActor.setVisible(false);this.pixelDemon.setVisible(demonShown);this.label.setVisible(this.enemyState!=='dead');
       const col=(PROFILE.style==='flame'?2:0)+(PROFILE.body==='female'?1:0);
       let key='profile-idle',pf=col;
       if(this.moving){key='profile-run';const cycle=[0,1,2,3,4,3,2,1];pf=cycle[Math.floor(this.walk*.9)%cycle.length]*4+col;}
@@ -850,11 +897,9 @@ class Arena extends Phaser.Scene {
       this.profileActor.setPosition(Math.round(this.p.x),Math.round(pFeet-Math.abs(stride)*2-(this.dodge>0?3:0))).setFlipX(facing<0).setDepth(pDepth+0.002).setVisible(!lost);
       if(this.playerFlash>0)this.profileActor.setTintFill(0xffffff);else this.profileActor.clearTint();
       this.interactLabel.setVisible(false);
-      const clue=FOREST_CLUES[this.trialClues];
-      if(this.run.stage===0&&this.mode==='playing'&&clue&&Math.hypot(this.p.x-clue.x,this.p.y-clue.y)<62)this.interactLabel.setPosition(clue.x,clue.y+15).setText('E · '+clue.title).setVisible(true);
-      else if(this.run.stage===0&&this.mode==='playing'&&Math.hypot(this.p.x-FOREST_SHRINE.x,this.p.y-FOREST_SHRINE.y)<62)this.interactLabel.setPosition(FOREST_SHRINE.x,FOREST_SHRINE.y+10).setText('E · Read the shrine').setVisible(true);
+      if(this.run.stage===0&&this.mode==='playing'&&Math.hypot(this.p.x-FOREST_SHRINE.x,this.p.y-FOREST_SHRINE.y)<62)this.interactLabel.setPosition(FOREST_SHRINE.x,FOREST_SHRINE.y+10).setText('E · Read the shrine (optional)').setVisible(true);
       // Ground mist drifts beneath the actors without masking attack poses.
-      for(let i=0;i<5;i++){u.fillStyle(0xa0c1c1,0.025);u.fillEllipse((this.clock*9+i*245)%1200-100,130+i*100,240,22);}
+      for(let i=0;i<5;i++){u.fillStyle(0xa0c1c1,0.025);u.fillEllipse((IS_SELECTION?this.cameras.main.scrollX:0)+(this.clock*9+i*245)%1200-100,130+i*100,240,22);}
     }
     if(IS_SELECTION&&this.isBoss){
       this.pixelDemon.setVisible(false);this.pixelHead.setVisible(false);

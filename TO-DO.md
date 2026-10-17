@@ -23,3 +23,7 @@ Current handoff: TUTORIAL-PLAYTEST.md and report.md. No live AI service or audio
 ## Second playtest
 
 Review PLAYTEST-REVISION-01.md: movement, three-cut combos, readable melee patterns, Breath/form navigation and four regional layouts. Remaining art: north/south movement and dedicated sword combo poses. Future hub work: training that increases Breath capacity, plus progression/save design.
+
+## Third personal playtest
+
+Review direct form activation, smaller character scale, walking between training clearings and checkpoint reload. Investigation is reserved for later crow missions, not required in this training arc.
