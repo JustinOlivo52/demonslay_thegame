@@ -27,3 +27,7 @@ Review PLAYTEST-REVISION-01.md: movement, three-cut combos, readable melee patte
 ## Third personal playtest
 
 Review direct form activation, smaller character scale, walking between training clearings and checkpoint reload. Investigation is reserved for later crow missions, not required in this training arc.
+
+## Playtest revision 03
+
+Next personal review: intro clarity, optional-route navigation, limited supplies, boss fairness, grounded recruit/demon running and the survivor ceremony. Remaining art: dedicated north/south poses, detailed attendant sprites and a full Hand Demon crawl sheet.

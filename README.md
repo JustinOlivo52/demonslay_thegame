@@ -48,3 +48,7 @@ See PLAYTEST-REVISION-01.md for faster movement, smaller actors, extra run/dodge
 ## Playtest revision 02
 
 Forms now cast directly from 1/2, numpad or their cards. The training route connects the four clearings through a scrolling world; no investigation is required. Victories save immediately and the next lesson begins after walking into its area. See PLAYTEST-REVISION-02.md.
+
+## Playtest revision 03
+
+Added a short controls introduction, vertical exploration loops with two finite potion caches, higher novice Breath costs, a two-phase Hand Demon, grounded hybrid run animation and a survivor ceremony before the crow. See PLAYTEST-REVISION-03.md.

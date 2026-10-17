@@ -13,7 +13,7 @@ function nearRoute(x:number,y:number,route:readonly {x:number;y:number}[],radius
 export function forestWalkable(x:number,y:number,stage=0){if(stage>0)return areaWalkable(x,y,stage);return x>=50&&x<=955&&y>=90&&y<=520&&(nearRoute(x,y,FOREST_ROUTE,88)||nearRoute(x,y,FOREST_BRANCH,65)||Math.hypot(x-360,y-170)<70||((x-805)/195)**2+((y-330)/150)**2<=1);}
 export function moveThroughForest(point:{x:number;y:number},dx:number,dy:number,stage=0){const steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/5));for(let i=0;i<steps;i++){if(forestWalkable(point.x+dx/steps,point.y,stage))point.x+=dx/steps;if(forestWalkable(point.x,point.y+dy/steps,stage))point.y+=dy/steps;}}
 function randomSource(){let n=197;return()=>{n=(Math.imul(n,1664525)+1013904223)>>>0;return n/4294967296;};}
-function canopy(ctx:CanvasRenderingContext2D,x:number,y:number,r:()=>number){
+export function canopy(ctx:CanvasRenderingContext2D,x:number,y:number,r:()=>number){
  ctx.fillStyle='#071517';ctx.fillRect(x-6,y-35,14,45);ctx.fillStyle='#342e2b';ctx.fillRect(x-4,y-32,7,39);ctx.fillStyle='#574337';ctx.fillRect(x-3,y-27,2,29);
  for(let i=0;i<12;i++){const dx=Math.round((r()-.5)*60/4)*4,dy=Math.round((r()-.5)*32/4)*4;ctx.fillStyle=['#0a2225','#10302e','#173c34','#204b3e'][i%4];ctx.fillRect(x+dx-18,y-73+dy,36,24);ctx.fillRect(x+dx-22,y-69+dy,44,16);if(i%3===0){ctx.fillStyle='#315a45';ctx.fillRect(x+dx-12,y-72+dy,18,3);}}
 }
