@@ -40,3 +40,7 @@ Build output is in `dist/`. Codespaces configuration installs dependencies and f
 The tutorial stages reuse one authored forest region/clearing; this is not a multi-region campaign or seven-night simulation. Backstories use local templates and enemy variety uses seeded rules; live AI services are not connected. No sound, accounts, cloud saves, hub, weapon upgrades, XP progression or blocking yet. Browser-local progress can be lost if site data is cleared. Several animations still need dedicated frames/directional cleanup.
 
 See [team report](report.md), [roadmap](docs/ROADMAP.md), [art direction](docs/ART-DIRECTION.md), and [next tasks](TO-DO.md). Older checkpoint notes record the project's earlier state.
+
+## Latest personal-playtest revision
+
+See PLAYTEST-REVISION-01.md for faster movement, smaller actors, extra run/dodge poses, three-cut sword combos, visible form cards with Breath, distinct melee patterns and four tutorial regions. TUTORIAL-PLAYTEST.md has current controls.

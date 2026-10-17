@@ -1,10 +1,10 @@
 /** Reusable visual archetypes, independent of level. No Blood Demon Arts at levels 1–5. */
 export const DEMON_ARCHETYPES = [
- {id:'ash',name:'Ash-Fist',column:0,silhouette:'Heavy charcoal fists and a white hair tuft'},
- {id:'thorn',name:'Thorn-Horn',column:1,silhouette:'Branching horns and a ragged moss cloak'},
- {id:'lantern',name:'Ember-Eye',column:2,silhouette:'One large amber eye and a straw waist wrap'},
- {id:'veil',name:'Silver-Veil',column:3,silhouette:'Long silver hair and a torn plum robe'},
- {id:'tusk',name:'Blue-Tusk',column:4,silhouette:'Broad shoulders and short upward tusks'},
+ {id:'ash',name:'Goro, the Hollow Fist',column:0,silhouette:'Heavy charcoal fists and a white hair tuft'},
+ {id:'thorn',name:'Ibara, the Briar Stalker',column:1,silhouette:'Branching horns and a ragged moss cloak'},
+ {id:'lantern',name:'Akame, the Watcher',column:2,silhouette:'One large amber eye and a straw waist wrap'},
+ {id:'veil',name:'Shigure, the Veiled',column:3,silhouette:'Long silver hair and a torn plum robe'},
+ {id:'tusk',name:'Aoto, the Mountain Maw',column:4,silhouette:'Broad shoulders and short upward tusks'},
 ] as const;
 export type DemonArchetypeId=typeof DEMON_ARCHETYPES[number]['id'];
 export function rollDemonEncounter(level:number,seed:number,forcedId?:string){
