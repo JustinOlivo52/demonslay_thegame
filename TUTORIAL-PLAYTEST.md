@@ -9,18 +9,18 @@ Existing recruit: review the saved recruit and enter the same route. Direct rout
 ## Playable sequence
 
 1. **Beyond the wisteria:** investigate two pieces of evidence and defeat the first lesser demon. Optional shrine lore remains available.
-2. **Trust your breathing:** defeat a second, distinct lesser demon while practicing your two starting forms and stamina management.
+2. **Trust your breathing:** defeat a second, distinct lesser demon while practicing your two starting forms and Breath management.
 3. **Survive the night:** a third lesser demon tests dodging and healing.
 4. **Hand Demon:** a multi-armed boss alternates ordinary sweeps with longer-windup, harder-hitting attacks. It uses melee animation tells, not Blood Demon Art ground circles.
 5. **Dawn and crow:** after the boss finisher, continue to the passing scene. A Kasugai crow is recorded as received. The story montage covers the rest of the seven-night event.
 
-This is a condensed tutorial using the same forest clearing for staged encounters, not four distinct regions or a seven-night survival simulation. Three regular enemy appearances are drawn from the seeded pool and kept stable for retry.
+This is a condensed tutorial with four authored areas linked by encounter transitions, not a seven-night survival simulation. The foothill trail leads into a bamboo basin, a ruined waystation and an ancient cedar boss grove. Three regular enemy appearances are drawn from the seeded pool and kept stable for retry.
 
 ## Controls
 
 - WASD: move; mouse: aim.
-- Click or J: basic sword attack.
-- 1 / 2: select breathing form; Q: cast.
+- Click or J: three-cut sword combo. Tap during a cut to buffer the next; pause to reset. Dodge can cancel a basic cut.
+- 1 / 2 or click a form card: select breathing form; Q or Use selected form: cast. Forms spend Breath (20 / 32), which regenerates between casts; dodges use stamina.
 - Space: dodge using stamina.
 - E: inspect nearby evidence or shrine.
 - H: drink a healing potion (+45 vitality, capped at 100). No potion is consumed at full health. Start with two potions.
@@ -38,7 +38,7 @@ Progress saves when you continue between encounters, including the final passing
 
 - Pixel art, no sound yet.
 - Live AI backstories/scenarios are not connected. Current origins are templates and encounter variants are seeded.
-- Water/Flame choreography is a first-pass gameplay adaptation. Water Wheel lacks dedicated somersault frames. Some sprite frame alignment and directional views need polish.
+- Water/Flame choreography is a first-pass gameplay adaptation. Water Wheel lacks dedicated somersault frames. The revised run/dodge sheet adds poses; dedicated north/south views and full sword animation remain future art work.
 - The Hand Demon uses its own generated four-pose sheet and alternating melee timings, not final boss production animation or Blood Demon Arts.
 - Crow presentation is a simple pixel vignette and text.
 - Corps hub, rooms, weapon upgrades, XP progression and post-selection missions are the next development checkpoints.
@@ -56,3 +56,5 @@ Progress saves when you continue between encounters, including the final passing
 ## Codespaces container recovery
 
 The container image tag is `mcr.microsoft.com/devcontainers/javascript-node:24-bookworm`. The earlier `1-24-bookworm` tag does not exist and causes container creation to fail. After pulling the latest playtest branch, run **Codespaces: Rebuild Container** from the command palette. If the Codespace is in recovery mode, pull the branch in the recovery terminal first, then rebuild. Alternatively create a new Codespace from the playtest branch. Do not delete an existing Codespace that contains unsaved work.
+
+See PLAYTEST-REVISION-01.md for the combat, movement, region and animation changes based on the first personal playtest.

@@ -1,13 +1,15 @@
 import Phaser from 'phaser';
+import {MELEE_PATTERNS,meleeFor,meleeHits,type MeleeId} from './encounters';
 import {TUTORIAL_STAGES,RUN_KEY,profileKey,readRun,advanceRun,newRun,heal} from './tutorial';
+import RUN_REGIONS from './recruit-run-regions.json';
 import SPRITE_REGIONS from './sprite-regions.json';
 import DEMON_FEET_ANCHORS from './demon-roster-anchors.json';
 import {DEMON_ARCHETYPES,rollDemonEncounter} from './demon-roster';
-import {FOREST_CLUES,FOREST_SHRINE,FOREST_SPAWN,FOREST_DEMON,FOREST_ROUTE,forestWalkable,moveThroughForest,paintForestForeground,paintForest} from './forest';
+import {TRIAL_AREAS,FOREST_CLUES,FOREST_SHRINE,FOREST_SPAWN,FOREST_DEMON,FOREST_ROUTE,forestWalkable,moveThroughForest,paintForestForeground,paintForest} from './forest';
 import {SAVE_KEY,readCharacter,STARTERS} from './character';
 import PIXEL_ANCHORS from './pixel-anchors.json';
 import { FINISHER, canFinish } from './finisher';
-import { RULES as R, inSwordArc } from './combat';
+import { RULES as R, SWORD_COMBO, comboIndex, breathCapacity } from './combat';
 import { RIG } from './rig';
 import { WATER_FORMS, phaseAt, activeProgress, advanceBetween, formHits, type WaterId } from './water';
 import './style.css';
@@ -20,7 +22,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 <header><a class="wordmark" href="./"><span class="kanji">夜</span> <span>NIGHTFALL</span></a><span class="build">PIXEL COMPARISON / EXPERIMENT</span></header>
 <main><section class="intro"><div><p class="eyebrow">THE FIRST STEP TO HASHIRA</p><h1>A different kind of motion.</h1><p>Pixel sprite animation experiment · same arena and combat rules</p></div><div class="checkpoint"><span class="dot"></span> Combat playtest <small>Movement · timing · survival</small></div></section>
 <div class="layout"><section class="game-panel"><div class="arena-heading"><span>01 — WISTERIA TRAINING GROUNDS</span><span>NIGHT / PRACTICE</span></div><div id="game" tabindex="0" aria-label="Combat arena. WASD to move, mouse to aim, click or J to attack, Space to dodge, Escape to pause."></div><div class="arena-footer"><span id="status" role="status">Enter the arena to begin.</span><span id="score">DEMONS DEFEATED 00</span></div></section>
-<aside><section class="lab"><p class="eyebrow">WATER TECHNIQUE LAB</p><label for="form-select">Equipped form</label><select id="form-select"><option value="surface">1 · Water Surface Slash</option><option value="wheel">2 · Water Wheel</option></select><button id="cast" class="secondary">Use form · Q</button><button id="replay" class="secondary">Reset + demonstrate form</button><label><input type="checkbox" id="dummy" checked> Stationary target (no attacks)</label><label><input type="checkbox" id="hitboxes" checked> Show hitboxes</label><label><input type="checkbox" id="slow"> Slow motion · ¼ speed</label><p id="form-status" role="status"></p><details><summary>Tune selected form</summary><label>Damage <input id="tune-damage" type="number" min="1" max="125" step="1"></label><label>Reach <input id="tune-reach" type="number" min="30" max="160" step="1"></label><label>Stamina <input id="tune-stamina" type="number" min="0" max="100" step="1"></label><label>Cooldown (s) <input id="tune-cooldown" type="number" min="0.5" max="10" step="0.1"></label><p>Timing uses fixed windup / active / recovery phases for this first test. Changes apply to the next cast.</p></details><p>Blue outline = damage area during active frames. Surface Slash uses new sprite poses. Wheel remains a motion prototype; this sheet has no somersault frames.</p></section><p class="eyebrow">YOUR LOADOUT</p><h2>Slayer recruit</h2><p class="muted">Level 1 · Combat foundation</p><div class="resource"><div>Vitality <span id="hp">100 / 100</span></div><progress id="health" max="100" value="100"></progress></div><div class="resource"><div>Stamina <span id="sp">100 / 100</span></div><progress id="stamina" max="100" value="100"></progress></div><hr><p class="eyebrow">CONTROLS</p><dl><dt><kbd>W A S D</kbd></dt><dd>Move</dd><dt><kbd>MOUSE</kbd></dt><dd>Aim</dd><dt><kbd>CLICK</kbd> / <kbd>J</kbd></dt><dd>Sword attack</dd><dt><kbd>SPACE</kbd></dt><dd>Dodge · 28 stamina</dd><dt><kbd>F</kbd></dt><dd>Finish vulnerable demon</dd><dt><kbd>ESC</kbd></dt><dd>Pause</dd></dl><button id="start">Enter the arena <span>↗</span></button><button id="retry" class="secondary">Reset encounter</button><p class="tip">Read the demon’s pose to dodge melee attacks. At zero HP, approach and press F within four seconds to finish it before full regeneration.</p></aside></div>
+<aside><section class="lab"><p class="eyebrow">WATER TECHNIQUE LAB</p><label for="form-select">Equipped form</label><select id="form-select"><option value="surface">1 · Water Surface Slash</option><option value="wheel">2 · Water Wheel</option></select><button id="cast" class="secondary">Use form · Q</button><button id="replay" class="secondary">Reset + demonstrate form</button><label><input type="checkbox" id="dummy" checked> Stationary target (no attacks)</label><label><input type="checkbox" id="hitboxes" checked> Show hitboxes</label><label><input type="checkbox" id="slow"> Slow motion · ¼ speed</label><p id="form-status" role="status"></p><details><summary>Tune selected form</summary><label>Damage <input id="tune-damage" type="number" min="1" max="125" step="1"></label><label>Reach <input id="tune-reach" type="number" min="30" max="160" step="1"></label><label>Breath cost <input id="tune-stamina" type="number" min="0" max="100" step="1"></label><label>Cooldown (s) <input id="tune-cooldown" type="number" min="0.5" max="10" step="0.1"></label><p>Timing uses fixed windup / active / recovery phases for this first test. Changes apply to the next cast.</p></details><p>Blue outline = damage area during active frames. Surface Slash uses new sprite poses. Wheel remains a motion prototype; this sheet has no somersault frames.</p></section><p class="eyebrow">YOUR LOADOUT</p><h2>Slayer recruit</h2><p class="muted">Level 1 · Combat foundation</p><div class="resource"><div>Vitality <span id="hp">100 / 100</span></div><progress id="health" max="100" value="100"></progress></div><div class="resource"><div>Stamina <span id="sp">100 / 100</span></div><progress id="stamina" max="100" value="100"></progress></div><hr><p class="eyebrow">CONTROLS</p><dl><dt><kbd>W A S D</kbd></dt><dd>Move</dd><dt><kbd>MOUSE</kbd></dt><dd>Aim</dd><dt><kbd>CLICK</kbd> / <kbd>J</kbd></dt><dd>Sword attack</dd><dt><kbd>SPACE</kbd></dt><dd>Dodge · 28 stamina</dd><dt><kbd>F</kbd></dt><dd>Finish vulnerable demon</dd><dt><kbd>ESC</kbd></dt><dd>Pause</dd></dl><button id="start">Enter the arena <span>↗</span></button><button id="retry" class="secondary">Reset encounter</button><p class="tip">Read the demon’s pose to dodge melee attacks. At zero HP, approach and press F within four seconds to finish it before full regeneration.</p></aside></div>
 <section class="notes"><div><p class="eyebrow">PLAYTEST 01</p><h3>Does the fight feel right?</h3></div><p>Try moving diagonally, dodging a strike, and attacking from different angles. Then tell us what feels responsive, confusing, or unfair.</p><span>Next checkpoint<br><strong>Breathing forms</strong></span></section></main><footer>Personal fan-game prototype · Original character art <span>Keyboard + mouse required</span></footer>`;
 
 if(IS_SELECTION&&PROFILE){
@@ -69,7 +71,7 @@ function initialEncounter(){
 }
 const W = 1000, H = 620;
 const SERIF = 'Marcellus, Georgia, serif', SANS = '"DM Sans", sans-serif', KANJI = '"Noto Serif JP", "Hiragino Mincho ProN", serif';
-const PLAYER_FEET = 40, DEMON_FEET = 46, ZOOM = 1.3, TAU = Math.PI * 2;
+const PLAYER_FEET = 40, DEMON_FEET = 46, ZOOM = IS_SELECTION?1:1.3, TAU = Math.PI * 2;
 const MOONLIGHT = 0xe0dbec; // gentle cool tint so the illustrations sit inside the night scene
 const SL = RIG.slayer, DM = RIG.demon, KT = RIG.katana;
 const LANTERNS = [{x: 30, y: 325}, {x: 970, y: 325}];
@@ -202,6 +204,15 @@ class Arena extends Phaser.Scene {
   private run=readRun((()=>{try{return localStorage.getItem(RUN_KEY);}catch{return null;}})(),PROFILE?profileKey(PROFILE):'sandbox');
   private get stage(){return TUTORIAL_STAGES[Math.min(this.run.stage,3)];}
   private get isBoss(){return IS_SELECTION&&this.run.stage===3;}
+  private areaStage=-1;
+  private patternId:MeleeId='claw';private enemyAngle=0;private strikeElapsed=0;private enemyHits=new Set<number>();
+  private get pattern(){return MELEE_PATTERNS[this.patternId];}
+  private get area(){return TRIAL_AREAS[Math.min(this.run.stage,3)];}
+  private get actorSize(){return IS_SELECTION?94:150;}
+  private get demonSize(){return IS_SELECTION?112:168;}
+  private maxBreath=breathCapacity();private breath=this.maxBreath;
+  private combo=-1;private comboWindow=0;private queuedSlash=false;private slash:{index:number;elapsed:number;hit:boolean;angle:number}|null=null;
+  private lastMove=new Phaser.Math.Vector2(1,0);
   private attackCount=0;private bossHeavy=false;private potionCount=2;private transitionSaved=false;
   private bossSprite!:Phaser.GameObjects.Sprite;private bossHead!:Phaser.GameObjects.Sprite;
   private encounter=initialEncounter();
@@ -212,7 +223,7 @@ class Arena extends Phaser.Scene {
   private hp = R.health; private stamina = R.stamina; private ehp = this.enemyMaxHp;
   private angle = 0; private swing = 0; private swordCooldown = 0;
   private dodge = 0; private dodgeCooldown = 0; private dodgeVector = new Phaser.Math.Vector2();
-  private enemyState: 'chase' | 'windup' | 'recovery' | 'downed' | 'dead' = 'chase';
+  private enemyState: 'chase' | 'windup' | 'strike' | 'recovery' | 'downed' | 'dead' = 'chase';
   private executionFlash = 0;
   private finishRemaining = 0;
   private enemyTimer = 0; private target = {x: 0, y: 0};
@@ -246,6 +257,7 @@ class Arena extends Phaser.Scene {
   private playerFlash = 0; private clawLife = 0; private clawAt = {x: 0, y: 0};
   constructor() {super('Arena');}
   preload() {
+    this.load.image('profile-run','art/recruit-run-sheet.png');
     this.load.image('hand-demon','art/hand-demon-sheet.png');
     this.load.image('profile-motion','art/recruit-motion-sheet.png');
     this.load.image('profile-idle','art/recruit-creation-sheet.png');
@@ -274,17 +286,18 @@ class Arena extends Phaser.Scene {
       else for(let i=0;i<4*rows;i++)tex.add(i,0,(i%4)*w,Math.floor(i/4)*h,w,h);
       tex.setFilter(Phaser.Textures.FilterMode.NEAREST);
     }
+    const runTexture=this.textures.get('profile-run');for(const [i,r] of RUN_REGIONS.frames.entries())runTexture.add(i,0,r.x,r.y,r.w,r.h);runTexture.setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.profileActor=this.add.sprite(0,0,'profile-idle',0).setOrigin(0.5,0.96).setDisplaySize(150,150).setVisible(false);
     const boss=this.textures.get('hand-demon'),bossImage=boss.getSourceImage() as HTMLImageElement;
     const bw=Math.floor(bossImage.width/4);for(let i=0;i<4;i++)boss.add(i,0,i*bw,0,bw,bossImage.height);boss.setFilter(Phaser.Textures.FilterMode.NEAREST);
-    this.bossSprite=this.add.sprite(0,0,'hand-demon',0).setOrigin(0.5,0.94).setDisplaySize(235,235).setVisible(false);
-    this.bossHead=this.add.sprite(0,0,'hand-demon',0).setOrigin(0.5,0.94).setDisplaySize(235,235).setVisible(false);
+    this.bossSprite=this.add.sprite(0,0,'hand-demon',0).setOrigin(0.5,0.94).setDisplaySize(165,165).setVisible(false);
+    this.bossHead=this.add.sprite(0,0,'hand-demon',0).setOrigin(0.5,0.94).setDisplaySize(165,165).setVisible(false);
     const layer = (key: string, paint: (ctx: CanvasRenderingContext2D) => void, depth: number) => {
       const texture = this.textures.createCanvas(key, W, H)!;
       paint(texture.getContext()); texture.refresh();
       return this.add.image(0, 0, key).setOrigin(0).setDepth(depth);
     };
-    layer('ground', IS_SELECTION?paintForest:paintGround, 0);
+    layer('ground', IS_SELECTION?ctx=>paintForest(ctx,Math.min(this.run.stage,3)):paintGround, 0);this.areaStage=Math.min(this.run.stage,3);
     this.under = this.add.graphics().setDepth(1);
     // Illustrated characters: the slayer is a small cutout rig (two legs under the body), the demon one sprite.
     const part = (p: {key: string; origin: readonly number[]; x: number; y: number}, scale: number) => this.add.image(p.x, p.y, p.key).setOrigin(p.origin[0], p.origin[1]).setScale(scale);
@@ -328,6 +341,14 @@ class Arena extends Phaser.Scene {
     document.querySelector('#cast')!.addEventListener('click', () => {this.castForm(); document.querySelector<HTMLElement>('#game')!.focus();});
     document.querySelector('#replay')!.addEventListener('click', () => {this.reset(); this.angle=0; this.castForm();});
     this.input.on('pointerdown', () => {if(this.mode === 'playing') this.attack();});
+    const breathHud=document.createElement('div');breathHud.className='resource breath-resource';breathHud.innerHTML='<div>Breath <span id=bp>100 / 100</span></div><progress id=breath max=100 value=100></progress>';document.querySelector(IS_SELECTION?'#vital-bars':'aside')!.append(breathHud);
+    if(IS_SELECTION){
+      const slots=document.querySelector('#forest-slots')!;
+      const cards=document.createElement('div');cards.className='form-cards';cards.innerHTML=['surface','wheel'].map((id,i)=>`<button type=button class=form-card id=form-${id} aria-pressed=${i===0}><kbd>${i+1}</kbd><strong>${PROFILE?STARTERS[PROFILE.style].forms[i]:WATER_FORMS[id as WaterId].name}</strong><span class=form-meta></span></button>`).join('')+'<button type=button id=cast-equipped>Q · Use selected form</button>';slots.append(cards);
+      for(const id of ['surface','wheel'] as const)document.querySelector('#form-'+id)!.addEventListener('click',()=>{this.selectForm(id);document.querySelector<HTMLElement>('#game')!.focus();});
+      document.querySelector('#cast-equipped')!.addEventListener('click',()=>{this.castForm();document.querySelector<HTMLElement>('#game')!.focus();});
+      const feedback=document.createElement('p');feedback.id='combat-feedback';feedback.setAttribute('role','status');slots.append(feedback);
+    }
     document.querySelector('#start')!.addEventListener('click', () => {if(this.mode === 'playing')this.mode='paused';else if(this.mode === 'paused')this.mode='playing';else this.reset();this.sync();});
     document.querySelector('#retry')!.addEventListener('click', () => this.reset());
     window.addEventListener('blur', () => {if(this.mode==='playing'){this.mode='paused';this.sync();}});
@@ -340,10 +361,11 @@ class Arena extends Phaser.Scene {
       next:()=>this.continueTrial(),
       down:()=>{this.ehp=0;this.downDemon();},
       near:()=>{this.p={x:this.e.x-50,y:this.e.y};},
+      target:(x:number,y:number)=>{this.e={x,y};},dummy:(value:boolean)=>{this.trainingDummy=value;},
       far:()=>{this.p={x:54,y:74};},
       finish:()=>this.finishDemon(),
       pause:()=>{this.mode='paused';},resume:()=>{this.mode='playing';},
-      state:()=>({run:this.run,potions:this.potionCount,playerHealth:this.hp,position:{...this.p},shrine:this.shrineRead,encounter:this.encounter,clues:this.trialClues,combat:this.trialCombat,profile:PROFILE,enemy:this.enemyState,hp:this.ehp,timer:this.finishRemaining,mode:this.mode,wins:this.wins,execution:this.executionFlash,ash:this.deathFade})
+      state:()=>({run:this.run,potions:this.potionCount,playerHealth:this.hp,position:{...this.p},enemyPosition:{...this.e},breath:this.breath,maxBreath:this.maxBreath,stamina:this.stamina,combo:this.combo,slash:this.slash,pattern:this.patternId,area:this.area.name,selectedForm:this.selectedForm,technique:this.technique,shrine:this.shrineRead,encounter:this.encounter,clues:this.trialClues,combat:this.trialCombat,profile:PROFILE,enemy:this.enemyState,hp:this.ehp,timer:this.finishRemaining,mode:this.mode,wins:this.wins,execution:this.executionFlash,ash:this.deathFade})
     };
     if(IS_SELECTION){this.trainingDummy=false;this.showHitboxes=false;}
     if(IS_SELECTION){
@@ -361,15 +383,17 @@ class Arena extends Phaser.Scene {
   private reset() {
     if(IS_SELECTION&&this.run.passed){this.showPassed();return;}
     if(IS_SELECTION){const original=rollDemonEncounter(1,this.encounterSeed);this.encounter=rollDemonEncounter(Math.min(this.run.stage+1,5),this.encounterSeed,DEMON_ARCHETYPES[(original.archetype.column+this.run.stage)%5].id);}
-    this.transitionSaved=false;this.attackCount=0;this.bossHeavy=false;
+    this.transitionSaved=false;this.attackCount=0;this.bossHeavy=false;this.patternId=meleeFor(this.encounter.archetype.column,this.isBoss);this.enemyHits.clear();this.strikeElapsed=0;
+    this.breath=this.maxBreath;this.combo=-1;this.comboWindow=0;this.queuedSlash=false;this.slash=null;
+    if(IS_SELECTION&&this.areaStage!==Math.min(this.run.stage,3)){const texture=this.textures.get('ground') as Phaser.Textures.CanvasTexture;paintForest(texture.getContext(),Math.min(this.run.stage,3));texture.refresh();this.areaStage=Math.min(this.run.stage,3);}
     if(IS_SELECTION){this.potionCount=this.run.potions;document.querySelector<HTMLElement>('#selection-passed')?.setAttribute('hidden','');}
-    this.p=IS_SELECTION?{...FOREST_SPAWN}:{x:300,y:340};this.e=IS_SELECTION?{...FOREST_DEMON}:{x:this.trainingDummy?380:700,y:340};
+    this.p=IS_SELECTION?{...this.area.spawn}:{x:300,y:340};this.e=IS_SELECTION?{...this.area.demon}:{x:this.trainingDummy?380:700,y:340};
     if(IS_SELECTION){this.tourIndex=0;this.shrineRead=false;this.trialClues=0;this.trialCombat=false;this.trialSaved=false;this.trialText='The wisteria ends here. Follow the trail and look for signs of other candidates.';}
     this.executionFlash=0;this.finishRemaining=0;this.technique=null;this.formCooldowns={surface:0,wheel:0};this.labMessage='Q to cast · 1 / 2 to select a form';this.hp=IS_SELECTION?this.run.health:R.health;this.stamina=R.stamina;this.ehp=this.enemyMaxHp;
     this.swing=0;this.swordCooldown=0;this.dodge=0;this.dodgeCooldown=0;this.hurt=0;this.enemyTimer=0;this.enemyState='chase';this.mode='playing';
     this.hitFlash=0;this.hurtFx=0;this.ehpShown=this.enemyMaxHp;this.deathFade=0;this.endDelay=0;this.clawLife=0;this.overlayAlpha=0;this.playerFlash=0;
     this.particles=[];this.ghosts=[];this.strikeAnim=0;this.demonSprite.setCrop();for(const f of this.floaters)f.text.destroy();this.floaters=[];
-    if(IS_SELECTION&&this.run.stage>0){this.p={x:690,y:350};this.trialClues=2;this.trialCombat=true;this.trialText=(this.isBoss?'At a sheltered rest point, you recover at least 75 vitality and find a potion. ':'')+this.stage.lesson;}
+    if(IS_SELECTION&&this.run.stage>0){this.trialClues=2;this.trialCombat=true;this.trialText=(this.isBoss?'At a sheltered rest point, you recover at least 75 vitality and find a potion. ':'')+this.stage.lesson;}
     this.sync();
     document.querySelector<HTMLElement>('#game')!.focus();
   }
@@ -389,32 +413,56 @@ class Arena extends Phaser.Scene {
     this.trialText=result.used?'You drink a healing potion. +45 vitality.':this.potionCount===0?'No healing potions remain.':'Your vitality is already full.';
     if(result.used)this.floatText(this.p.x,this.p.y-75,'+45 HP','#bde9be','#143c23',18);
   }
+  private selectForm(id:WaterId){
+    this.selectedForm=id;document.querySelector<HTMLSelectElement>('#form-select')!.value=id;
+    for(const prop of ['damage','reach','stamina','cooldown'] as const)document.querySelector<HTMLInputElement>(`#tune-${prop}`)!.value=String(this.tuning[id][prop]);
+  }
   private attack() {
-    if((IS_SELECTION&&!this.trialCombat)||this.mode !== 'playing' || this.enemyState==='downed' || this.technique || this.swordCooldown>0 || this.dodge>0)return;
-    this.swordCooldown=R.swordCooldown;this.swing=0.15;
-    if(inSwordArc(this.p.x,this.p.y,this.angle,this.e.x,this.e.y)) {
-      this.ehp=Math.max(0,this.ehp-R.swordDamage);
-      this.onSwordHit(R.swordDamage);
-      if(this.ehp===0)this.downDemon();
+    if((IS_SELECTION&&!this.trialCombat)||this.mode!=='playing'||['downed','dead'].includes(this.enemyState)||this.technique||this.dodge>0)return;
+    if(this.slash){this.queuedSlash=true;return;}
+    if(this.swordCooldown>0)return;
+    this.combo=comboIndex(this.combo,this.comboWindow);this.comboWindow=0;
+    this.slash={index:this.combo,elapsed:0,hit:false,angle:this.angle};this.queuedSlash=false;
+    this.labMessage=`Sword · ${this.combo+1}/3 · ${SWORD_COMBO[this.combo].name}`;
+  }
+  private updateSlash(dt:number){
+    const slash=this.slash;if(!slash)return;const f=SWORD_COMBO[slash.index],old=slash.elapsed;slash.elapsed+=dt;
+    const active=(t:number)=>Phaser.Math.Clamp((t-f.windup)/f.active,0,1);
+    const advance=(active(slash.elapsed)-active(old))*f.advance;
+    this.movePlayer(Math.cos(slash.angle)*advance,Math.sin(slash.angle)*advance);
+    const dx=this.e.x-this.p.x,dy=this.e.y-this.p.y;
+    const a=Phaser.Math.Angle.Wrap(Math.atan2(dy,dx)-slash.angle);
+    if(!slash.hit&&slash.elapsed>=f.windup&&old<f.windup+f.active&&!['downed','dead'].includes(this.enemyState)&&Math.hypot(dx,dy)<=f.reach&&Math.abs(a)<=f.arc){
+      slash.hit=true;this.ehp=Math.max(0,this.ehp-f.damage);this.onSwordHit(f.damage);if(this.ehp===0)this.downDemon();
+    }
+    const progress=active(slash.elapsed);this.swing=progress>0&&progress<1?.15*(1-progress):0;
+    if(slash.elapsed>=f.windup+f.active+f.recovery){
+      this.slash=null;this.comboWindow=slash.index===2?0:.48;
+      if(slash.index===2){this.swordCooldown=.13;this.queuedSlash=false;}
+      else if(this.queuedSlash)this.attack();
     }
   }
   private inspectForest(){
     if(this.mode!=='playing')return;
-    if(Math.hypot(this.p.x-FOREST_SHRINE.x,this.p.y-FOREST_SHRINE.y)<62){this.shrineRead=true;this.trialText='A small wayside shrine. Someone left a promise here: “Let us all see the dawn.” The side trail returns to the fork.';return;}
+    if(this.run.stage===0&&Math.hypot(this.p.x-FOREST_SHRINE.x,this.p.y-FOREST_SHRINE.y)<62){this.shrineRead=true;this.trialText='A small wayside shrine. Someone left a promise here: “Let us all see the dawn.” The side trail returns to the fork.';return;}
     const clue=FOREST_CLUES[this.trialClues];
     if(clue&&Math.hypot(this.p.x-clue.x,this.p.y-clue.y)<62){this.trialText=clue.text;this.trialClues++;if(this.trialClues===2)this.trialCombat=true;}
   }
   private movePlayer(dx:number,dy:number){
-    if(IS_SELECTION)moveThroughForest(this.p,dx,dy);
+    if(IS_SELECTION)moveThroughForest(this.p,dx,dy,Math.min(this.run.stage,3));
     else{this.p.x=Phaser.Math.Clamp(this.p.x+dx,54,946);this.p.y=Phaser.Math.Clamp(this.p.y+dy,74,570);}
   }
+  private moveEnemy(dx:number,dy:number){
+    if(IS_SELECTION)moveThroughForest(this.e,dx,dy,Math.min(this.run.stage,3));
+    else {this.e.x=Phaser.Math.Clamp(this.e.x+dx,54,946);this.e.y=Phaser.Math.Clamp(this.e.y+dy,74,570);}
+  }
   private downDemon() {
-    this.technique=null;this.enemyState='downed';this.finishRemaining=FINISHER.window;this.strikeAnim=0;this.clawLife=0;
+    this.technique=null;this.slash=null;this.queuedSlash=false;this.enemyState='downed';this.finishRemaining=FINISHER.window;this.strikeAnim=0;this.clawLife=0;
     this.labMessage='Demon vulnerable — get close and press F!';
   }
   private finishDemon() {
     if(!canFinish(this.enemyState==='downed',this.finishRemaining,Phaser.Math.Distance.Between(this.p.x,this.p.y,this.e.x,this.e.y)))return;
-    this.executionFlash=0.65;this.finishRemaining=0;this.enemyState='dead';this.technique=null;this.swing=0.15;
+    this.executionFlash=0.65;this.finishRemaining=0;this.enemyState='dead';this.technique=null;this.slash=null;this.swing=0.15;
     this.mode='won';this.wins++;
     this.floatText(this.e.x,this.e.y-85,'DECAPITATED','#d6faff','#183544',18);
     this.onDemonDefeated();this.endDelay+=0.65;
@@ -423,11 +471,11 @@ class Arena extends Phaser.Scene {
     if(IS_SELECTION&&!this.trialCombat){this.trialText='Inspect the clues before engaging the demon.';return;}
     if(this.enemyState==='downed') {this.labMessage='Approach and press F to finish.';return;}
     if(this.mode !== 'playing') {this.labMessage='Start or resume the encounter first.';return;}
-    if(this.technique || this.dodge>0 || this.swordCooldown>0) {this.labMessage='Finish the current action first.';return;}
+    if(this.technique || this.slash || this.dodge>0 || this.swordCooldown>0) {this.labMessage='Finish the current action first.';return;}
     const id=this.selectedForm, tuning=this.tuning[id];
     if(this.formCooldowns[id]>0) {this.labMessage='This form is cooling down.';return;}
-    if(this.stamina<tuning.stamina) {this.labMessage='Not enough stamina.';return;}
-    this.stamina-=tuning.stamina;this.formCooldowns[id]=tuning.cooldown;
+    if(this.breath<tuning.stamina) {this.labMessage='Not enough Breath — recover before casting.';return;}
+    this.breath-=tuning.stamina;this.formCooldowns[id]=tuning.cooldown;
     this.technique={id,elapsed:0,angle:this.angle,hit:false,damage:tuning.damage,reach:tuning.reach};
     this.labMessage=`${IS_SELECTION&&PROFILE?STARTERS[PROFILE.style].forms[id==='surface'?0:1]:WATER_FORMS[id].name} · windup`;
   }
@@ -468,20 +516,21 @@ class Arena extends Phaser.Scene {
         if(this.finishRemaining===0){this.ehp=this.enemyMaxHp;this.ehpShown=this.enemyMaxHp;this.enemyState='chase';this.labMessage='Too late — the demon fully regenerated!';this.floatText(this.e.x,this.e.y-75,'REGENERATED','#ffb6bf','#3d1522',18);}
         else if(Phaser.Input.Keyboard.JustDown(this.keys.F))this.finishDemon();
       }
-      if(!this.technique)this.angle=this.demoMode ? Phaser.Math.Angle.Between(this.p.x,this.p.y,this.e.x,this.e.y) : Phaser.Math.Angle.Between(this.p.x,this.p.y,this.aim.x,this.aim.y);
+      if(!this.technique&&!this.slash)this.angle=this.demoMode ? Phaser.Math.Angle.Between(this.p.x,this.p.y,this.e.x,this.e.y) : Phaser.Math.Angle.Between(this.p.x,this.p.y,this.aim.x,this.aim.y);
       for(const id of ['surface','wheel'] as const)this.formCooldowns[id]=Math.max(0,this.formCooldowns[id]-dt);
-      for(const [key,id] of [['ONE','surface'],['TWO','wheel']] as const) if(Phaser.Input.Keyboard.JustDown(this.keys[key])) {this.selectedForm=id; document.querySelector<HTMLSelectElement>('#form-select')!.value=id;for(const prop of ['damage','reach','stamina','cooldown'] as const)document.querySelector<HTMLInputElement>(`#tune-${prop}`)!.value=String(this.tuning[id][prop]);}
+      for(const [key,id] of [['ONE','surface'],['TWO','wheel']] as const)if(Phaser.Input.Keyboard.JustDown(this.keys[key]))this.selectForm(id);
       if(Phaser.Input.Keyboard.JustDown(this.keys.Q))this.castForm();
       this.swordCooldown=Math.max(0,this.swordCooldown-dt);this.swing=Math.max(0,this.swing-dt);this.hurt=Math.max(0,this.hurt-dt);this.dodgeCooldown=Math.max(0,this.dodgeCooldown-dt);
       let move=new Phaser.Math.Vector2(Number(this.keys.D.isDown)-Number(this.keys.A.isDown),Number(this.keys.S.isDown)-Number(this.keys.W.isDown)).normalize();
       if(this.demoMode&&(!IS_SELECTION||this.trialCombat)){
         const distance=Phaser.Math.Distance.Between(this.p.x,this.p.y,this.e.x,this.e.y);
-        const away=this.enemyState==='windup';
+        const away=this.enemyState==='windup'||this.enemyState==='strike';
         if(this.hp<=55&&this.potionCount>0)this.usePotion();
-        move=new Phaser.Math.Vector2(this.e.x-this.p.x,this.e.y-this.p.y).normalize().scale(away?-1:distance>78?1:0);
+        move=new Phaser.Math.Vector2(this.e.x-this.p.x,this.e.y-this.p.y).normalize().scale(away?-1:distance>62?1:0);
         if(away&&this.enemyTimer<0.32&&this.dodge===0&&this.dodgeCooldown===0&&this.stamina>=R.dodgeCost&&!this.technique){this.dodge=R.dodgeDuration;this.dodgeCooldown=R.dodgeCooldown;this.stamina-=R.dodgeCost;this.dodgeVector=move.clone();this.onDodge();}
         if(this.enemyState==='downed'&&distance<=FINISHER.reach&&this.finishRemaining<FINISHER.window-0.9)this.finishDemon();
-        if(this.enemyState==='recovery'&&distance<=90&&this.formCooldowns.surface===0&&!this.technique&&this.stamina>=20)this.castForm();
+        if(this.enemyState==='recovery'&&distance<=90&&this.formCooldowns.surface===0&&!this.technique&&this.breath>=20)this.castForm();
+        else if(this.enemyState==='recovery'&&distance<80&&!this.technique)this.attack();
       }
       if(IS_SELECTION&&this.demoMode&&!this.trialCombat){
         const tour=[FOREST_ROUTE[1],FOREST_ROUTE[2],FOREST_SHRINE,FOREST_ROUTE[2],FOREST_ROUTE[3],FOREST_CLUES[1]];
@@ -489,26 +538,41 @@ class Arena extends Phaser.Scene {
         if(next){const delta=new Phaser.Math.Vector2(next.x-this.p.x,next.y-this.p.y);const near=delta.length()<=12;move=near?new Phaser.Math.Vector2():delta.normalize();if(near){this.inspectForest();this.tourIndex++;}}
       }
       this.moving=move.length()>0;
-      if(Phaser.Input.Keyboard.JustDown(this.keys.SPACE)&&!this.technique&&this.dodgeCooldown===0&&this.stamina>=R.dodgeCost){this.dodge=R.dodgeDuration;this.dodgeCooldown=R.dodgeCooldown;this.stamina-=R.dodgeCost;this.dodgeVector=move.length()>0?move.clone():new Phaser.Math.Vector2(Math.cos(this.angle),Math.sin(this.angle));this.onDodge();}
-      const velocity=this.technique?new Phaser.Math.Vector2():this.dodge>0?this.dodgeVector.clone().scale(R.dodgeSpeed):move.scale(R.speed);
+      if(Phaser.Input.Keyboard.JustDown(this.keys.SPACE)&&!this.technique&&this.dodgeCooldown===0&&this.stamina>=R.dodgeCost){this.slash=null;this.swing=0;this.queuedSlash=false;this.comboWindow=0;this.dodge=R.dodgeDuration;this.dodgeCooldown=R.dodgeCooldown;this.stamina-=R.dodgeCost;this.dodgeVector=move.length()>0?move.clone():new Phaser.Math.Vector2(Math.cos(this.angle),Math.sin(this.angle));this.onDodge();}
+      if(move.length()>0)this.lastMove.copy(move);
+      const velocity=this.technique?move.clone().scale(R.speed*.35):this.dodge>0?this.dodgeVector.clone().scale(R.dodgeSpeed):move.scale(R.speed);
       this.movePlayer(velocity.x*dt,velocity.y*dt);
       const invulnerable=this.dodge>0;
       this.dodge=Math.max(0,this.dodge-dt);if(!invulnerable&&!this.technique)this.stamina=Math.min(100,this.stamina+R.staminaRegen*dt);
       if(Phaser.Input.Keyboard.JustDown(this.keys.J))this.attack();
-      this.updateTechnique(dt);
-      if(this.mode==='playing'&&(!IS_SELECTION||this.trialCombat)&&!this.trainingDummy&&this.enemyState==='chase') {
-        const distance=Phaser.Math.Distance.Between(this.p.x,this.p.y,this.e.x,this.e.y);
-        if(distance<110){this.enemyState='windup';this.attackCount++;this.bossHeavy=this.isBoss&&this.attackCount%2===0;this.enemyTimer=this.isBoss?(this.bossHeavy?1.15:0.85):R.windup;this.target={...this.p};}
-        else {const a=Phaser.Math.Angle.Between(this.e.x,this.e.y,this.p.x,this.p.y);if(IS_SELECTION)moveThroughForest(this.e,Math.cos(a)*100*dt,Math.sin(a)*100*dt);else{this.e.x+=Math.cos(a)*100*dt;this.e.y+=Math.sin(a)*100*dt;}}
-      } else if(this.mode==='playing'&&(!IS_SELECTION||this.trialCombat)&&!this.trainingDummy&&this.enemyState==='windup') {
-        this.enemyTimer-=dt;
-        if(this.enemyTimer<=0){
-          const inReach=Phaser.Math.Distance.Between(this.p.x,this.p.y,this.target.x,this.target.y)<(this.isBoss?(this.bossHeavy?130:110):R.enemyReach);
-          if(inReach&&!invulnerable){this.hp=Math.max(0,this.hp-this.enemyDamage);this.hurt=0.25;this.cameras.main.shake(100,0.004);if(this.hp===0)this.mode='lost';}
-          this.onDemonStrike(inReach, invulnerable);
-          this.enemyState='recovery';this.enemyTimer=this.isBoss?(this.bossHeavy?1.5:1.2):R.recovery;
-        }
-      } else if(this.mode==='playing'&&(!IS_SELECTION||this.trialCombat)&&!this.trainingDummy&&this.enemyState==='recovery'){this.enemyTimer-=dt;if(this.enemyTimer<=0)this.enemyState='chase';}
+      this.comboWindow=Math.max(0,this.comboWindow-dt);
+      if(!this.technique)this.breath=Math.min(this.maxBreath,this.breath+(this.moving?12:24)*dt);
+      this.updateSlash(dt);this.updateTechnique(dt);
+      if(this.mode==='playing'&&(!IS_SELECTION||this.trialCombat)&&!this.trainingDummy){
+        if(this.enemyState==='chase'){
+          const distance=Phaser.Math.Distance.Between(this.p.x,this.p.y,this.e.x,this.e.y);
+          const next=meleeFor(this.encounter.archetype.column,this.isBoss,this.attackCount+1),plan=MELEE_PATTERNS[next];
+          if(distance<plan.reach+(plan.lunge>0?85:14)){
+            this.patternId=next;this.attackCount++;this.bossHeavy=next==='heavy';this.enemyState='windup';this.enemyTimer=plan.windup;
+            this.target={...this.p};this.enemyAngle=Phaser.Math.Angle.Between(this.e.x,this.e.y,this.target.x,this.target.y);this.enemyHits.clear();
+          }else{const a=Phaser.Math.Angle.Between(this.e.x,this.e.y,this.p.x,this.p.y);this.moveEnemy(Math.cos(a)*plan.speed*dt,Math.sin(a)*plan.speed*dt);}
+        }else if(this.enemyState==='windup'){
+          this.enemyTimer-=dt;if(this.enemyTimer<=0){this.enemyState='strike';this.strikeElapsed=0;this.enemyHits.clear();}
+        }else if(this.enemyState==='strike'){
+          const before=this.strikeElapsed;this.strikeElapsed+=dt;const plan=this.pattern;
+          const steps=Math.max(1,Math.ceil(plan.lunge*dt/plan.active/5));
+          for(let i=0;i<steps;i++){
+            this.moveEnemy(Math.cos(this.enemyAngle)*plan.lunge*dt/plan.active/steps,Math.sin(this.enemyAngle)*plan.lunge*dt/plan.active/steps);
+            for(const [hit,at] of plan.hits.entries())if(this.strikeElapsed>=at&&this.strikeElapsed<at+.14&&!this.enemyHits.has(hit)){
+              if(meleeHits(this.patternId,this.e,this.enemyAngle,this.p)){
+                this.enemyHits.add(hit);if(!invulnerable){this.hp=Math.max(0,this.hp-this.enemyDamage);this.hurt=.25;if(this.hp===0)this.mode='lost';}this.onDemonStrike(true,invulnerable);
+              }
+            }
+          }
+          for(const at of plan.hits)if(before<=at&&this.strikeElapsed>at){this.clawAt={x:this.e.x+Math.cos(this.enemyAngle)*plan.reach*.6,y:this.e.y+Math.sin(this.enemyAngle)*plan.reach*.6};this.clawLife=.25;this.strikeAnim=.25;}
+          if(this.strikeElapsed>=plan.active){this.enemyState='recovery';this.enemyTimer=plan.recovery;}
+        }else if(this.enemyState==='recovery'){this.enemyTimer-=dt;if(this.enemyTimer<=0)this.enemyState='chase';}
+      }
     } else this.moving=false;
     if(this.mode==='won')this.technique=null;
     this.animate(this.mode==='paused'?0:dt);
@@ -586,9 +650,13 @@ class Arena extends Phaser.Scene {
       const next=document.querySelector<HTMLButtonElement>('#continue-trial');if(next){next.hidden=this.mode!=='won'||this.endDelay>0||this.run.passed;next.textContent=this.isBoss?'Greet the dawn →':'Continue trial →';}
       const supplies=document.querySelector('#trial-supplies');if(supplies)supplies.textContent=`H · Potion ${this.potionCount}/2 · ${this.isBoss?'Boss encounter':this.stage.title}`;
       document.querySelector('#trial-hint')!.textContent=this.mode==='won'?'Press Continue or Enter when the ash settles. Progress saves between encounters.':this.mode==='lost'?'Retry to return to the trail entrance. Your character profile is safe.':this.enemyState==='downed'?`Get close and press F · ${this.finishRemaining.toFixed(1)}s until full recovery`:this.trialText;
-      document.querySelector('#trial-form')!.textContent=`Equipped: ${STARTERS[PROFILE.style].forms[this.selectedForm==='surface'?0:1]}`;
+      document.querySelector('#trial-form')!.textContent=`${STARTERS[PROFILE.style].name} · Select 1 / 2 or click · Q to cast`;
+      for(const id of ['surface','wheel'] as const){const card=document.querySelector<HTMLButtonElement>('#form-'+id);if(!card)continue;card.setAttribute('aria-pressed',String(this.selectedForm===id));card.classList.toggle('selected',this.selectedForm===id);card.classList.toggle('unavailable',this.breath<this.tuning[id].stamina||this.formCooldowns[id]>0);card.querySelector('.form-meta')!.textContent=`${this.tuning[id].stamina} Breath · ${this.formCooldowns[id]>0?this.formCooldowns[id].toFixed(1)+'s cooldown':this.breath<this.tuning[id].stamina?'Recover Breath':'Ready'}`;}
+      const feedback=document.querySelector('#combat-feedback');if(feedback)feedback.textContent=this.labMessage;
+      document.querySelector('.forest-nav>span')!.textContent=`FINAL SELECTION · ${this.area.name.toUpperCase()}`;
     }
 
+    document.querySelector<HTMLProgressElement>('#breath')!.max=this.maxBreath;document.querySelector<HTMLProgressElement>('#breath')!.value=this.breath;document.querySelector('#bp')!.textContent=`${Math.floor(this.breath)} / ${this.maxBreath}`;
     document.querySelector('#form-status')!.textContent=`${this.labMessage} · cooldown ${this.formCooldowns[this.selectedForm].toFixed(1)}s`; 
     document.querySelector<HTMLProgressElement>('#health')!.value=this.hp;document.querySelector('#hp')!.textContent=`${this.hp} / 100`;
     document.querySelector<HTMLProgressElement>('#stamina')!.value=this.stamina;document.querySelector('#sp')!.textContent=`${Math.floor(this.stamina)} / 100`;
@@ -638,12 +706,12 @@ class Arena extends Phaser.Scene {
     }
     // Normal melee uses its animation as the tell. Area telegraphs are reserved for future Blood Demon Arts.
     if(this.clawLife>0)this.drawClaw(o,l);
-    const facing=Math.cos(this.angle)<0?-1:1, demonFacing=this.p.x<this.e.x?-1:1;
-    const pFeet=this.p.y+PLAYER_FEET, eFeet=this.e.y+DEMON_FEET, pDepth=2+pFeet/1000;
+    const facing=(this.moving&&!this.technique&&!this.slash&&Math.abs(this.lastMove.x)>.1?this.lastMove.x:Math.cos(this.angle))<0?-1:1, demonFacing=this.p.x<this.e.x?-1:1;
+    const pFeet=this.p.y+(IS_SELECTION?24:PLAYER_FEET), eFeet=this.e.y+(IS_SELECTION?28:DEMON_FEET), pDepth=2+pFeet/1000;
     const shadow=(x:number,y:number,w:number)=>{u.fillStyle(0x05070d,0.45);u.fillEllipse(x,y,w,w*0.36);};
     const demonShown=this.enemyState!=='dead'||this.deathFade>0;
-    if(demonShown&&(!IS_SELECTION||this.trialCombat))shadow(this.e.x,eFeet,74);
-    shadow(this.p.x,pFeet,50);
+    if(demonShown&&(!IS_SELECTION||this.trialCombat))shadow(this.e.x,eFeet,IS_SELECTION?43:74);
+    shadow(this.p.x,pFeet,IS_SELECTION?30:50);
     if(this.mode==='playing'&&this.stamina<99.5){
       const low=this.stamina<R.dodgeCost;
       u.lineStyle(3,0x0b0e18,0.5);u.strokeCircle(this.p.x,pFeet,28);
@@ -708,15 +776,18 @@ class Arena extends Phaser.Scene {
       if(this.swing>0){l.lineStyle(3,0x7cc8ff,0.5);l.lineBetween(hx+dx*14,hy+dy*14,hx+dx*KT.length,hy+dy*KT.length);}
     }
     if(this.swing>0){
-      const a=this.swing/0.15;
-      this.crescent(o,this.p.x,this.p.y,this.angle,80,18,0xe8f7ff,0.75*a);
-      this.crescent(l,this.p.x,this.p.y,this.angle,82,10,0x5fb4ff,0.55*a);
-      this.crescent(l,this.p.x,this.p.y,this.angle,70,6,0x9fe7ff,0.35*a);
+      const a=this.swing/.15,cut=this.slash?.index??0,reach=SWORD_COMBO[cut].reach;
+      const direction=this.slash?.angle??this.angle;
+      const accent=IS_SELECTION&&PROFILE?.style==='flame'?0xffbd76:0xa5e2ed;
+      const visualAngle=direction+(cut===1?-.18:cut===2?.12:0);
+      this.crescent(o,this.p.x,this.p.y,visualAngle,reach,cut===2?24:14,0xe8f7ff,.8*a);
+      this.crescent(l,this.p.x,this.p.y,visualAngle,reach+2,8,accent,.6*a);
+      if(cut===1){o.lineStyle(3,accent,a);o.beginPath();o.arc(this.p.x,this.p.y,reach-10,direction+1.2,direction-1.2,true);o.strokePath();}
     }
     for(const q of this.particles){const a=Math.min(1,q.life/q.max*1.6);(q.glow?l:o).fillStyle(q.color,a);(q.glow?l:o).fillCircle(q.x,q.y,q.size*(0.5+0.5*q.life/q.max));}
     for(const q of this.petals){o.save();o.translateCanvas(q.x,q.y);o.rotateCanvas(q.rot);o.fillStyle(q.color,0.75);o.fillEllipse(0,0,8,3.8);o.restore();}
     if(this.enemyState!=='dead'){
-      const x=this.e.x,y=this.e.y+DEMON_FEET-(this.isBoss?195:DM.height)-12,w=80,seg=w/(this.enemyMaxHp/R.swordDamage);
+      const x=this.e.x,y=eFeet-(this.isBoss?143:IS_SELECTION?100:DM.height)-12,w=80,seg=w/(this.enemyMaxHp/R.swordDamage);
       o.fillStyle(0x0a0d16,0.9);o.fillRect(x-w/2-2,y-2,w+4,9);
       o.fillStyle(0xf3d9c8,0.85);o.fillRect(x-w/2,y,w*this.ehpShown/this.enemyMaxHp,5);
       o.fillStyle(0xd2384f);o.fillRect(x-w/2,y,w*this.ehp/this.enemyMaxHp,5);
@@ -731,16 +802,16 @@ class Arena extends Phaser.Scene {
     this.katana.setVisible(false);this.fallen.setVisible(false);
     this.ghostPool.forEach(img=>img.setVisible(false));
     this.demonSprite.setVisible(false);
-    const demonRow=(this.enemyState==='downed'||this.enemyState==='dead'||this.enemyState==='recovery')?0:this.strikeAnim>0?3:this.enemyState==='windup'?0:1+Math.floor(this.clock*7)%2;
+    const demonRow=(this.enemyState==='downed'||this.enemyState==='dead'||this.enemyState==='recovery')?0:this.enemyState==='strike'||this.strikeAnim>0?3:this.enemyState==='windup'?0:1+Math.floor(this.clock*7)%2;
     const demonFrame=demonRow*5+this.encounter.archetype.column;
-    this.pixelDemon.setFrame(demonFrame).setScale(168/SPRITE_REGIONS['pixel-demon'].cellHeight).setOrigin(SPRITE_REGIONS['pixel-demon'].frames[demonFrame].ox,1).setPosition(Math.round(this.e.x),Math.round(eFeet))
-      .setFlipX((demonFacing>0)!==(demonRow===2)).setDepth(2+eFeet/1000).setVisible(demonShown)
+    this.pixelDemon.setFrame(demonFrame).setScale(this.demonSize/SPRITE_REGIONS['pixel-demon'].cellHeight).setOrigin(SPRITE_REGIONS['pixel-demon'].frames[demonFrame].ox,1).setPosition(Math.round(this.e.x),Math.round(eFeet))
+      .setRotation(this.enemyState==='windup'?-demonFacing*.14:this.enemyState==='strike'?demonFacing*.18:0).setFlipX((demonFacing>0)!==(demonRow===2)).setDepth(2+eFeet/1000).setVisible(demonShown)
       .setAlpha(this.enemyState==='dead'?this.deathFade/1.1:1);
     const df=this.pixelDemon.frame;
     const separated=this.enemyState==='dead'&&this.executionFlash<0.4;
     this.pixelDemon.setCrop();
     if(separated)this.pixelDemon.setCrop(0,df.realHeight*0.36,df.realWidth,df.realHeight*0.64);
-    this.pixelHead.setVisible(separated&&demonShown).setFrame(demonFrame).setScale(168/SPRITE_REGIONS['pixel-demon'].cellHeight).setOrigin(SPRITE_REGIONS['pixel-demon'].frames[demonFrame].ox,1).setFlipX(demonFacing>0)
+    this.pixelHead.setVisible(separated&&demonShown).setFrame(demonFrame).setScale(this.demonSize/SPRITE_REGIONS['pixel-demon'].cellHeight).setOrigin(SPRITE_REGIONS['pixel-demon'].frames[demonFrame].ox,1).setFlipX(demonFacing>0)
       .setPosition(Math.round(this.e.x+Math.max(0,0.4-this.executionFlash)*55),Math.round(eFeet-Math.max(0,0.4-this.executionFlash)*35))
       .setDepth(2+eFeet/1000+0.001).setAlpha(this.deathFade/1.1).setCrop(0,0,df.realWidth,df.realHeight*0.36);
     if(this.hitFlash>0)this.pixelDemon.setTintFill(0xffffff);else this.pixelDemon.clearTint();
@@ -761,24 +832,31 @@ class Arena extends Phaser.Scene {
       this.pixelActor.setVisible(false);this.pixelDemon.setVisible(this.trialCombat&&demonShown);this.label.setVisible(this.trialCombat&&this.enemyState!=='dead');
       const col=(PROFILE.style==='flame'?2:0)+(PROFILE.body==='female'?1:0);
       let key='profile-idle',pf=col;
-      if(this.moving){key='profile-motion';pf=(Math.floor(this.walk*0.65)%2)*4+col;}
+      if(this.moving){key='profile-run';const cycle=[0,1,2,3,4,3,2,1];pf=cycle[Math.floor(this.walk*.9)%cycle.length]*4+col;}
       if(cast){key='profile-motion';pf=(phaseAt(cast.id,cast.elapsed)==='windup'?2:3)*4+col;}
-      else if(this.swing>0||this.executionFlash>0){key='profile-motion';pf=3*4+col;}
+      else if(this.slash){key='profile-motion';const f=SWORD_COMBO[this.slash.index];pf=(this.slash.elapsed<f.windup?2:this.slash.elapsed<f.windup+f.active?3:0)*4+col;}
+      else if(this.executionFlash>0){key='profile-motion';pf=3*4+col;}
       this.profileActor.setTexture(key,pf);
-      if(key==='profile-motion')this.profileActor.setScale(150/SPRITE_REGIONS['profile-motion'].cellHeight).setOrigin(SPRITE_REGIONS['profile-motion'].frames[pf].ox,1);
-      else this.profileActor.setDisplaySize(150,150).setOrigin(0.5,0.96);
-      this.profileActor.setPosition(Math.round(this.p.x),Math.round(pFeet)).setFlipX(facing<0).setDepth(pDepth+0.002).setVisible(!lost);
+      if(key==='profile-run')this.profileActor.setScale(this.actorSize/RUN_REGIONS.cellHeight).setOrigin(RUN_REGIONS.frames[pf].ox,1);
+      else if(key==='profile-motion')this.profileActor.setScale(this.actorSize/SPRITE_REGIONS['profile-motion'].cellHeight).setOrigin(SPRITE_REGIONS['profile-motion'].frames[pf].ox,1);
+      else this.profileActor.setDisplaySize(this.actorSize,this.actorSize).setOrigin(0.5,0.96);
+      const stride=this.moving?Math.sin(this.walk):0;
+      const action=this.slash?Math.sin(Math.min(1,this.slash.elapsed/(SWORD_COMBO[this.slash.index].windup+SWORD_COMBO[this.slash.index].active))*Math.PI):0;
+      const actionLean=this.slash?(this.slash.index===1?-.12:.14)*action:0;
+      if(this.dodge>0){key='profile-run';pf=(this.dodge>R.dodgeDuration*.65?5:6)*4+col;this.profileActor.setTexture(key,pf).setScale(this.actorSize/RUN_REGIONS.cellHeight).setOrigin(RUN_REGIONS.frames[pf].ox,1);}
+      this.profileActor.setRotation((this.dodge>0?.22:actionLean+stride*.025)*facing);
+      this.profileActor.setPosition(Math.round(this.p.x),Math.round(pFeet-Math.abs(stride)*2-(this.dodge>0?3:0))).setFlipX(facing<0).setDepth(pDepth+0.002).setVisible(!lost);
       if(this.playerFlash>0)this.profileActor.setTintFill(0xffffff);else this.profileActor.clearTint();
       this.interactLabel.setVisible(false);
       const clue=FOREST_CLUES[this.trialClues];
-      if(this.mode==='playing'&&clue&&Math.hypot(this.p.x-clue.x,this.p.y-clue.y)<62)this.interactLabel.setPosition(clue.x,clue.y+15).setText('E · '+clue.title).setVisible(true);
-      else if(this.mode==='playing'&&Math.hypot(this.p.x-FOREST_SHRINE.x,this.p.y-FOREST_SHRINE.y)<62)this.interactLabel.setPosition(FOREST_SHRINE.x,FOREST_SHRINE.y+10).setText('E · Read the shrine').setVisible(true);
+      if(this.run.stage===0&&this.mode==='playing'&&clue&&Math.hypot(this.p.x-clue.x,this.p.y-clue.y)<62)this.interactLabel.setPosition(clue.x,clue.y+15).setText('E · '+clue.title).setVisible(true);
+      else if(this.run.stage===0&&this.mode==='playing'&&Math.hypot(this.p.x-FOREST_SHRINE.x,this.p.y-FOREST_SHRINE.y)<62)this.interactLabel.setPosition(FOREST_SHRINE.x,FOREST_SHRINE.y+10).setText('E · Read the shrine').setVisible(true);
       // Ground mist drifts beneath the actors without masking attack poses.
       for(let i=0;i<5;i++){u.fillStyle(0xa0c1c1,0.025);u.fillEllipse((this.clock*9+i*245)%1200-100,130+i*100,240,22);}
     }
     if(IS_SELECTION&&this.isBoss){
       this.pixelDemon.setVisible(false);this.pixelHead.setVisible(false);
-      const bf=this.enemyState==='windup'?1:this.strikeAnim>0?2:this.enemyState==='recovery'||this.enemyState==='downed'?3:0;
+      const bf=this.enemyState==='windup'?1:this.enemyState==='strike'||this.strikeAnim>0?2:this.enemyState==='recovery'||this.enemyState==='downed'?3:0;
       this.bossSprite.setFrame(bf).setPosition(this.e.x,eFeet).setFlipX(demonFacing>0).setVisible(demonShown).setDepth(2+eFeet/1000).setAlpha(this.enemyState==='dead'?this.deathFade/1.1:1).setCrop();
       const frame=this.bossSprite.frame,cut=frame.realHeight*.34;
       this.bossHead.setVisible(separated&&demonShown).setFrame(bf).setPosition(this.e.x+(0.4-this.executionFlash)*45,eFeet).setFlipX(demonFacing>0).setDepth(2+eFeet/1000+.001).setAlpha(this.deathFade/1.1).setCrop(0,0,frame.realWidth,cut);

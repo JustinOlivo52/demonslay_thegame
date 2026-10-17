@@ -19,3 +19,10 @@ test('styles start with two forms and distribute remaining unlocks through level
   }
   assert.throws(()=>formUnlockLevels(2));
 });
+
+test('combo progresses to a finisher and resets after timeout or third cut',async()=>{
+ const {SWORD_COMBO,comboIndex,breathCapacity}=await import('./combat.ts');
+ assert.deepEqual([comboIndex(-1,0),comboIndex(0,.2),comboIndex(1,.2),comboIndex(2,.2)],[0,1,2,0]);
+ assert.equal(comboIndex(1,0),0);assert.ok(SWORD_COMBO[2].damage>SWORD_COMBO[0].damage);
+ assert.equal(breathCapacity(0),100);assert.equal(breathCapacity(3),130);assert.equal(breathCapacity(99),200);assert.equal(breathCapacity(NaN),100);
+});

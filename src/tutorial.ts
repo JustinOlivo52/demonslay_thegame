@@ -1,7 +1,7 @@
 /** Condensed playable Final Selection, not a literal seven-night simulation. */
 export const TUTORIAL_STAGES=[
  {id:'trail',title:'Beyond the wisteria',lesson:'Follow the signs. Read the demon’s pose, strike, then approach and press F to finish.',health:125,damage:16},
- {id:'breathing',title:'Trust your breathing',lesson:'Select forms with 1 / 2 and press Q. Watch stamina and cooldowns; recover between attacks.',health:145,damage:18},
+ {id:'breathing',title:'Trust your breathing',lesson:'Select forms with 1 / 2 and press Q. Forms spend Breath; dodges spend stamina. Use the form cards below or keys 1 / 2, then Q.',health:145,damage:18},
  {id:'survival',title:'Survive the night',lesson:'Dodge with Space. Press H to drink a healing potion when hurt. You have two for the trial.',health:160,damage:20},
  {id:'hand-demon',title:'The Hand Demon',lesson:'Watch its arms. A longer windup precedes its heavy strike. Dodge, recover, and finish before it regenerates.',health:300,damage:24},
 ] as const;

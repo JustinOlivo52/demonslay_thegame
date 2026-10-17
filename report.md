@@ -82,3 +82,7 @@ Expanded Final Selection to three regular-demon encounters and the Hand Demon bo
 See TUTORIAL-PLAYTEST.md for play instructions, controls and limitations. Developer sandbox remains separate.
 
 Validation: build and all seven test files pass. Automated browser playthroughs completed all four fights for Water and Flame with no page errors, then reloaded the saved crow ending. Separate checks verified H healing, checkpoint supplies on retry, and full boss recovery after a missed finishing window.
+
+## First personal-playtest revision
+
+See PLAYTEST-REVISION-01.md. Added smaller actors/wider movement space, faster movement, separate regional layouts, five melee patterns, a buffered three-cut sword chain, visible form navigation and independent Breath, plus a 28-frame generated run/dodge sheet. Training has a capacity hook but no playable progression yet. Character creator remains unchanged.

@@ -56,3 +56,7 @@ The development sandbox remains a separate entry throughout and shares tested ga
 ## Tutorial playtest milestone
 
 Character creation is approved. The condensed Final Selection tutorial now implements the three lesser-demon lessons, Hand Demon encounter, checkpoint progression, potion healing and passing/crow scene for owner playtesting. It reuses one forest region. The explorable Corps hub remains the next checkpoint. Tune trial pacing and animation from Justin's feedback before expanding the world or adding live AI services.
+
+### Personal playtest revision 01
+
+Combat/movement iteration before the hub: responsive movement, smaller actors, wider spaces, unique tutorial regions, three-cut sword chains, melee variety and a visible Breath/form HUD. Training progression remains a future hub task; Breath capacity is prepared for that integration.

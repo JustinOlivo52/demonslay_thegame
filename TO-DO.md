@@ -19,3 +19,7 @@
 - [ ] Retain the independent developer sandbox for testing.
 
 Current handoff: TUTORIAL-PLAYTEST.md and report.md. No live AI service or audio is required to play this build.
+
+## Second playtest
+
+Review PLAYTEST-REVISION-01.md: movement, three-cut combos, readable melee patterns, Breath/form navigation and four regional layouts. Remaining art: north/south movement and dedicated sword combo poses. Future hub work: training that increases Breath capacity, plus progression/save design.
