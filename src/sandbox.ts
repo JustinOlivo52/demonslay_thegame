@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import SPRITE_REGIONS from './sprite-regions.json';
 import DEMON_FEET_ANCHORS from './demon-roster-anchors.json';
 import {DEMON_ARCHETYPES,rollDemonEncounter} from './demon-roster';
-import {FOREST_CLUES,paintForest} from './forest';
+import {FOREST_CLUES,FOREST_SHRINE,FOREST_SPAWN,FOREST_DEMON,FOREST_ROUTE,forestWalkable,moveThroughForest,paintForestForeground,paintForest} from './forest';
 import {SAVE_KEY,readCharacter,STARTERS} from './character';
 import PIXEL_ANCHORS from './pixel-anchors.json';
 import { FINISHER, canFinish } from './finisher';
@@ -10,6 +10,7 @@ import { RULES as R, inSwordArc } from './combat';
 import { RIG } from './rig';
 import { WATER_FORMS, phaseAt, activeProgress, advanceBetween, formHits, type WaterId } from './water';
 import './style.css';
+import './forest.css';
 
 const IS_SELECTION=new URLSearchParams(location.search).has('selection');
 const PROFILE=(()=>{try{return readCharacter(localStorage.getItem(SAVE_KEY));}catch{return null;}})();
@@ -40,6 +41,18 @@ if(IS_SELECTION&&PROFILE){
  document.querySelector('.notes h3')!.textContent='Your first night in the forest.';
  document.querySelector('.notes p:not(.eyebrow)')!.textContent='Investigate two clues, face one lesser demon, then finish it before it regenerates. This is the first tutorial area, not the full Final Selection.';
  document.querySelector('.tip')!.textContent='Ordinary attacks are signaled by the demon’s pose. Dodge, use your breathing forms, and press F when it is vulnerable.';
+}
+
+if(IS_SELECTION&&PROFILE){
+ document.body.classList.add('forest-play');
+ const nav=document.createElement('div');nav.className='forest-nav';nav.innerHTML='<a href="./">夜 &nbsp; NIGHTFALL</a><span>FINAL SELECTION · THE FIRST NIGHT</span><div id="forest-actions"></div>';document.querySelector('main')!.prepend(nav);
+ for(const id of ['start','retry'])document.querySelector('#forest-actions')!.append(document.querySelector('#'+id)!);
+ const hud=document.createElement('div');hud.className='forest-hud';hud.innerHTML='<div class="forest-vitals"><p id="forest-recruit"></p><div id="vital-bars"></div></div><div id="forest-objectives"></div><div class="forest-dock"><div id="forest-slots"></div><p id="forest-controls">WASD Move · Mouse Aim · J / Click Sword · Space Dodge · E Inspect · F Finish · Esc Pause</p></div>';document.querySelector('.game-panel')!.append(hud);
+ document.querySelector('#forest-recruit')!.textContent=`${PROFILE.name} · Level 1`;
+ document.querySelectorAll('aside .resource').forEach(node=>document.querySelector('#vital-bars')!.append(node));
+ document.querySelector('#forest-objectives')!.append(document.querySelector('#trial-objective')!,document.querySelector('#trial-hint')!);
+ document.querySelector('#forest-slots')!.append(document.querySelector('#trial-form')!);
+ document.querySelector('#trial-hint')!.textContent='Follow the winding trail. Look for signs left by other candidates.';
 }
 
 function initialEncounter(){
@@ -213,6 +226,9 @@ class Arena extends Phaser.Scene {
   private pixelHead!: Phaser.GameObjects.Sprite;
   private finishTest = new URLSearchParams(location.search).has('finishTest');
   private pixelDemon!: Phaser.GameObjects.Sprite;
+  private tourIndex = 0;
+  private shrineRead = false;
+  private interactLabel!: Phaser.GameObjects.Text;
   private trialClues = 0;
   private trialText = '';
   private trialCombat = false;
@@ -268,9 +284,10 @@ class Arena extends Phaser.Scene {
     this.demonSprite = part(DM.full, DM.scale);
     this.over = this.add.graphics().setDepth(3);
     this.glow = this.add.graphics().setDepth(4).setBlendMode(Phaser.BlendModes.ADD);
-    if(!IS_SELECTION)layer('foreground', paintForeground, 5);
+    layer('foreground', IS_SELECTION?paintForestForeground:paintForeground, 5);
     layer('light', paintLight, 6).setScrollFactor(0);
     this.hurtImage = layer('hurt', paintHurt, 7).setAlpha(0).setScrollFactor(0);
+    this.interactLabel=this.add.text(0,0,'',{fontFamily:SANS,fontSize:'12px',color:'#f1e7c9',backgroundColor:'#102326',padding:{x:9,y:7}}).setOrigin(0.5,1).setDepth(9).setVisible(false);
     this.label = this.add.text(0, 0, '', {fontFamily: SANS, fontSize: '12px', fontStyle: '600', color: '#e9cbd4', stroke: '#0b0e18', strokeThickness: 4}).setOrigin(0.5).setDepth(8).setLetterSpacing(1.5);
     this.top = this.add.graphics().setDepth(9);
     this.shade = this.add.rectangle(W / 2, H / 2, W, H, 0x060912, 0.66).setDepth(10).setScrollFactor(0);
@@ -312,14 +329,14 @@ class Arena extends Phaser.Scene {
       far:()=>{this.p={x:54,y:74};},
       finish:()=>this.finishDemon(),
       pause:()=>{this.mode='paused';},resume:()=>{this.mode='playing';},
-      state:()=>({encounter:this.encounter,clues:this.trialClues,combat:this.trialCombat,profile:PROFILE,enemy:this.enemyState,hp:this.ehp,timer:this.finishRemaining,mode:this.mode,wins:this.wins,execution:this.executionFlash,ash:this.deathFade})
+      state:()=>({position:{...this.p},shrine:this.shrineRead,encounter:this.encounter,clues:this.trialClues,combat:this.trialCombat,profile:PROFILE,enemy:this.enemyState,hp:this.ehp,timer:this.finishRemaining,mode:this.mode,wins:this.wins,execution:this.executionFlash,ash:this.deathFade})
     };
     if(IS_SELECTION){this.trainingDummy=false;this.showHitboxes=false;}
     this.sync(); this.draw();
   }
   private reset() {
-    this.p={x:IS_SELECTION?110:300,y:340};this.e={x:IS_SELECTION?790:this.trainingDummy?380:700,y:340};
-    if(IS_SELECTION){this.trialClues=0;this.trialCombat=false;this.trialSaved=false;this.trialText='Find the torn cord along the trail. Press E nearby.';}
+    this.p=IS_SELECTION?{...FOREST_SPAWN}:{x:300,y:340};this.e=IS_SELECTION?{...FOREST_DEMON}:{x:this.trainingDummy?380:700,y:340};
+    if(IS_SELECTION){this.tourIndex=0;this.shrineRead=false;this.trialClues=0;this.trialCombat=false;this.trialSaved=false;this.trialText='The wisteria ends here. Follow the trail and look for signs of other candidates.';}
     this.executionFlash=0;this.finishRemaining=0;this.technique=null;this.formCooldowns={surface:0,wheel:0};this.labMessage='Q to cast · 1 / 2 to select a form';this.hp=R.health;this.stamina=R.stamina;this.ehp=this.enemyMaxHp;
     this.swing=0;this.swordCooldown=0;this.dodge=0;this.dodgeCooldown=0;this.hurt=0;this.enemyTimer=0;this.enemyState='chase';this.mode='playing';
     this.hitFlash=0;this.hurtFx=0;this.ehpShown=this.enemyMaxHp;this.deathFade=0;this.endDelay=0;this.clawLife=0;this.overlayAlpha=0;this.playerFlash=0;
@@ -335,6 +352,16 @@ class Arena extends Phaser.Scene {
       this.onSwordHit(R.swordDamage);
       if(this.ehp===0)this.downDemon();
     }
+  }
+  private inspectForest(){
+    if(this.mode!=='playing')return;
+    if(Math.hypot(this.p.x-FOREST_SHRINE.x,this.p.y-FOREST_SHRINE.y)<62){this.shrineRead=true;this.trialText='A small wayside shrine. Someone left a promise here: “Let us all see the dawn.” The side trail returns to the fork.';return;}
+    const clue=FOREST_CLUES[this.trialClues];
+    if(clue&&Math.hypot(this.p.x-clue.x,this.p.y-clue.y)<62){this.trialText=clue.text;this.trialClues++;if(this.trialClues===2)this.trialCombat=true;}
+  }
+  private movePlayer(dx:number,dy:number){
+    if(IS_SELECTION)moveThroughForest(this.p,dx,dy);
+    else{this.p.x=Phaser.Math.Clamp(this.p.x+dx,54,946);this.p.y=Phaser.Math.Clamp(this.p.y+dy,74,570);}
   }
   private downDemon() {
     this.technique=null;this.enemyState='downed';this.finishRemaining=FINISHER.window;this.strikeAnim=0;this.clawLife=0;
@@ -366,8 +393,7 @@ class Arena extends Phaser.Scene {
     // Substeps prevent a fast wheel from passing through a target without a hit.
     const steps=Math.max(1,Math.ceil(distance/8));
     for(let i=1;i<=steps;i++) {
-      this.p.x=Phaser.Math.Clamp(this.p.x+Math.cos(cast.angle)*distance/steps,IS_SELECTION?70:54,IS_SELECTION?930:946);
-      this.p.y=Phaser.Math.Clamp(this.p.y+Math.sin(cast.angle)*distance/steps,IS_SELECTION?288:74,IS_SELECTION?414:570);
+      this.movePlayer(Math.cos(cast.angle)*distance/steps,Math.sin(cast.angle)*distance/steps);
       const sample=old+(cast.elapsed-old)*i/steps;
       const originalReach=WATER_FORMS[cast.id].reach;
       const dx=this.e.x-this.p.x,dy=this.e.y-this.p.y;
@@ -389,11 +415,7 @@ class Arena extends Phaser.Scene {
     const dt=Math.min(delta/1000,0.04)*(this.slowMotion ? 0.25 : 1);
     if(Phaser.Input.Keyboard.JustDown(this.keys.ESC)) {if(this.mode==='playing')this.mode='paused';else if(this.mode==='paused')this.mode='playing';}
     if(this.mode==='playing'){
-      if(IS_SELECTION&&Phaser.Input.Keyboard.JustDown(this.keys.E)&&this.trialClues<2){
-        const clue=FOREST_CLUES[this.trialClues];
-        if(Phaser.Math.Distance.Between(this.p.x,this.p.y,clue.x,clue.y)<85){this.trialText=clue.text;this.trialClues++;if(this.trialClues===2)this.trialCombat=true;}
-        else this.trialText='Move closer to the marked clue and press E.';
-      }
+      if(IS_SELECTION&&Phaser.Input.Keyboard.JustDown(this.keys.E))this.inspectForest();
       if(this.enemyState==='downed') {
         this.finishRemaining=Math.max(0,this.finishRemaining-dt);
         if(this.finishRemaining===0){this.ehp=this.enemyMaxHp;this.ehpShown=this.enemyMaxHp;this.enemyState='chase';this.labMessage='Too late — the demon fully regenerated!';this.floatText(this.e.x,this.e.y-75,'REGENERATED','#ffb6bf','#3d1522',18);}
@@ -413,10 +435,15 @@ class Arena extends Phaser.Scene {
         if(this.enemyState==='downed'&&distance<=FINISHER.reach&&this.finishRemaining<FINISHER.window-0.9)this.finishDemon();
         if(this.enemyState==='recovery'&&distance<=90&&this.formCooldowns.surface===0&&!this.technique&&this.stamina>=20)this.castForm();
       }
+      if(IS_SELECTION&&this.demoMode&&!this.trialCombat){
+        const tour=[FOREST_ROUTE[1],FOREST_ROUTE[2],FOREST_SHRINE,FOREST_ROUTE[2],FOREST_ROUTE[3],FOREST_CLUES[1]];
+        const next=tour[this.tourIndex];
+        if(next){const delta=new Phaser.Math.Vector2(next.x-this.p.x,next.y-this.p.y);const near=delta.length()<=12;move=near?new Phaser.Math.Vector2():delta.normalize();if(near){this.inspectForest();this.tourIndex++;}}
+      }
       this.moving=move.length()>0;
       if(Phaser.Input.Keyboard.JustDown(this.keys.SPACE)&&!this.technique&&this.dodgeCooldown===0&&this.stamina>=R.dodgeCost){this.dodge=R.dodgeDuration;this.dodgeCooldown=R.dodgeCooldown;this.stamina-=R.dodgeCost;this.dodgeVector=move.length()>0?move.clone():new Phaser.Math.Vector2(Math.cos(this.angle),Math.sin(this.angle));this.onDodge();}
       const velocity=this.technique?new Phaser.Math.Vector2():this.dodge>0?this.dodgeVector.clone().scale(R.dodgeSpeed):move.scale(R.speed);
-      this.p.x=Phaser.Math.Clamp(this.p.x+velocity.x*dt,IS_SELECTION?70:54,IS_SELECTION?930:946);this.p.y=Phaser.Math.Clamp(this.p.y+velocity.y*dt,IS_SELECTION?288:74,IS_SELECTION?414:570);
+      this.movePlayer(velocity.x*dt,velocity.y*dt);
       const invulnerable=this.dodge>0;
       this.dodge=Math.max(0,this.dodge-dt);if(!invulnerable&&!this.technique)this.stamina=Math.min(100,this.stamina+R.staminaRegen*dt);
       if(Phaser.Input.Keyboard.JustDown(this.keys.J))this.attack();
@@ -424,7 +451,7 @@ class Arena extends Phaser.Scene {
       if(this.mode==='playing'&&(!IS_SELECTION||this.trialCombat)&&!this.trainingDummy&&this.enemyState==='chase') {
         const distance=Phaser.Math.Distance.Between(this.p.x,this.p.y,this.e.x,this.e.y);
         if(distance<110){this.enemyState='windup';this.enemyTimer=R.windup;this.target={...this.p};}
-        else {const a=Phaser.Math.Angle.Between(this.e.x,this.e.y,this.p.x,this.p.y);this.e.x+=Math.cos(a)*100*dt;this.e.y+=Math.sin(a)*100*dt;}
+        else {const a=Phaser.Math.Angle.Between(this.e.x,this.e.y,this.p.x,this.p.y);if(IS_SELECTION)moveThroughForest(this.e,Math.cos(a)*100*dt,Math.sin(a)*100*dt);else{this.e.x+=Math.cos(a)*100*dt;this.e.y+=Math.sin(a)*100*dt;}}
       } else if(this.mode==='playing'&&(!IS_SELECTION||this.trialCombat)&&!this.trainingDummy&&this.enemyState==='windup') {
         this.enemyTimer-=dt;
         if(this.enemyTimer<=0){
@@ -505,7 +532,7 @@ class Arena extends Phaser.Scene {
 
   private sync() {
     if(IS_SELECTION&&PROFILE){
-      const title=this.mode==='won'?'First encounter cleared':this.mode==='lost'?'Your trial is not over':this.trialClues===0?'Investigate the broken cord':this.trialClues===1?'Follow the footprints':this.enemyState==='downed'?'Finish the demon · F':'Face the demon';
+      const title=this.mode==='won'?'First encounter cleared':this.mode==='lost'?'Your trial is not over':this.trialClues===0?'Follow the forest trail':this.trialClues===1?'Follow the tracks uphill':this.enemyState==='downed'?'Finish the demon · F':'Face the demon';
       document.querySelector('#trial-objective')!.textContent=title;
       document.querySelector('#trial-hint')!.textContent=this.mode==='won'?'This first forest slice is complete. The next region and Hand Demon are still to come.':this.mode==='lost'?'Retry to return to the trail entrance. Your character profile is safe.':this.enemyState==='downed'?`Get close and press F · ${this.finishRemaining.toFixed(1)}s until full recovery`:this.trialText;
       document.querySelector('#trial-form')!.textContent=`Equipped: ${STARTERS[PROFILE.style].forms[this.selectedForm==='surface'?0:1]}`;
@@ -516,7 +543,7 @@ class Arena extends Phaser.Scene {
     document.querySelector<HTMLProgressElement>('#stamina')!.value=this.stamina;document.querySelector('#sp')!.textContent=`${Math.floor(this.stamina)} / 100`;
     const messages={ready:'Enter the arena to begin.',playing:'Read the attack pose. Dodge, strike, then approach and press F to finish.',paused:'Paused — resume when you’re ready.',lost:'You fell in training. Reset and try another approach.',won:'Encounter cleared. Reset to practice again.'};
     document.querySelector('#status')!.textContent=messages[this.mode];document.querySelector('#score')!.textContent=`DEMONS DEFEATED ${String(this.wins).padStart(2,'0')}`;
-    document.querySelector('#start')!.textContent=this.mode==='playing'?'Pause encounter':this.mode==='paused'?'Resume encounter':'Enter the arena ↗';
+    document.querySelector('#start')!.textContent=this.mode==='playing'?'Pause encounter':this.mode==='paused'?'Resume':IS_SELECTION?'Enter forest':'Enter the arena ↗';
     const screens:Record<Mode,[string,string,string]>={ready:['夜','THE TRAINING GROUNDS','Enter the arena to begin'],paused:['休','PAUSED','Press Esc or Resume when you’re ready'],lost:['敗','FALLEN IN TRAINING','Reset the encounter to try again'],won:['滅','ENCOUNTER CLEARED','The demon crumbles to ash. Your first step forward.'],playing:['','','']};
     if(IS_SELECTION){screens.ready=['藤','FINAL SELECTION','Enter the forest. Investigate with E.'];screens.won=['一','FIRST ENCOUNTER CLEARED','The trial continues in the next checkpoint.'];screens.lost=['敗','RISE AND TRY AGAIN','Reset to return to the trail entrance.'];}
     const [kanji,title,sub]=screens[this.mode];
@@ -553,7 +580,7 @@ class Arena extends Phaser.Scene {
     u.clear();o.clear();l.clear();t.clear();
     if(this.executionFlash>0&&this.executionFlash<0.4){o.lineStyle(6,0xecfbff,Math.min(1,this.executionFlash/0.3));o.lineBetween(this.e.x-50,this.e.y-43,this.e.x+50,this.e.y-55);l.lineStyle(12,0x77d5ff,0.5*Math.min(1,this.executionFlash/0.3));l.lineBetween(this.e.x-50,this.e.y-43,this.e.x+50,this.e.y-55);}
     this.drawTechnique(o,l);
-    for(const [i,lantern] of LANTERNS.entries()){
+    for(const [i,lantern] of (IS_SELECTION?[]:LANTERNS).entries()){
       const f=0.85+0.1*Math.sin(c*9+i*2)+0.05*Math.sin(c*23+i);
       for(let k=0;k<6;k++){l.fillStyle(0xffa850,0.05*f);l.fillCircle(lantern.x,lantern.y-10,18+k*16*f);}
       l.fillStyle(0xffd38a,0.5*f);l.fillRect(lantern.x-5,lantern.y-14,10,8);
@@ -691,7 +718,12 @@ class Arena extends Phaser.Scene {
       else this.profileActor.setDisplaySize(150,150).setOrigin(0.5,0.96);
       this.profileActor.setPosition(Math.round(this.p.x),Math.round(pFeet)).setFlipX(facing<0).setDepth(pDepth+0.002).setVisible(!lost);
       if(this.playerFlash>0)this.profileActor.setTintFill(0xffffff);else this.profileActor.clearTint();
-      if(this.trialClues<2){const clue=FOREST_CLUES[this.trialClues];t.lineStyle(2,0xd5b9e9,0.9);t.strokeRect(clue.x-9,clue.y-9,18,18);t.fillStyle(0xd5b9e9,0.8);t.fillRect(clue.x-2,clue.y-24,4,8);}
+      this.interactLabel.setVisible(false);
+      const clue=FOREST_CLUES[this.trialClues];
+      if(this.mode==='playing'&&clue&&Math.hypot(this.p.x-clue.x,this.p.y-clue.y)<62)this.interactLabel.setPosition(clue.x,clue.y+15).setText('E · '+clue.title).setVisible(true);
+      else if(this.mode==='playing'&&Math.hypot(this.p.x-FOREST_SHRINE.x,this.p.y-FOREST_SHRINE.y)<62)this.interactLabel.setPosition(FOREST_SHRINE.x,FOREST_SHRINE.y+10).setText('E · Read the shrine').setVisible(true);
+      // Ground mist drifts beneath the actors without masking attack poses.
+      for(let i=0;i<5;i++){u.fillStyle(0xa0c1c1,0.025);u.fillEllipse((this.clock*9+i*245)%1200-100,130+i*100,240,22);}
     }
     const px=this.aim.x,py=this.aim.y;
     t.lineStyle(1.5,0xd9c8f5,0.85);t.strokeCircle(px,py,7);
