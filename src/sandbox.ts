@@ -500,8 +500,9 @@ class Arena extends Phaser.Scene {
     }
     if(this.enemyState==='downed')return;
     const phase=phaseAt(cast.id,cast.elapsed);
-    this.labMessage=`${WATER_FORMS[cast.id].name} · ${phase} · ${cast.hit ? 'HIT' : 'no hit yet'}`;
-    if(phase==='done') {this.labMessage=`${WATER_FORMS[cast.id].name} · ${cast.hit ? 'hit confirmed' : 'missed'}`;this.technique=null;}
+    const formName=IS_SELECTION&&PROFILE?STARTERS[PROFILE.style].forms[cast.id==='surface'?0:1]:WATER_FORMS[cast.id].name;
+    this.labMessage=`${formName} · ${phase} · ${cast.hit ? 'HIT' : 'no hit yet'}`;
+    if(phase==='done') {this.labMessage=`${formName} · ${cast.hit ? 'hit confirmed' : 'missed'}`;this.technique=null;}
   }
   update(_time:number, delta:number) {
     const pointer=this.input.activePointer;this.cameras.main.getWorldPoint(pointer.x,pointer.y,this.aim);
@@ -526,8 +527,9 @@ class Arena extends Phaser.Scene {
         const distance=Phaser.Math.Distance.Between(this.p.x,this.p.y,this.e.x,this.e.y);
         const away=this.enemyState==='windup'||this.enemyState==='strike';
         if(this.hp<=55&&this.potionCount>0)this.usePotion();
-        move=new Phaser.Math.Vector2(this.e.x-this.p.x,this.e.y-this.p.y).normalize().scale(away?-1:distance>62?1:0);
-        if(away&&this.enemyTimer<0.32&&this.dodge===0&&this.dodgeCooldown===0&&this.stamina>=R.dodgeCost&&!this.technique){this.dodge=R.dodgeDuration;this.dodgeCooldown=R.dodgeCooldown;this.stamina-=R.dodgeCost;this.dodgeVector=move.clone();this.onDodge();}
+        const escape=new Phaser.Math.Vector2(this.p.x-this.e.x,this.p.y-this.e.y).normalize();
+        move=away?escape.clone().scale(distance<this.pattern.reach+25?1:0):escape.clone().scale(distance>62?-1:0);
+        if(away&&this.enemyTimer<0.32&&this.dodge===0&&this.dodgeCooldown===0&&this.stamina>=R.dodgeCost&&!this.technique){this.dodge=R.dodgeDuration;this.dodgeCooldown=R.dodgeCooldown;this.stamina-=R.dodgeCost;this.dodgeVector=escape.clone();this.onDodge();}
         if(this.enemyState==='downed'&&distance<=FINISHER.reach&&this.finishRemaining<FINISHER.window-0.9)this.finishDemon();
         if(this.enemyState==='recovery'&&distance<=90&&this.formCooldowns.surface===0&&!this.technique&&this.breath>=20)this.castForm();
         else if(this.enemyState==='recovery'&&distance<80&&!this.technique)this.attack();

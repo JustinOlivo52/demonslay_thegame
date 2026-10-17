@@ -24,3 +24,7 @@ The approved character creator and pixel-art direction are retained. The first p
 ## Limits
 
 No new audio, live AI services, training activity, hub, multiplayer or inventory systems. Basic combo art reuses existing anticipation/strike poses with distinct timing, lean and slash trails; it is not a complete new hand-animated sword sheet. Generated run frames still need player review. Existing tutorial saves continue at the same encounter number in its new area.
+
+## Verification
+
+Production build and all eight test files pass. Browser input checks confirmed exact three-hit combo damage, mouse/keyboard form selection, independent Breath consumption, finisher and crow. Run/dodge rendering produced no page errors. A full Water playthrough cleared all four encounters and persisted completion. The first Flame demo stalled because its retreat policy kept it too far from a double-strike enemy; the developer-only demo now bounds its retreat distance. The fixed-seed Flame run then completed all four encounters and persisted its crow with no page errors. Checkpoint restore, H healing, boss full regeneration and retry supplies also passed.
