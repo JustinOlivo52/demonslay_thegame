@@ -52,3 +52,7 @@ Progress saves when you continue between encounters, including the final passing
 - Is healing sufficient? Is the finish window fair?
 - Does Continue/save/retry behave as expected?
 - Does the crow scene feel like a satisfying end to the tutorial?
+
+## Codespaces container recovery
+
+The container image tag is `mcr.microsoft.com/devcontainers/javascript-node:24-bookworm`. The earlier `1-24-bookworm` tag does not exist and causes container creation to fail. After pulling the latest playtest branch, run **Codespaces: Rebuild Container** from the command palette. If the Codespace is in recovery mode, pull the branch in the recovery terminal first, then rebuild. Alternatively create a new Codespace from the playtest branch. Do not delete an existing Codespace that contains unsaved work.
