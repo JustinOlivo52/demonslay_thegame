@@ -60,3 +60,7 @@ Character creation is approved. The condensed Final Selection tutorial now imple
 ### Personal playtest revision 01
 
 Combat/movement iteration before the hub: responsive movement, smaller actors, wider spaces, unique tutorial regions, three-cut sword chains, melee variety and a visible Breath/form HUD. Training progression remains a future hub task; Breath capacity is prepared for that integration.
+
+### Playtest revision 02
+
+Connected training traversal, direct form casts and another scale pass precede further hub work. Keep open battle spaces. Future investigations must span connected mission regions; the training tutorial has no mandatory clues.
