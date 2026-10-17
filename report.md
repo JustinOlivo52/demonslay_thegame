@@ -68,3 +68,17 @@ Added five reusable pixel demon archetypes and a validated, seeded encounter des
 ## GitHub synchronization
 
 GitHub write access was restored. This source is prepared for branch `codex/pixel-selection-checkpoints`, targeting main through a review pull request. Earlier local-only delivery notes describe their historical handoffs. Latest scope: pixel sandbox, timed finisher, character creation, first Final Selection forest slice and seeded lesser-demon pool. Live AI services, the Hand Demon, full trial, crow and hub remain future work.
+
+## Forest exploration redesign
+
+Reworked the first forest slice into a winding route with an optional shrine branch, proximity-only evidence interactions, natural pixel canopies/props/light/mist and a compact gameplay HUD. Player, dodge, form advance and demon movement now respect the same path collision. The sandbox remains unchanged in function and retains its developer controls.
+
+The browser tour walked the route, visited the shrine, inspected clues and completed combat/finishing without teleporting or page errors. Build and six test files pass. See FOREST-REDESIGN.md. Update targets the existing review branch and PR #2; main remains unmerged.
+
+## Complete condensed tutorial for playtesting
+
+Expanded Final Selection to three regular-demon encounters and the Hand Demon boss, with continuing checkpoints, two healing potions (H), checkpoint-aware retry/reload and a passing/crow vignette. A pre-boss rest grants at least 75 health and one potion. Boss attacks alternate sweep/heavy timing and remain melee tells without ground-circle warnings. Encounter staging uses the same authored forest/clearing; this is not a multi-region campaign. Final save records selection passed and crow received; the Corps hub remains next.
+
+See TUTORIAL-PLAYTEST.md for play instructions, controls and limitations. Developer sandbox remains separate.
+
+Validation: build and all seven test files pass. Automated browser playthroughs completed all four fights for Water and Flame with no page errors, then reloaded the saved crow ending. Separate checks verified H healing, checkpoint supplies on retry, and full boss recovery after a missed finishing window.

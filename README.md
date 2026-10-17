@@ -1,32 +1,42 @@
 # Nightfall — DemonSlay
 
-Personal Demon Slayer fan-game project. TypeScript + Phaser + Vite; pixel-art gameplay direction.
+Personal Demon Slayer fan-game project built with TypeScript, Phaser and Vite. Pixel-art gameplay, browser first, single-player.
 
-## Run in Codespaces or locally
+## Playtest the tutorial
 
-Requires Node.js 24.
+Use Node.js 24. In Codespaces, select `codex/pixel-selection-checkpoints`, open a Codespace and run:
 
 ```sh
 npm ci
-npm test
-npm run build
 npm run dev
 ```
 
-Open the printed Vite URL. In Codespaces, open port 5173 from the Ports tab.
+Open port **5173** from the Ports tab. Create/save a recruit, choose Water or Flame and select **Enter Final Selection**. Existing recruits can enter directly at `/?selection=1`.
 
-- `/`: character creation (Checkpoint 1).
-- `/?sandbox=1`: developer combat/Water technique sandbox.
-- `/?demo=1`: scripted mock-combat demonstration.
+The condensed tutorial includes investigation, three lesser-demon encounters, a Hand Demon boss, healing, timed finishing and a passing/Kasugai-crow scene. Continue after each encounter. Progress saves between encounters; retry/reload restores the current checkpoint. The hub is the next development checkpoint.
 
-## Current checkpoint
+See [tutorial controls and playtest notes](TUTORIAL-PLAYTEST.md).
 
-Create a named male/female recruit, choose Water or Flame, review/edit an origin and save locally. The completion screen prepares the profile for Final Selection; the forest and hub are not implemented. Backstories currently use local templates. Preview appearances are not yet fully animated playable variants. The sandbox keeps its existing test character.
+## Controls
 
-See [checkpoint details](CHECKPOINT-01.md), [team report](report.md), [roadmap](docs/ROADMAP.md) and [art direction](docs/ART-DIRECTION.md).
+WASD move · mouse aim · click/J sword · 1/2 select form · Q cast · Space dodge · E investigate · H potion · F finish · Escape pause. Continue button/Enter advances after victory.
 
-Browser-local save only; no accounts, backend, live AI or audio. Clearing browser storage deletes the saved recruit. Combat requires keyboard/mouse. Generated character art requires further consistency/animation cleanup.
+## Development entries
 
-## First forest slice
+- `/`: character creation and saved recruit review.
+- `/?selection=1`: player-controlled tutorial.
+- `/?sandbox=1`: independent developer combat/technique sandbox.
+- `/?selection=1&demo=1`: scripted tutorial demonstration; not normal player control.
 
-After saving a recruit, choose **Enter Final Selection**, or open `/?selection=1`. Investigate two clues with E, fight one demon, and finish with F. This loads the saved recruit's appearance and Water/Flame style. See [forest checkpoint notes](CHECKPOINT-02-FOREST.md). The full trial, Hand Demon and hub remain future work.
+```sh
+npm test
+npm run build
+```
+
+Build output is in `dist/`. Codespaces configuration installs dependencies and forwards port 5173. Phaser's lazy-loaded combat bundle currently emits a size warning.
+
+## Current limits
+
+The tutorial stages reuse one authored forest region/clearing; this is not a multi-region campaign or seven-night simulation. Backstories use local templates and enemy variety uses seeded rules; live AI services are not connected. No sound, accounts, cloud saves, hub, weapon upgrades, XP progression or blocking yet. Browser-local progress can be lost if site data is cleared. Several animations still need dedicated frames/directional cleanup.
+
+See [team report](report.md), [roadmap](docs/ROADMAP.md), [art direction](docs/ART-DIRECTION.md), and [next tasks](TO-DO.md). Older checkpoint notes record the project's earlier state.
