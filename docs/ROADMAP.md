@@ -64,3 +64,7 @@ Combat/movement iteration before the hub: responsive movement, smaller actors, w
 ### Playtest revision 02
 
 Connected training traversal, direct form casts and another scale pass precede further hub work. Keep open battle spaces. Future investigations must span connected mission regions; the training tutorial has no mandatory clues.
+
+## Playtest revision 03
+
+Playtest revision 03 expands and polishes onboarding before hub development: short controls intro, a larger branching mountain, finite supplies, novice resource pressure, boss aggression, planted running and a survivor ceremony. Future training will integrate Breath capacity/control helpers.
