@@ -1,36 +1,32 @@
-# Nightfall — V1 combat prototype
+# Nightfall — DemonSlay
 
-Personal Demon Slayer-inspired fan-game project. TypeScript, Phaser 3 and Vite. Characters are original AI-generated illustrations animated in code; scenery and effects are drawn in code. See [art direction](docs/ART-DIRECTION.md).
+Personal Demon Slayer fan-game project. TypeScript + Phaser + Vite; pixel-art gameplay direction.
 
-## Run
+## Run in Codespaces or locally
 
 Requires Node.js 24.
 
 ```sh
-git clone https://github.com/JustinOlivo52/demonslay_thegame.git
-cd demonslay_thegame
 npm ci
+npm test
+npm run build
 npm run dev
 ```
 
-Open the address Vite prints (normally http://localhost:5173). Desktop keyboard and mouse required. The layout adapts to smaller screens, but touch controls are not implemented.
+Open the printed Vite URL. In Codespaces, open port 5173 from the Ports tab.
 
-```sh
-npm test
-npm run build
-npm run preview
-```
+- `/`: character creation (Checkpoint 1).
+- `/?sandbox=1`: developer combat/Water technique sandbox.
+- `/?demo=1`: scripted mock-combat demonstration.
 
-The production build is in `dist/`. It can be served by a static host. This prototype has no backend, accounts, generative AI, or persistent progress.
+## Current checkpoint
 
-## Play
+Create a named male/female recruit, choose Water or Flame, review/edit an origin and save locally. The completion screen prepares the profile for Final Selection; the forest and hub are not implemented. Backstories currently use local templates. Preview appearances are not yet fully animated playable variants. The sandbox keeps its existing test character.
 
-Click **Enter the arena**. WASD moves, mouse aims, click or J attacks, Space dodges, and Escape pauses. Losing browser focus pauses automatically. **Reset encounter** resets health and the enemy. Defeat five sword hits' worth of enemy health to clear the encounter. The session defeat counter is not saved.
+See [checkpoint details](CHECKPOINT-01.md), [team report](report.md), [roadmap](docs/ROADMAP.md) and [art direction](docs/ART-DIRECTION.md).
 
-The enemy marks its target for 0.7 seconds before striking, then recovers for 1.1 seconds. Dodge costs 28 stamina and provides brief invulnerability. Movement is normalized so diagonal movement is not faster. An attack must reach the enemy and point toward it.
+Browser-local save only; no accounts, backend, live AI or audio. Clearing browser storage deletes the saved recruit. Combat requires keyboard/mouse. Generated character art requires further consistency/animation cleanup.
 
-See [roadmap](docs/ROADMAP.md) and [playtest guide](docs/PLAYTEST-01.md). Prototype 01 ends at the first personal playtest; further development follows feedback.
+## First forest slice
 
-## GitHub Codespaces
-
-Open the main branch in GitHub, choose **Code → Codespaces → Create codespace**. The dev container installs dependencies and forwards port 5173. Run `npm run dev` in the Codespaces terminal, then open port 5173 from the Ports tab. Keep the forwarded port private.
+After saving a recruit, choose **Enter Final Selection**, or open `/?selection=1`. Investigate two clues with E, fight one demon, and finish with F. This loads the saved recruit's appearance and Water/Flame style. See [forest checkpoint notes](CHECKPOINT-02-FOREST.md). The full trial, Hand Demon and hub remain future work.

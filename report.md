@@ -1,158 +1,70 @@
-# Nightfall: team report
+# DemonSlay — current team report
 
-A shared working document for everyone building this game: **Justin** (owner, director, playtester), **Claude Code** (code and integration), **ChatGPT** (design partner and character art), **ElevenLabs** (sound and music), and **Kling** (animation clips). Read this first, then add to it. Newest entries go at the top of the log.
+## Owner decisions
 
-Repository: https://github.com/JustinOlivo52/demonslay_thegame
+- Pixel art is the approved gameplay direction for characters, animation and breathing effects. The illustrated version is historical reference; it is not the target animation pipeline.
+- Justin approved the pixel mock's artwork and animation direction. This does not mean all animations are production-ready or the game has been fully playtested.
+- Keep the canon Demon Slayer setting, breathing styles, Hashiras and major bosses. Original recruits, lesser demons and stories supplement that world.
+- Ordinary demon melee attacks use character poses as tells, without red ground-circle warnings. Reserve area telegraphs for Blood Demon Arts; level 10+ demon abilities remain future work.
+- Blocking for slayers and/or demons is a proposed future mechanic. Costs, mitigation, timing and animations are not decided or implemented.
+- A demon must be finished before ash/victory. Missing its vulnerability window causes full recovery.
+- Sound remains deferred.
 
-## 1. Where the project stands
+## Implemented in this local branch
 
-| Area | Status |
-|---|---|
-| Combat rules (Prototype 01) | Done and unchanged from the approved spec. Movement, mouse aim, sword attack, stamina dodge, telegraphed demon, pause, reset. |
-| Character art | Done for the prototype. Original AI-illustrated slayer, demon and katana in `art/source/`. |
-| Animation | Basic. The slayer's legs stride and his body leans and bobs; the demon animates through whole-body motion. No frame-by-frame animation yet. |
-| Effects | Done in code: swing trail, hit sparks, damage numbers, strike telegraph, claw marks, dodge afterimages, ash dissolve. |
-| Sound and music | Not started. |
-| Human playtest | **Not done yet. This is the next gate.** Every check so far has been automated. |
+Pixel slayer/demon sprite sheets, Surface Slash poses and water effects, Water Wheel gameplay prototype, lab tools and scripted mock-combat controls.
 
-Branch: `claude/new-session-pjdq69`, open as pull request #1 into `main`.
+Finisher first pass: zero HP enters a downed state. Within four simulation seconds and 90 world units, F triggers a slash effect, ash dissolution and victory. Missing the window restores full HP. Basic attacks and forms do not repeatedly damage the downed target. Pause freezes the timer. Lab reset clears the state. Demo controls attempt finishing automatically.
 
-## 2. Who does what
+The zero-HP threshold, four-second window and 90-unit reach are provisional tuning choices; Justin requested a low-health finish opportunity and limited window, not these exact values.
 
-| Member | Owns | Hands off |
-|---|---|---|
-| **Justin** | Final say on everything. Playtests. Runs ChatGPT, Kling and ElevenLabs. Uploads their output to Claude Code. | Decisions and feedback in this file; files via upload. |
-| **Claude Code** | All code: gameplay, rendering, animation playback, audio playback, tests, builds, Git. Turns art, video clips and audio into game-ready assets. Keeps this report current. | Commits on the branch; a summary entry in the log. |
-| **ChatGPT** | Story, characters, missions, balance ideas, art direction. Generates character and pose images. Reviews this report and challenges decisions. | Images and written proposals that Justin pastes or uploads. |
-| **Kling** | Short video clips of the existing characters performing one action each. | MP4 clips (specs in section 4). |
-| **ElevenLabs** | Sound effects and music. | Audio files (specs in section 5). |
+Finisher presentation is an effect and text cue, not a completed sprite decapitation sequence. Sprite foot alignment, in-between frames, up/down views, arbitrary-aim matching and leftover effect alignment still need work. Water Wheel does not yet have somersault frames.
 
-**Ground rules**
+## Responsibilities
 
-- One source of truth: this file plus the repository. If it isn't written here or committed, it isn't decided.
-- Justin approves each checkpoint before work moves to the next one: build, verify, playtest, feedback, fix blockers, approval, next checkpoint.
-- Original designs only. Inspired by Demon Slayer, never copying canon characters, haori patterns, names or music. Don't name canon characters in prompts.
-- This is a personal fan project and won't be sold. It is a portfolio piece, so keep a record of how each AI tool was used.
+Justin: direction, feedback, checkpoint approval and eventual audio assets.
+ChatGPT: art direction, candidate sprite/effect assets, gameplay design and bounded prototype implementation.
+Claude: repository integration, gameplay architecture, builds and tests. Preserve newer work when integrating this local prototype.
 
-## 3. Art pipeline (ChatGPT → Claude Code)
+## Next
 
-Full rules and prompts live in [`docs/ART-DIRECTION.md`](docs/ART-DIRECTION.md). Summary:
+1. Browser-test finisher success, out-of-range input, timeout/full regeneration, pause and reset.
+2. Record the revised melee/finisher encounter for Justin.
+3. Align sprite feet and improve attack transitions; create finishing poses.
+4. Define blocking before implementation.
+5. Continue the next approved gameplay checkpoint; retain the hub/crow/nighttime investigation mission plan.
 
-1. Each character gets one full-body illustration: transparent PNG, three-quarter view facing right, arms held away from the body, hands empty, at least 1024 px tall.
-2. Always reuse the **shared style block** from the art direction doc so every character matches.
-3. Upload the image to Claude Code. It goes into `art/source/`, and `scripts/build_art.py` cuts it into game sprites.
-4. New poses of an existing character: give ChatGPT the current image as the reference and ask for the same character in the new pose, with the same rules.
+## Delivery
 
-**Current cast**
+Changes are local only, not pushed to GitHub. Original report is preserved in docs/REPORT-HISTORICAL.md; its old art restrictions, video-to-sprite pipeline and audio priorities are superseded by this report.
 
-| Asset | File | Notes |
-|---|---|---|
-| Slayer recruit (player) | `art/source/slayer.png` | Indigo-to-wisteria haori with an arrow-feather pattern, high ponytail with a red cord, amber eyes, cheek scar. |
-| Lesser demon (level 1) | `art/source/demon.png` | Grey-violet skin with veins, ivory horns, yellow slit-pupil eyes, tattered plum kimono, red sash, long claws. |
-| Katana | `art/source/katana.png` | Plain steel blade; it takes the breathing style's colour in code later. |
+## Polished finisher verification
 
-## 4. Animation pipeline (Kling → Claude Code)
+- Added frame-specific alpha-bound foot baselines to reduce sprite vertical jumps (effects baked into frames still limit perfect alignment).
+- Added a short finishing strike and rendered head/body separation before the ash fade. Uses existing sprite poses/crops, not newly drawn execution frames.
+- Added a small delay before demo controls finish the target so the countdown can be seen.
+- Browser checks passed: out-of-range finisher refused; pause freezes countdown; timeout restores 125 HP; actual F input finishes nearby downed target; ash completes; reset clears vulnerability and restores health.
+- Production build and all three test files pass. Blocking and dedicated Water Wheel poses remain outstanding.
+- Debug state bridge is available only with ?finishTest=1 for browser verification. ?demo=1 enables scripted mock-combat controls.
 
-Plan: Kling animates the existing illustration into a short clip, and Claude Code turns the clip into sprite frames (frame extraction, background removal, alignment, sprite sheet).
+## Main-game checkpoint 1: character creation
 
-**Clip specs**
+Justin approved preserving the development sandbox and the opening-chapter structure. Water and Flame are the two confirmed starting styles.
 
-- Start from the current character image (image-to-video).
-- **One action per clip**, 2 to 4 seconds.
-- **Static camera**, no zoom or pan. Character fully in frame the whole time, head to feet.
-- **Plain flat background** (solid white or green) so it can be removed cleanly.
-- Character keeps facing right.
-- For loops (walk, idle), ask for the clip to end in the same pose it starts in.
-- Name files like `slayer-slash.mp4`, `demon-claw.mp4`.
+Implemented a separate main entry for character creation, male/female style-matched previews, name validation, editable offline origin templates, review and local profile saving. Saved records grant the correct first two style forms at level 1 and stop at selection-ready. Live AI backstories, playable appearance integration, the tutorial forest and hub remain future work. Sandbox is preserved at ?sandbox=1 and is lazy-loaded separately.
 
-**Animation wishlist, in priority order**
+See CHECKPOINT-01.md for limits, files and verification. Seven automated tests and browser flow checks pass; Justin's checkpoint review is next. No GitHub push performed.
 
-| # | Character | Action | Notes |
-|---|---|---|---|
-| 1 | Slayer | Horizontal katana slash | The move players see most. Start here to prove the pipeline. |
-| 2 | Demon | Claw strike | Rears back, then a downward two-handed claw swipe. |
-| 3 | Slayer | Run cycle | Loop. |
-| 4 | Slayer | Dodge dash | Short, low forward lunge. |
-| 5 | Demon | Walk / lurch | Loop. Hunched, unsettling. |
-| 6 | Slayer | Hurt and fall | For the loss state. |
+## First Final Selection forest slice
 
-The slayer's katana is a separate sprite in the game. For the slash clip, generate him **holding** the katana; Claude Code will decide whether to use the drawn sword or the separate one.
+Implemented `?selection=1`, gated by a valid saved recruit. Added one bounded forest trail, two E-interaction clues and one activated demon encounter. Name/style/body choices carry into this scene; a limited shared motion sheet supplies the four recruit variants. Water/Flame starting forms use shared combat timing with style-dependent movement/effects. Existing sandbox remains separate and uses the same combat implementation.
 
-## 5. Audio pipeline (ElevenLabs → Claude Code)
+No full trial, Hand Demon, crow or hub yet. Success saves only a first-encounter-clear record; no rewards or Corps promotion. See CHECKPOINT-02-FOREST.md for limits and review criteria.
 
-**File specs**
+## Lesser demon pool
 
-- Sound effects: **WAV**, short, with no silence at the start (they must fire on the frame the action happens).
-- Music and ambience: **OGG or MP3**, made to **loop seamlessly**.
-- Keep volumes roughly even across files; Claude Code balances them in the game.
-- Name files like `sfx-sword-swing.wav`, `music-battle.ogg`.
+Added five reusable pixel demon archetypes and a validated, seeded encounter descriptor for levels 1–5. Sandbox can choose archetype/level or roll an appearance. Forest tutorial uses a saved level-1 seed. Health bars, damage and regeneration use encounter stats. All five types currently share the same melee behaviour; Blood Demon Arts are absent. See DEMON-POOL.md for future validated AI-scenario integration and asset limitations. Browser pool checks pass with no page errors.
 
-**Sound list for Prototype 01**
+## GitHub synchronization
 
-| File | Moment in the game | Direction |
-|---|---|---|
-| `sfx-sword-swing.wav` | Every attack | Sharp katana whoosh, light and fast. Make 2 or 3 variations so it doesn't repeat. |
-| `sfx-sword-hit.wav` | Sword connects with the demon | Clean blade slice with a heavy impact. |
-| `sfx-dodge.wav` | Dodge | Quick cloth swish and footstep skid. |
-| `sfx-demon-windup.wav` | Demon telegraph (0.7 s) | Low, rising growl that peaks at the strike. Must fit inside 0.7 s. |
-| `sfx-demon-claw.wav` | Demon strike | Vicious claw swipe tearing the air. |
-| `sfx-player-hurt.wav` | Player takes damage | Body impact plus a short pained grunt. |
-| `sfx-evade.wav` | Strike misses during a dodge | Soft, satisfying whoosh-past. |
-| `sfx-demon-death.wav` | Demon crumbles to ash | Dry, crackling disintegration fading into wind. |
-| `sfx-ui-click.wav` | Buttons | Soft wooden click. |
-| `sting-victory.ogg` | Encounter cleared | 3 to 5 s. Taiko hit with a shamisen phrase, triumphant but restrained. |
-| `sting-defeat.ogg` | Player falls | 3 to 5 s. Low, somber flute. |
-| `ambience-night.ogg` | Always, quietly | Night wind, insects, rustling wisteria leaves. Loop. |
-| `music-battle.ogg` | During a fight | Tense Taisho-era Japanese action: taiko drums, shamisen, shakuhachi, with a modern orchestral pulse. Loop, about 1 to 2 minutes. Original composition, no imitation of the anime's soundtrack. |
-
-## 6. Decisions
-
-**Locked**
-
-- TypeScript, Phaser 3 and Vite, browser first, single-player.
-- Top-down action RPG; level cap 50; one active breathing style; Hashira trial at level 50 (see [`docs/ROADMAP.md`](docs/ROADMAP.md)).
-- Art direction: AI illustrations animated in code, original designs, anime cel-shaded style.
-- Combat tuning for Prototype 01 (health 100, stamina 100, speed 185, dodge 28 stamina, sword 25 damage and 83 reach, demon 125 health and 20 damage, 0.7 s warning, 1.1 s recovery).
-
-**Still open** (don't decide these before their milestone)
-
-- Which two starting breathing styles V1 offers.
-- Whether repeated use (mastery) adds to skill-point upgrades.
-- What happens to active demons at sunrise.
-- Death penalties.
-- Upgrade transfer when switching styles.
-- Details of the Sun and Moon unlock missions.
-- Multiplayer versus AI allies for the final encounter.
-
-## 7. Next steps
-
-1. **Justin:** playtest Prototype 01 in Codespaces using [`docs/PLAYTEST-01.md`](docs/PLAYTEST-01.md), then write feedback in the log below.
-2. **Justin + Kling:** generate animation #1 (slayer katana slash) and upload it.
-3. **Claude Code:** build the clip-to-sprite pipeline from that clip; fix any playtest blockers.
-4. **Justin + ElevenLabs:** generate the Prototype 01 sound list (can run in parallel).
-5. **Claude Code:** add audio playback with volume controls and a mute toggle.
-6. After Justin approves Prototype 01: start Checkpoint 2 (breathing forms and decapitation).
-
-**How to run it:** open the repository on GitHub, then **Code → Codespaces → Create codespace** on the branch above (or on `main` once PR #1 is merged). Wait for setup to finish, run `npm run dev`, and open port 5173 from the Ports tab.
-
-## 8. Questions for ChatGPT
-
-- What should the first two starting breathing styles be? Suggest original names, colour, and 6 to 8 forms each, without copying canon forms.
-- Give the player character a name and short backstory that fits a Taisho-era recruit.
-- Suggest 3 more demon archetypes with one unmistakable silhouette feature each, plus a Blood Demon Art idea for level 10+.
-- Review the sound list in section 5. What's missing for the feel we want?
-
-## 9. Log
-
-Add entries at the top: date, who, what changed, and what's needed next.
-
-### 2026-10-13: Claude Code
-- Created this report.
-- Status: Prototype 01 is playable with the illustrated characters. Tests pass (2/2), the production build succeeds, and automated browser checks pass. Human playtest still pending.
-- Needed: Justin's playtest feedback, a Kling slash clip, and the ElevenLabs sound list.
-
-### 2026-10-12: Claude Code
-- Restored the missing `src/` code from the original zip and fixed the repo layout (Codespaces config, docs folder, README).
-- Added the arena, combat effects and page styling.
-- Researched the Demon Slayer visual language and moved to AI-illustrated characters (`docs/ART-DIRECTION.md`).
-- Integrated Justin's slayer, demon and katana illustrations with a cutout rig and a following camera.
+GitHub write access was restored. This source is prepared for branch `codex/pixel-selection-checkpoints`, targeting main through a review pull request. Earlier local-only delivery notes describe their historical handoffs. Latest scope: pixel sandbox, timed finisher, character creation, first Final Selection forest slice and seeded lesser-demon pool. Live AI services, the Hand Demon, full trial, crow and hub remain future work.

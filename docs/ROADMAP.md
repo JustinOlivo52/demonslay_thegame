@@ -42,3 +42,13 @@ Additional styles and mentors; style-change missions; Sun/Moon special paths; re
 Upper Rank multi-phase bosses; post-Hashira challenges; progression toward Muzan; decide ally AI versus multiplayer based on tested gameplay and engineering scope. Desktop packaging through Electron or Tauri. Portfolio documentation, CI, meaningful tests, deployment workflow and demo. A small Pygame port can serve as a separate Python learning project.
 
 Later versions are planning directions, not prerequisites or automatic additions to V1.
+
+## Approved opening-chapter checkpoint sequence (supersedes older ordering)
+
+1. Character creation: name, male/female pixel recruit, Water or Flame starting style, style outfit, welcome/backstory, local profile save. Implemented for review; offline story fixtures until AI backend exists.
+2. Final Selection forest tutorial: connected areas, staged demon encounters, movement, sword, breathing, dodge, consumable and finisher instruction.
+2.5. Hand Demon boss and Final Selection completion.
+3. Passing ceremony, crow introduction and saved transition to Corps life.
+4. Headquarters hub: crow missions, player training, room/save/loadout, Swordsmith Village access and mentor destinations. Expand destination content incrementally.
+
+The development sandbox remains a separate entry throughout and shares tested gameplay systems with later missions. Character preview choices still need integration into playable animation/loadouts in checkpoint 2.

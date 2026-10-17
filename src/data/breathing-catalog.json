@@ -1,0 +1,933 @@
+[
+  {
+    "id": "water",
+    "name": "Water Breathing",
+    "associatedCharacter": "Giyu Tomioka",
+    "access": "starting-selection",
+    "minimumStyleLevel": 1,
+    "forms": [
+      {
+        "id": "water-01",
+        "canonNumber": 1,
+        "name": "Water Surface Slash",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "water-02",
+        "canonNumber": 2,
+        "name": "Water Wheel",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "water-03",
+        "canonNumber": 3,
+        "name": "Flowing Dance",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "water-04",
+        "canonNumber": 4,
+        "name": "Striking Tide",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "water-05",
+        "canonNumber": 5,
+        "name": "Blessed Rain After the Drought",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "water-06",
+        "canonNumber": 6,
+        "name": "Whirlpool",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "water-07",
+        "canonNumber": 7,
+        "name": "Drop Ripple Thrust",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "water-08",
+        "canonNumber": 8,
+        "name": "Waterfall Basin",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "water-09",
+        "canonNumber": 9,
+        "name": "Splashing Water Flow, Turbulent",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "water-10",
+        "canonNumber": 10,
+        "name": "Constant Flux",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "water-11",
+        "canonNumber": 11,
+        "name": "Dead Calm",
+        "status": "known",
+        "notes": "Personal technique; game-specific access requirements pending."
+      }
+    ]
+  },
+  {
+    "id": "flame",
+    "name": "Flame Breathing",
+    "associatedCharacter": "Kyojuro Rengoku",
+    "access": "starting-selection",
+    "minimumStyleLevel": 1,
+    "forms": [
+      {
+        "id": "flame-01",
+        "canonNumber": 1,
+        "name": "Unknowing Fire",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "flame-02",
+        "canonNumber": 2,
+        "name": "Rising Scorching Sun",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "flame-03",
+        "canonNumber": 3,
+        "name": "Blazing Universe",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "flame-04",
+        "canonNumber": 4,
+        "name": "Blooming Flame Undulation",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "flame-05",
+        "canonNumber": 5,
+        "name": "Flame Tiger",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "flame-06",
+        "canonNumber": 6,
+        "name": null,
+        "status": "unrevealed",
+        "notes": null
+      },
+      {
+        "id": "flame-07",
+        "canonNumber": 7,
+        "name": null,
+        "status": "unrevealed",
+        "notes": null
+      },
+      {
+        "id": "flame-08",
+        "canonNumber": 8,
+        "name": null,
+        "status": "unrevealed",
+        "notes": null
+      },
+      {
+        "id": "flame-09",
+        "canonNumber": 9,
+        "name": "Rengoku",
+        "status": "known",
+        "notes": null
+      }
+    ]
+  },
+  {
+    "id": "thunder",
+    "name": "Thunder Breathing",
+    "associatedCharacter": "Jigoro Kuwajima",
+    "access": "starting-selection",
+    "minimumStyleLevel": 1,
+    "forms": [
+      {
+        "id": "thunder-01",
+        "canonNumber": 1,
+        "name": "Thunderclap and Flash",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "thunder-02",
+        "canonNumber": 2,
+        "name": "Rice Spirit",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "thunder-03",
+        "canonNumber": 3,
+        "name": "Thunder Swarm",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "thunder-04",
+        "canonNumber": 4,
+        "name": "Distant Thunder",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "thunder-05",
+        "canonNumber": 5,
+        "name": "Heat Lightning",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "thunder-06",
+        "canonNumber": 6,
+        "name": "Rumble and Flash",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "thunder-07",
+        "canonNumber": 7,
+        "name": "Honoikazuchi no Kami",
+        "status": "known",
+        "notes": "Personal technique; game-specific access requirements pending."
+      }
+    ]
+  },
+  {
+    "id": "wind",
+    "name": "Wind Breathing",
+    "associatedCharacter": "Sanemi Shinazugawa",
+    "access": "starting-selection",
+    "minimumStyleLevel": 1,
+    "forms": [
+      {
+        "id": "wind-01",
+        "canonNumber": 1,
+        "name": "Dust Whirlwind Cutter",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "wind-02",
+        "canonNumber": 2,
+        "name": "Claws-Purifying Wind",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "wind-03",
+        "canonNumber": 3,
+        "name": "Clean Storm Wind Tree",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "wind-04",
+        "canonNumber": 4,
+        "name": "Rising Dust Storm",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "wind-05",
+        "canonNumber": 5,
+        "name": "Cold Mountain Wind",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "wind-06",
+        "canonNumber": 6,
+        "name": "Black Wind Mountain Mist",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "wind-07",
+        "canonNumber": 7,
+        "name": "Gale, Sudden Gusts",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "wind-08",
+        "canonNumber": 8,
+        "name": "Primary Gale Slash",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "wind-09",
+        "canonNumber": 9,
+        "name": "Idaten Typhoon",
+        "status": "known",
+        "notes": null
+      }
+    ]
+  },
+  {
+    "id": "stone",
+    "name": "Stone Breathing",
+    "associatedCharacter": "Gyomei Himejima",
+    "access": "starting-selection",
+    "minimumStyleLevel": 1,
+    "forms": [
+      {
+        "id": "stone-01",
+        "canonNumber": 1,
+        "name": "Serpentinite Bipolar",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "stone-02",
+        "canonNumber": 2,
+        "name": "Upper Smash",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "stone-03",
+        "canonNumber": 3,
+        "name": "Stone Skin",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "stone-04",
+        "canonNumber": 4,
+        "name": "Volcanic Rock, Rapid Conquest",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "stone-05",
+        "canonNumber": 5,
+        "name": "Arcs of Justice",
+        "status": "known",
+        "notes": null
+      }
+    ]
+  },
+  {
+    "id": "mist",
+    "name": "Mist Breathing",
+    "associatedCharacter": "Muichiro Tokito",
+    "access": "starting-selection",
+    "minimumStyleLevel": 1,
+    "forms": [
+      {
+        "id": "mist-01",
+        "canonNumber": 1,
+        "name": "Low Clouds, Distant Haze",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "mist-02",
+        "canonNumber": 2,
+        "name": "Eight-Layered Mist",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "mist-03",
+        "canonNumber": 3,
+        "name": "Scattering Mist Splash",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "mist-04",
+        "canonNumber": 4,
+        "name": "Shifting Flow Slash",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "mist-05",
+        "canonNumber": 5,
+        "name": "Sea of Clouds and Haze",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "mist-06",
+        "canonNumber": 6,
+        "name": "Lunar Dispersing Mist",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "mist-07",
+        "canonNumber": 7,
+        "name": "Obscuring Clouds",
+        "status": "known",
+        "notes": "Personal technique; game-specific access requirements pending."
+      }
+    ]
+  },
+  {
+    "id": "flower",
+    "name": "Flower Breathing",
+    "associatedCharacter": "Kanae Kocho",
+    "access": "starting-selection",
+    "minimumStyleLevel": 1,
+    "forms": [
+      {
+        "id": "flower-01",
+        "canonNumber": 1,
+        "name": null,
+        "status": "unrevealed",
+        "notes": null
+      },
+      {
+        "id": "flower-02",
+        "canonNumber": 2,
+        "name": "Honorable Shadow Plum",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "flower-03",
+        "canonNumber": 3,
+        "name": null,
+        "status": "unrevealed",
+        "notes": null
+      },
+      {
+        "id": "flower-04",
+        "canonNumber": 4,
+        "name": "Crimson Hanagoromo",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "flower-05",
+        "canonNumber": 5,
+        "name": "Peonies of Futility",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "flower-06",
+        "canonNumber": 6,
+        "name": "Whirling Peach",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "flower-07",
+        "canonNumber": null,
+        "name": "Equinoctial Vermilion Eye",
+        "status": "known",
+        "notes": "Final Form; catalog position is not a canon form number."
+      }
+    ]
+  },
+  {
+    "id": "insect",
+    "name": "Insect Breathing",
+    "associatedCharacter": "Shinobu Kocho",
+    "access": "starting-selection",
+    "minimumStyleLevel": 1,
+    "forms": [
+      {
+        "id": "insect-01",
+        "canonNumber": null,
+        "name": "Butterfly Dance: Caprice",
+        "status": "known",
+        "notes": "Named dance; catalog position is not a canon form number."
+      },
+      {
+        "id": "insect-02",
+        "canonNumber": null,
+        "name": "Dance of the Bee Sting: True Flutter",
+        "status": "known",
+        "notes": "Named dance; catalog position is not a canon form number."
+      },
+      {
+        "id": "insect-03",
+        "canonNumber": null,
+        "name": "Dance of the Dragonfly: Compound Eye Hexagon",
+        "status": "known",
+        "notes": "Named dance; catalog position is not a canon form number."
+      },
+      {
+        "id": "insect-04",
+        "canonNumber": null,
+        "name": "Dance of the Centipede: Hundred-Legged Zigzag",
+        "status": "known",
+        "notes": "Named dance; catalog position is not a canon form number."
+      }
+    ]
+  },
+  {
+    "id": "serpent",
+    "name": "Serpent Breathing",
+    "associatedCharacter": "Obanai Iguro",
+    "access": "starting-selection",
+    "minimumStyleLevel": 1,
+    "forms": [
+      {
+        "id": "serpent-01",
+        "canonNumber": 1,
+        "name": "Winding Serpent Slash",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "serpent-02",
+        "canonNumber": 2,
+        "name": "Venom Fangs of the Narrow Head",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "serpent-03",
+        "canonNumber": 3,
+        "name": "Coil Choke",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "serpent-04",
+        "canonNumber": 4,
+        "name": "Twin-Headed Reptile",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "serpent-05",
+        "canonNumber": 5,
+        "name": "Slithering Serpent",
+        "status": "known",
+        "notes": null
+      }
+    ]
+  },
+  {
+    "id": "love",
+    "name": "Love Breathing",
+    "associatedCharacter": "Mitsuri Kanroji",
+    "access": "starting-selection",
+    "minimumStyleLevel": 1,
+    "forms": [
+      {
+        "id": "love-01",
+        "canonNumber": 1,
+        "name": "Shivers of First Love",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "love-02",
+        "canonNumber": 2,
+        "name": "Love Pangs",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "love-03",
+        "canonNumber": 3,
+        "name": "Catlove Shower",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "love-04",
+        "canonNumber": 4,
+        "name": null,
+        "status": "unrevealed",
+        "notes": null
+      },
+      {
+        "id": "love-05",
+        "canonNumber": 5,
+        "name": "Swaying Love, Wildclaw",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "love-06",
+        "canonNumber": 6,
+        "name": "Cat-Legged Winds of Love",
+        "status": "known",
+        "notes": null
+      }
+    ]
+  },
+  {
+    "id": "sound",
+    "name": "Sound Breathing",
+    "associatedCharacter": "Tengen Uzui",
+    "access": "starting-selection",
+    "minimumStyleLevel": 1,
+    "forms": [
+      {
+        "id": "sound-01",
+        "canonNumber": 1,
+        "name": "Roar",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "sound-02",
+        "canonNumber": 2,
+        "name": null,
+        "status": "unrevealed",
+        "notes": null
+      },
+      {
+        "id": "sound-03",
+        "canonNumber": 3,
+        "name": null,
+        "status": "unrevealed",
+        "notes": null
+      },
+      {
+        "id": "sound-04",
+        "canonNumber": 4,
+        "name": "Constant Resounding Slashes",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "sound-05",
+        "canonNumber": 5,
+        "name": "String Performance",
+        "status": "known",
+        "notes": null
+      }
+    ]
+  },
+  {
+    "id": "beast",
+    "name": "Beast Breathing",
+    "associatedCharacter": "Inosuke Hashibira",
+    "access": "starting-selection",
+    "minimumStyleLevel": 1,
+    "forms": [
+      {
+        "id": "beast-01",
+        "canonNumber": 1,
+        "name": "Pierce",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "beast-02",
+        "canonNumber": 2,
+        "name": "Slice",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "beast-03",
+        "canonNumber": 3,
+        "name": "Devour",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "beast-04",
+        "canonNumber": 4,
+        "name": "Slice ’n’ Dice",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "beast-05",
+        "canonNumber": 5,
+        "name": "Crazy Cutting",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "beast-06",
+        "canonNumber": 6,
+        "name": "Palisade Bite",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "beast-07",
+        "canonNumber": 7,
+        "name": "Spatial Awareness",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "beast-08",
+        "canonNumber": 8,
+        "name": "Explosive Rush",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "beast-09",
+        "canonNumber": 9,
+        "name": "Extending Bendy Slash",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "beast-10",
+        "canonNumber": 10,
+        "name": "Whirling Fangs",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "beast-11",
+        "canonNumber": null,
+        "name": "Sudden Throwing Strike",
+        "status": "known",
+        "notes": "Improvised technique, not numbered Eleventh Form."
+      }
+    ]
+  },
+  {
+    "id": "sun",
+    "name": "Sun Breathing",
+    "associatedCharacter": null,
+    "access": "special-mission",
+    "minimumStyleLevel": 30,
+    "forms": [
+      {
+        "id": "sun-01",
+        "canonNumber": 1,
+        "name": "Dance",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "sun-02",
+        "canonNumber": 2,
+        "name": "Clear Blue Sky",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "sun-03",
+        "canonNumber": 3,
+        "name": "Raging Sun",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "sun-04",
+        "canonNumber": 4,
+        "name": "Burning Bones, Summer Sun",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "sun-05",
+        "canonNumber": 5,
+        "name": "Setting Sun Transformation",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "sun-06",
+        "canonNumber": 6,
+        "name": "Solar Heat Haze",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "sun-07",
+        "canonNumber": 7,
+        "name": "Beneficent Radiance",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "sun-08",
+        "canonNumber": 8,
+        "name": "Sunflower Thrust",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "sun-09",
+        "canonNumber": 9,
+        "name": "Dragon Sun Halo Head Dance",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "sun-10",
+        "canonNumber": 10,
+        "name": "Fire Wheel",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "sun-11",
+        "canonNumber": 11,
+        "name": "Fake Rainbow",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "sun-12",
+        "canonNumber": 12,
+        "name": "Flame Dance",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "sun-13",
+        "canonNumber": 13,
+        "name": "Thirteenth Form",
+        "status": "sequence",
+        "notes": "Requires all twelve preceding forms; repeats them continuously."
+      }
+    ]
+  },
+  {
+    "id": "moon",
+    "name": "Moon Breathing",
+    "associatedCharacter": null,
+    "access": "special-mission",
+    "minimumStyleLevel": 30,
+    "forms": [
+      {
+        "id": "moon-01",
+        "canonNumber": 1,
+        "name": "Dark Moon, Evening Palace",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "moon-02",
+        "canonNumber": 2,
+        "name": "Pearl Flower Moongazing",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "moon-03",
+        "canonNumber": 3,
+        "name": "Loathsome Moon, Chains",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "moon-04",
+        "canonNumber": 4,
+        "name": null,
+        "status": "unrevealed",
+        "notes": null
+      },
+      {
+        "id": "moon-05",
+        "canonNumber": 5,
+        "name": "Moon Spirit Calamitous Eddy",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "moon-06",
+        "canonNumber": 6,
+        "name": "Perpetual Night, Lonely Moon: Incessant",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "moon-07",
+        "canonNumber": 7,
+        "name": "Mirror of Misfortune, Moonlit",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "moon-08",
+        "canonNumber": 8,
+        "name": "Moon-Dragon Ringtail",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "moon-09",
+        "canonNumber": 9,
+        "name": "Waning Moonswaths",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "moon-10",
+        "canonNumber": 10,
+        "name": "Drilling Slashes, Moon Through Bamboo Leaves",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "moon-11",
+        "canonNumber": 11,
+        "name": null,
+        "status": "unrevealed",
+        "notes": null
+      },
+      {
+        "id": "moon-12",
+        "canonNumber": 12,
+        "name": null,
+        "status": "unrevealed",
+        "notes": null
+      },
+      {
+        "id": "moon-13",
+        "canonNumber": 13,
+        "name": null,
+        "status": "unrevealed",
+        "notes": null
+      },
+      {
+        "id": "moon-14",
+        "canonNumber": 14,
+        "name": "Catastrophe, Tenman Crescent Moon",
+        "status": "known",
+        "notes": null
+      },
+      {
+        "id": "moon-15",
+        "canonNumber": 15,
+        "name": null,
+        "status": "unrevealed",
+        "notes": null
+      },
+      {
+        "id": "moon-16",
+        "canonNumber": 16,
+        "name": "Moonbow, Half Moon",
+        "status": "known",
+        "notes": null
+      }
+    ]
+  }
+]
