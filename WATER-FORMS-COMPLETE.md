@@ -1,6 +1,6 @@
 # Water Breathing — complete functional prototype
 
-All eleven forms are available in the independent developer lab at `/?water-lab=1`, linked from `/?sandbox=1`. This is a functional combat/VFX prototype using the approved pixel recruits and demon. It is not a finished set of bespoke body-animation sheets.
+All eleven forms are available in the independent developer lab at `/?water-lab=1`, linked from `/?sandbox=1`. This is a functional combat/VFX prototype using the approved pixel recruits and demon. The later [description-led choreography pass](SOURCE-FIDELITY-01.md) adds a 48-cell pose atlas; full directional in-betweens remain unfinished.
 
 ## Try it
 
@@ -17,14 +17,14 @@ Costs are lab base Breath values. Cooldowns begin at cast time. Damage is maximu
 | # | Form | Breath | Cooldown | Base damage | Gameplay |
 | --- | --- | ---: | ---: | ---: | --- |
 | I | Water Surface Slash | 20 | 1.4 s | 35 | One horizontal forward cut |
-| II | Water Wheel | 32 | 2.5 s | 45 | Advancing circular cut, 190-unit travel |
+| II | Water Wheel | 32 | 2.5 s | 45 | Forward somersault, vertical circular cut, 190-unit travel |
 | III | Flowing Dance | 34 | 3 s | 16 × 3 | Three cuts along an advancing S path |
 | IV | Striking Tide | 38 | 3.6 s | 14 × 4 | Four rhythmic forward cuts |
 | V | Blessed Rain After the Drought | 28 | 3 s | 55 | Gentle cut; requires a yielding target |
 | VI | Whirlpool | 42 | 4 s | 12 × 3 | Three close-range rotating cuts |
 | VII | Drop Ripple Thrust | 26 | 2.2 s | 42 | Fast narrow thrust; reach 150, not a projectile |
 | VIII | Waterfall Basin | 48 | 4.2 s | 60 | Downward splash centered 70 units ahead, clipped to terrain |
-| IX | Splashing Water Flow, Turbulent | 42 | 5 s | 11 × 4 | Zigzag footwork with two brief evasive steps |
+| IX | Splashing Water Flow, Turbulent | 42 | 5 s | 0 | Non-damaging zigzag footwork with two brief evasive steps |
 | X | Constant Flux | 52 | 5.8 s | 14 + 20 + 28 | Turning cuts build damage; water-dragon ribbon |
 | XI | Dead Calm | 55 | 7 s | 0 | Timed nearby-melee defense; Giyu’s personal form |
 
@@ -50,8 +50,12 @@ The original Water starter scene and shared tutorial technique registry remain i
 
 ## Validation and remaining work
 
-Production build and all 15 test files / 44 cases pass. Chromium checks exercised all ten damaging forms through real Q input, checking hit results, movement, costs and cooldowns. Additional checks covered hostile mercy rejection, rear-target thrust miss, live AI Dead Calm parry followed by damage after expiration, pause freezing, terrain bounds, missed/successful finishes, both body selectors, no save mutation and no page errors. These are focused prepared encounters, not a new full tutorial playthrough. The complete technique recording demonstrates prepared casts and a live-AI defensive stance.
+Production build and all 15 test files / 44 cases pass. Chromium checks exercised all nine damaging forms and non-damaging ninth-form footwork through real Q input, checking hit results, movement, costs and cooldowns. Additional checks covered hostile mercy rejection, rear-target thrust miss, live AI Dead Calm parry followed by damage after expiration, pause freezing, terrain bounds, missed/successful finishes, both body selectors, no save mutation and no page errors. These are focused prepared encounters, not a new full tutorial playthrough. The complete technique recording demonstrates prepared casts and a live-AI defensive stance.
 
-The current effects use the shared pixel attack poses, active-time movement and existing run frames. Dedicated somersault, sheathing, thrust and other form-specific body frames remain a later art pass, along with directional choreography, water swimming and sound. Enemy AI here is an ordinary claw opponent; it does not test Blood Demon Art projectiles. Keep player review before calling this production-complete animation.
+The latest lab uses authored per-form sequences from the new body-pose atlas, with real tuck/inverted/landing, turning and thrust poses. Additional in-betweens, full directional body views, swimming and sound remain future work; see SOURCE-FIDELITY-01.md. Enemy AI here is an ordinary claw opponent; it does not test Blood Demon Art projectiles. Keep player review before calling this production-complete animation.
 
 Next full-set checkpoint: Flame, then Thunder and Wind before resuming Mist. Normal level eligibility through 30 and increasingly expensive skill purchases/upgrades through 50 remain separate progression work.
+
+## Choreography correction
+
+Water Wheel now has a narrow forward sword lane and 0.56 active seconds; Flux has 1.2 active seconds for its turning sequence. Water IX no longer has four damage windows: it is mobility/evasion. Strike contact begins at the cut/thrust/landing beat. Dead Calm uses quiet drawn-blade art and contact flashes instead of a persistent circular shield. See SOURCE-FIDELITY-01.md for references, all form corrections and the remaining fidelity limits.

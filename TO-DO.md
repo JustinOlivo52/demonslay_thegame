@@ -77,3 +77,13 @@ Next personal review: intro clarity, optional-route navigation, limited supplies
 - [ ] Justin: review Flame Tiger, Rengoku and the frontal guard in the recording/lab.
 - [ ] Dedicated upward/downward and defensive sword body frames; existing shared poses are provisional.
 - [ ] Next: Thunder’s remaining forms, followed by Wind.
+
+## Source-fidelity candidate — Water and Flame
+
+- [x] Review all 17 revealed techniques against indexed reference descriptions and document deliberate adaptations.
+- [x] Add 48-cell pose atlas, per-form sequences, strike-aligned contact, narrower Wheel contact and non-damaging ninth-form footwork.
+- [x] Quiet Calm, turning Flux, rising/descending Flame guards, enveloping Tiger and Rengoku flame-dragon motif.
+- [ ] Justin: review new Water/Flame videos and use **Compare previous body poses** for the body-only comparison.
+- [ ] Refine in-betweens, directional body art, anatomy/cloth consistency and exact shoulder/hip timing against selected manga/anime shots.
+- [ ] Carry reviewed candidates into normal tutorial/starter animation; current changes are isolated to technique labs.
+- [ ] Apply feedback before resuming the full Thunder set, then Wind. See SOURCE-FIDELITY-01.md.
