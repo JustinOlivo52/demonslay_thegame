@@ -64,3 +64,5 @@ Production build and 18 test files / 55 defined cases pass. Tests cover complete
 Chromium checks exercise all 17 techniques, exact prepared hit results, costs/cooldowns, terrain, frontal/rear/expired defense, pause and finishing without save mutation. Additional checks inspect both bodies/styles, nine key live poses, paused frame stability and the previous-pose comparison. New Water and Flame recordings demonstrate the candidate in prepared encounters; these are not full tutorial playthroughs.
 
 Next: Justin reviews these candidates; apply specific visual corrections, then resume the complete Thunder set followed by Wind.
+
+Final visual refinement: `public/art/technique-motifs.png` contains three generated, inspected pixel heads (water dragon, flame tiger, flame dragon). The lab binds them to the corresponding blade trails; they have no independent movement, collision or damage. This replaces the earlier geometric placeholder faces.
