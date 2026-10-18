@@ -65,5 +65,15 @@ Next personal review: intro clarity, optional-route navigation, limited supplies
 - [x] Conditional merciful cut, precise thrust, escalating Flux strikes and finite Dead Calm melee defense.
 - [ ] Justin: compare each form’s feel and readability in `?water-lab=1`; review the recording.
 - [ ] Dedicated somersault/sheathing and form-specific body frames; current poses are shared prototypes.
-- [ ] Next: complete Flame, then Thunder and Wind before adding Mist.
+- [x] Complete all six revealed Flame forms in the developer lab.
+- [ ] Next: complete Thunder and Wind before adding Mist.
 - [ ] Wire higher forms into level eligibility, earned skill purchases and upgrades; lab access grants no saved ownership.
+
+## Complete Flame checkpoint
+
+- [x] Six revealed techniques, warm Flame outfits/effects, costs/cooldowns and canon-number hotkeys in `?flame-lab=1`.
+- [x] Unrevealed VI–VIII remain disabled and cannot be selected or purchased.
+- [x] Test all six real casts, front/rear/expired defense, charge collision, resource pressure, pause and finishing; regress all eleven Water forms after shared-scene extraction.
+- [ ] Justin: review Flame Tiger, Rengoku and the frontal guard in the recording/lab.
+- [ ] Dedicated upward/downward and defensive sword body frames; existing shared poses are provisional.
+- [ ] Next: Thunder’s remaining forms, followed by Wind.

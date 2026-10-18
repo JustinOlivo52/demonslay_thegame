@@ -42,7 +42,8 @@ The lab never writes character, tutorial or progression saves, awards XP, or gra
 
 - `src/water-kit.ts`: all eleven configurations, timing, hit geometry, movement, defensive windows and stable catalog mapping.
 - `src/water-effects.ts`: layered water ribbons, foam, ripples, waterfall splash, water-dragon and calm stance effects.
-- `src/water-lab.ts` / `.css`: independent interactive practice scene and controls.
+- `src/water-lab.ts`: Water configuration for the shared practice scene.
+- `src/technique-lab.ts` / `.css`: shared Water/Flame practice scene and controls.
 - `src/water-kit.test.mjs`: catalog completeness, frame-independent movement, geometry, mercy conditions, finite defense and catalog mapping tests.
 
 The original Water starter scene and shared tutorial technique registry remain intact. No other style's mechanics change in this checkpoint.
