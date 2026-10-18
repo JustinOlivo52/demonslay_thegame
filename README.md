@@ -57,3 +57,5 @@ Added a short controls introduction, vertical exploration loops with two finite 
 ## Headquarters checkpoint
 
 The crow ceremony now leads to headquarters: five destination introductions, a personal room/save journal, read-only starting forms and a practice-sandbox return path. See HEADQUARTERS-CHECKPOINT.md.
+
+Headquarters artwork now includes tiled-roof/shoji detail, clustered wisteria, a stone-edged koi pond, textured room materials and a shared detailed Kasugai crow. See [art refinement notes](HEADQUARTERS-ART-01.md). Typography uses local/system fallbacks without remote font imports.

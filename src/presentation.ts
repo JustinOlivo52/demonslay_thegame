@@ -1,3 +1,4 @@
+import {paintCrow} from './crow-art';
 import {INTRO_PANELS,CEREMONY_PANELS} from './trial-content';
 import type {Character} from './character';
 import './ceremony.css';
@@ -8,14 +9,14 @@ export class TrialPresentation{
   this.intro=document.createElement('section');this.intro.id='trial-intro';this.intro.className='trial-overlay';this.intro.hidden=true;this.intro.setAttribute('role','dialog');this.intro.setAttribute('aria-modal','true');this.intro.setAttribute('aria-labelledby','intro-title');
   this.intro.innerHTML='<div class=story-card><p class=kicker>FINAL SELECTION · BEFORE YOUR FIRST STEP</p><p id=intro-count></p><h1 id=intro-title></h1><p id=intro-copy></p><div class=story-actions><button id=intro-back>Back</button><button id=intro-next>Continue</button></div></div>';
   this.ending=document.createElement('section');this.ending.id='selection-passed';this.ending.className='trial-overlay';this.ending.hidden=true;this.ending.setAttribute('role','dialog');this.ending.setAttribute('aria-modal','true');this.ending.setAttribute('aria-labelledby','ceremony-title');
-  this.ending.innerHTML='<div class=story-card><p class=kicker>THE SEVENTH DAWN · THE SURVIVORS</p><canvas id=survivor-scene width=480 height=160 aria-label="Surviving recruits gather beneath the wisteria at dawn"></canvas><h1 id=ceremony-title></h1><p id=ceremony-copy></p><canvas id=crow-portrait width=48 height=40 aria-label="Your Kasugai crow arrives"></canvas><p id=passed-name></p><div class=story-actions><button id=ceremony-next>Continue</button><button id=replay-trial hidden>Replay tutorial</button><a id=ceremony-return href="?hub=1" hidden>Enter Corps headquarters</a></div><p id=ceremony-note hidden>Your crow will accompany you to Corps headquarters.</p></div>';
+  this.ending.innerHTML='<div class=story-card><p class=kicker>THE SEVENTH DAWN · THE SURVIVORS</p><canvas id=survivor-scene width=480 height=160 aria-label="Surviving recruits gather beneath the wisteria at dawn"></canvas><h1 id=ceremony-title></h1><p id=ceremony-copy></p><canvas id=crow-portrait width=80 height=64 aria-label="Your Kasugai crow arrives"></canvas><p id=passed-name></p><div class=story-actions><button id=ceremony-next>Continue</button><button id=replay-trial hidden>Replay tutorial</button><a id=ceremony-return href="?hub=1" hidden>Enter Corps headquarters</a></div><p id=ceremony-note hidden>Your crow will accompany you to Corps headquarters.</p></div>';
   options.parent.append(this.intro,this.ending);
   this.intro.querySelector('#intro-back')!.addEventListener('click',()=>{this.introStep=Math.max(0,this.introStep-1);this.renderIntro();});
   this.intro.querySelector('#intro-next')!.addEventListener('click',()=>{if(this.introStep<2){this.introStep++;this.renderIntro();}else{this.hide();options.onStart(this.first);}});
   this.ending.querySelector('#ceremony-next')!.addEventListener('click',()=>{if(this.endingStep<3){this.endingStep++;if(this.endingStep===3)options.onCrow();this.renderEnding();}});
   this.ending.querySelector('#replay-trial')!.addEventListener('click',()=>{this.hide();options.onReplay();});
   const ctx=this.ending.querySelector<HTMLCanvasElement>('#crow-portrait')!.getContext('2d')!;
-  ctx.fillStyle='#696153';ctx.fillRect(4,34,40,3);ctx.fillStyle='#171e29';ctx.fillRect(16,15,19,17);ctx.fillRect(9,6,14,14);ctx.fillRect(7,9,18,9);ctx.fillRect(31,25,10,8);ctx.fillRect(35,29,10,5);ctx.fillStyle='#344351';ctx.fillRect(18,17,12,4);ctx.fillRect(21,22,11,3);ctx.fillStyle='#b0a174';ctx.fillRect(3,13,7,3);ctx.fillStyle='#e6d4a7';ctx.fillRect(12,10,2,2);ctx.fillStyle='#6f736d';ctx.fillRect(20,30,2,5);ctx.fillRect(28,30,2,5);
+  ctx.imageSmoothingEnabled=false;ctx.fillStyle='#7a6950';ctx.fillRect(5,58,70,4);ctx.fillStyle='#b3a078';ctx.fillRect(5,58,70,1);paintCrow(ctx,8,5,1);
  }
  hide(){this.intro.hidden=true;this.ending.hidden=true;this.options.onModal(false);}
  showIntro(first:boolean){this.first=first;this.introStep=0;this.ending.hidden=true;this.intro.hidden=false;this.options.onModal(true);this.renderIntro();}
