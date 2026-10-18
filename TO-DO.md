@@ -49,7 +49,7 @@ Next personal review: intro clarity, optional-route navigation, limited supplies
 
 - [x] Thunder: starter choice, two distinct techniques, gold runtime cloth palette, former-Hashira mentor, seven-form catalog.
 - [ ] Justin: judge Thunder's dash readability, five-cut Rice Spirit timing and outfit/effects in screenshots/video and playtest.
-- [ ] Development: apply Thunder feedback, then Wind, Mist and the remaining starter styles one at a time. See BREATHING-STYLES-ROADMAP.md.
+- [ ] Development: apply Thunder feedback, complete the existing Water/Flame/Thunder/Wind sets before Mist. See BREATHING-STYLES-ROADMAP.md.
 - [ ] Dedicated Thunder iai/sheathing frames and stronger five-cut body animation; current shared poses/palette are provisional.
 - [ ] Higher-form skill purchases and individual technique passes; Sun/Moon special paths remain reserved.
 
@@ -57,4 +57,13 @@ Next personal review: intro clarity, optional-route navigation, limited supplies
 
 - [x] Wind starter, green male/female outfit treatment, two distinct techniques, nine-form reference catalog and Sanemi introduction.
 - [ ] Justin: review vortex travel/clarity and four-claw attack readability in the next recording/playtest.
-- [ ] Development: dedicated Wind body poses and tuning from feedback, then Mist. Higher forms and skill purchases remain separate work.
+- [ ] Development: dedicated Wind body poses and tuning from feedback, finish the four existing style sets before Mist. Skill purchases remain separate work.
+
+## Complete Water checkpoint
+
+- [x] Eleven functional Water forms in a dedicated developer lab, with water VFX, finite hit windows, movement/terrain checks, Breath costs and cooldowns.
+- [x] Conditional merciful cut, precise thrust, escalating Flux strikes and finite Dead Calm melee defense.
+- [ ] Justin: compare each form’s feel and readability in `?water-lab=1`; review the recording.
+- [ ] Dedicated somersault/sheathing and form-specific body frames; current poses are shared prototypes.
+- [ ] Next: complete Flame, then Thunder and Wind before adding Mist.
+- [ ] Wire higher forms into level eligibility, earned skill purchases and upgrades; lab access grants no saved ownership.
