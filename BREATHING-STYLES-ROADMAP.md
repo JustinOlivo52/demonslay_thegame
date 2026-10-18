@@ -11,7 +11,7 @@ Finish the full Water set, then Flame, Thunder and Wind before starting Mist. Al
 | Order | Style | Playable status |
 | --- | --- | --- |
 | 1 | Water | Two starting forms in normal play; all eleven functional prototypes in the Water lab |
-| 2 | Flame | Two starting forms, shared timing adaptation; further polish remains |
+| 2 | Flame | Two starting forms in normal play; all six revealed forms in the Flame lab |
 | 3 | Thunder | Current new-style checkpoint: two starting forms, gold cloth palette, lightning effects and former-Hashira mentor introduction |
 | 4 | Wind | Two starting forms, green cloth palette, vortex/claw effects and Sanemi mentor introduction |
 | 5 | Mist | After completing the four existing style sets |
@@ -50,4 +50,8 @@ Check both recruit bodies, preview and playable outfit, windup/active/recovery r
 
 ## Complete Water checkpoint
 
-All eleven forms have distinct timing, movement/hit rules and water effects in `?water-lab=1`. Form V requires a yielding target; XI is Giyu’s developer-only timed melee defense. The lab has no save/progression writes. See [full rules and limits](WATER-FORMS-COMPLETE.md). Dedicated body choreography and progression integration remain future work. Next full-set pass: Flame.
+All eleven forms have distinct timing, movement/hit rules and water effects in `?water-lab=1`. Form V requires a yielding target; XI is Giyu’s developer-only timed melee defense. The lab has no save/progression writes. See [full rules and limits](WATER-FORMS-COMPLETE.md). Dedicated body choreography and progression integration remain future work. Next full-set pass: Thunder; Flame’s revealed set is now complete in its lab.
+
+## Complete Flame checkpoint
+
+All six revealed forms (I–V and IX) have distinct functional prototypes in `?flame-lab=1`: straight rush, rising cut, descending cut, frontal defensive sweeps, tiger-shaped three-cut flourish and Rengoku’s committed ultimate charge. VI–VIII are unavailable unrevealed canon slots, not invented techniques. A shared technique-lab scene now serves Water and Flame, with Water’s timing/behavior retained. Normal characters still own only two starter forms. See [Flame scope and limits](FLAME-FORMS-COMPLETE.md). Next full-set pass: Thunder, then Wind before Mist.

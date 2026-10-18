@@ -81,8 +81,12 @@ Tutorial finishers now grant one-time XP, with level-ups after encounters two/th
 
 Owner requested the remaining breathing styles one at a time for visual quality. Thunder is the next implemented starter after Water/Flame: two distinct forms, golden cloth treatment, former-Hashira instructor context and complete reference form list. Future first passes follow BREATHING-STYLES-ROADMAP.md, beginning with Wind after Thunder feedback. All 14 styles exist in catalog data; only reviewed starter implementations become selectable. Higher forms require the later purchase/animation work; Sun and Moon remain special-mission level-30 paths.
 
-Wind is now implemented as the fourth starter first pass: advancing circular Dust Whirlwind Cutter and a stationary four-claw forward attack, green recruit palette, Sanemi association and nine-form catalog. Only its two granted forms are castable. Shared technique timing/geometry has been extracted to a registry with Water/Thunder regression coverage. Mist is the next style checkpoint.
+Wind is now implemented as the fourth starter first pass: advancing circular Dust Whirlwind Cutter and a stationary four-claw forward attack, green recruit palette, Sanemi association and nine-form catalog. Only its two granted forms are castable. Shared technique timing/geometry has been extracted to a registry with Water/Thunder regression coverage. Complete the existing four style sets before Mist.
 
 ## Full existing-style sets — current priority
 
 Complete Water, Flame, Thunder and Wind before adding Mist. Water now has eleven functional techniques in an isolated `?water-lab=1` sandbox. Normal play retains two granted forms. Later connect the stable catalog IDs to level eligibility through 30 and skill-point purchases/upgrades through 50. See [Water scope](../WATER-FORMS-COMPLETE.md).
+
+## Complete Flame lab
+
+All six revealed Flame forms (I–V and IX) now have functional combat/VFX prototypes at `?flame-lab=1`; VI–VIII remain unavailable canon slots. The independent Water and Flame entries share a tested practice-scene engine, while normal tutorial/ownership stays unchanged. Next: complete Thunder, then Wind, before Mist. See [Flame mechanics, validation and limits](../FLAME-FORMS-COMPLETE.md).

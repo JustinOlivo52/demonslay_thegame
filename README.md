@@ -27,6 +27,7 @@ WASD move · mouse aim · click/J sword · 1/2 cast form · Q repeat selected fo
 - `/?selection=1`: player-controlled tutorial.
 - `/?sandbox=1`: independent developer combat/technique sandbox.
 - `/?water-lab=1`: all eleven Water forms for independent testing; no character unlock/save changes.
+- `/?flame-lab=1`: all six revealed Flame forms; VI–VIII stay unavailable canon slots.
 - `/?hub=1`: headquarters, unlocked by the current recruit’s completed selection save.
 - `/?selection=1&demo=1`: scripted tutorial demonstration; not normal player control.
 
@@ -74,3 +75,7 @@ Wind is now the fourth starter: Dust Whirlwind Cutter and Claws-Purifying Wind, 
 ## Complete Water prototype
 
 Open `/?water-lab=1` directly, or use **All eleven Water forms** in the sandbox navigation. Choose a form in the sidebar, aim with the mouse and press Q. This lab uses 1–9 to select, 0 for X and minus for XI; J attacks, Space dodges and F finishes. Enable AI attacks to test defense, or Yielding target for form V. Normal character ownership remains unchanged. See [all eleven rules and remaining animation work](WATER-FORMS-COMPLETE.md).
+
+## Complete Flame prototype
+
+Open `/?flame-lab=1` directly, or use **Complete Flame forms** in sandbox navigation. All six revealed forms (I–V and IX) have distinct effects and combat behavior. VI–VIII are unrevealed in canon and remain unavailable. **1–5** select those forms, **9** selects Rengoku, and **Q** casts; movement, dodge and finishing match the Water lab. Enable AI attacks to test Blooming Flame Undulation’s frontal melee defense. No save/ownership changes or XP rewards. See [Flame rules and art limits](FLAME-FORMS-COMPLETE.md). Thunder’s complete set is next.
