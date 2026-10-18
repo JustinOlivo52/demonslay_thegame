@@ -3,4 +3,6 @@
 
 @media(max-width:680px){.character-stage{min-height:400px}.preview-caption{top:310px}}
 
-.creation-shell[data-style=thunder]{--accent:#e6c67b;--soft:#423c26;--glow:#ac8837}.creation-shell[data-style=thunder] .character-stage{background:radial-gradient(ellipse at 50% 58%,#51452b 0,#2c2c2e 45%,#171e28 80%)}.thunder .style-icon{color:#e9cc7e}.style-card.thunder{grid-column:1 / -1}
+.creation-shell[data-style=thunder]{--accent:#e6c67b;--soft:#423c26;--glow:#ac8837}.creation-shell[data-style=thunder] .character-stage{background:radial-gradient(ellipse at 50% 58%,#51452b 0,#2c2c2e 45%,#171e28 80%)}.thunder .style-icon{color:#e9cc7e}
+
+.creation-shell[data-style=wind]{--accent:#b1d4a0;--soft:#2b4133;--glow:#5a946a}.creation-shell[data-style=wind] .character-stage{background:radial-gradient(ellipse at 50% 58%,#35563e 0,#202e2d 45%,#151f27 80%)}.wind .style-icon{color:#b6dca5}

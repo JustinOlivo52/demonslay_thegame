@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open port **5173** from the Ports tab. Create/save a recruit, choose Water, Flame or Thunder and select **Enter Final Selection**. Existing recruits can enter directly at `/?selection=1`.
+Open port **5173** from the Ports tab. Create/save a recruit, choose Water, Flame, Thunder or Wind and select **Enter Final Selection**. Existing recruits can enter directly at `/?selection=1`.
 
 The condensed tutorial includes connected forest exploration, three lesser-demon encounters, a Hand Demon boss, scarce healing, timed finishing and a survivor/Kasugai-crow ceremony. Progress saves between encounters. After receiving the crow, enter the walkable Corps headquarters. See [headquarters controls and scope](HEADQUARTERS-CHECKPOINT.md).
 
@@ -67,3 +67,5 @@ Finished tutorial encounters now grant one-time XP. Level-ups restore health and
 ## Incremental breathing styles
 
 Thunder joins Water and Flame as a playable starter choice, with Thunderclap and Flash, five-strike Rice Spirit, gold cloth styling and Jigoro Kuwajima's former-Hashira introduction. Open **Form catalog** during selection to view the chosen style's remaining forms and level requirements; higher-form purchases/casts are not implemented. A separate Thunder lab is available at `/?sandbox=1&style=thunder`. See [style sequence and Thunder scope](BREATHING-STYLES-ROADMAP.md).
+
+Wind is now the fourth starter: Dust Whirlwind Cutter and Claws-Purifying Wind, green recruit styling, Sanemi’s mentor introduction and nine-form reference list. Its independent lab is `/?sandbox=1&style=wind`. Mist is next in the incremental queue.

@@ -52,3 +52,9 @@ Next personal review: intro clarity, optional-route navigation, limited supplies
 - [ ] Development: apply Thunder feedback, then Wind, Mist and the remaining starter styles one at a time. See BREATHING-STYLES-ROADMAP.md.
 - [ ] Dedicated Thunder iai/sheathing frames and stronger five-cut body animation; current shared poses/palette are provisional.
 - [ ] Higher-form skill purchases and individual technique passes; Sun/Moon special paths remain reserved.
+
+## Wind style checkpoint
+
+- [x] Wind starter, green male/female outfit treatment, two distinct techniques, nine-form reference catalog and Sanemi introduction.
+- [ ] Justin: review vortex travel/clarity and four-claw attack readability in the next recording/playtest.
+- [ ] Development: dedicated Wind body poses and tuning from feedback, then Mist. Higher forms and skill purchases remain separate work.

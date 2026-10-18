@@ -1,11 +1,12 @@
 export type Body = 'male' | 'female';
-export type StarterStyle = 'water' | 'flame' | 'thunder';
+export type StarterStyle = 'water' | 'flame' | 'thunder' | 'wind';
 export type Character = {version:1;name:string;body:Body;style:StarterStyle;backstory:string;level:1;ownedForms:[string,string];checkpoint:'selection-ready'};
 export const SAVE_KEY = 'nightfall.character.v1';
 export const STARTERS = {
  water:{name:'Water Breathing',mentor:'Giyu Tomioka',description:'Measured movement. Flowing attacks. A steady resolve.',forms:['Water Surface Slash','Water Wheel'],ids:['water-01','water-02']},
  flame:{name:'Flame Breathing',mentor:'Kyojuro Rengoku',description:'Decisive strikes. Unwavering spirit. A burning resolve.',forms:['Unknowing Fire','Rising Scorching Sun'],ids:['flame-01','flame-02']},
  thunder:{name:'Thunder Breathing',mentor:'Jigoro Kuwajima',description:'A former Hashira’s instruction. One decisive burst of speed.',forms:['Thunderclap and Flash','Rice Spirit'],ids:['thunder-01','thunder-02']},
+ wind:{name:'Wind Breathing',mentor:'Sanemi Shinazugawa',description:'Relentless pressure. Controlled violence. Cut through the storm.',forms:['Dust Whirlwind Cutter','Claws-Purifying Wind'],ids:['wind-01','wind-02']},
 } as const;
 export function validateName(value:string):string {
  const name=value.trim().replace(/\s+/g,' ');
@@ -22,11 +23,11 @@ const ORIGINS=[
 /** Offline story fixtures for checkpoint testing, not a connected generative-AI service. */
 export function makeBackstory(style:StarterStyle,variant:number):string {
  const [home,memory,purpose]=ORIGINS[((variant%ORIGINS.length)+ORIGINS.length)%ORIGINS.length];
- return `You grew up in ${home}. You still remember ${memory}. That memory became a promise: ${purpose}.\n\nMonths of training followed: steep mountain paths, a wooden practice sword, and the patient discipline of breathing. ${style==='water'?'Water taught you to adapt without surrendering your purpose.':style==='thunder'?'Thunder taught you to build speed from a grounded stance and commit in a single instant.':'Flame taught you to commit to a strike without losing control.'} Your instructor has judged you ready for Final Selection.\n\nAt the foot of Mount Fujikasane, wisteria stirs in the evening air. You are not a member of the Demon Slayer Corps yet. Tonight, you take the first step.`;
+ return `You grew up in ${home}. You still remember ${memory}. That memory became a promise: ${purpose}.\n\nMonths of training followed: steep mountain paths, a wooden practice sword, and the patient discipline of breathing. ${style==='water'?'Water taught you to adapt without surrendering your purpose.':style==='wind'?'Wind taught you to keep your footing while turning momentum into relentless, controlled cuts.':style==='thunder'?'Thunder taught you to build speed from a grounded stance and commit in a single instant.':'Flame taught you to commit to a strike without losing control.'} Your instructor has judged you ready for Final Selection.\n\nAt the foot of Mount Fujikasane, wisteria stirs in the evening air. You are not a member of the Demon Slayer Corps yet. Tonight, you take the first step.`;
 }
 export function createCharacter(name:string,body:Body,style:StarterStyle,backstory:string):Character {
  const normalized=validateName(name);
- if(!['male','female'].includes(body)||!['water','flame','thunder'].includes(style))throw new Error('Choose a valid character and breathing style.');
+ if(!['male','female'].includes(body)||!['water','flame','thunder','wind'].includes(style))throw new Error('Choose a valid character and breathing style.');
  if(backstory.trim().length<40||backstory.length>1600)throw new Error('Keep your backstory between 40 and 1,600 characters.');
  return {version:1,name:normalized,body,style,backstory:backstory.trim(),level:1,ownedForms:[...STARTERS[style].ids],checkpoint:'selection-ready'};
 }
