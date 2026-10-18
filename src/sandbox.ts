@@ -1,3 +1,5 @@
+import {freshProgression,awardTrialXP,spendStat,attributes,nextLevelXP,type Stat} from './progression';
+import {StatsPanel} from './stats-panel';
 import Phaser from 'phaser';
 import {TrialPresentation} from './presentation';
 import {noviceBreathCost,collectPotion,gaitFrame} from './trial-content';
@@ -207,6 +209,9 @@ class Arena extends Phaser.Scene {
   private subtitle!: Phaser.GameObjects.Text;
   private keys!: Record<string, Phaser.Input.Keyboard.Key>;
   private run=readRun((()=>{try{return localStorage.getItem(RUN_KEY);}catch{return null;}})(),PROFILE?profileKey(PROFILE):'sandbox');
+  private statsPanel!:StatsPanel;
+  private get progression(){return this.run.progress||freshProgression();}
+  private get playerStats(){return attributes(IS_SELECTION?this.progression:freshProgression());}
   private get stage(){return TUTORIAL_STAGES[Math.min(this.run.stage,3)];}
   private get isBoss(){return IS_SELECTION&&this.run.stage===3;}
   private presentation!:TrialPresentation;private cinematicActive=false;private introReturnMode:Mode='ready';
@@ -232,7 +237,7 @@ class Arena extends Phaser.Scene {
   private get enemyMaxHp(){return IS_SELECTION?this.stage.health:this.encounter.maxHealth;}
   private get enemyDamage(){return IS_SELECTION?(this.stage.damage+(this.bossHeavy?6:0)+(this.isBoss&&this.ehp<=this.enemyMaxHp*.5?4:0)):this.encounter.damage;}
   private p = {x: 300, y: 340}; private e = {x: 700, y: 340};
-  private hp = R.health; private stamina = R.stamina; private ehp = this.enemyMaxHp;
+  private hp = IS_SELECTION?this.run.health:R.health; private stamina = this.playerStats.stamina; private ehp = this.enemyMaxHp;
   private angle = 0; private swing = 0; private swordCooldown = 0;
   private dodge = 0; private dodgeCooldown = 0; private dodgeVector = new Phaser.Math.Vector2();
   private enemyState: 'chase' | 'windup' | 'strike' | 'recovery' | 'downed' | 'dead' = 'chase';
@@ -386,7 +391,7 @@ class Arena extends Phaser.Scene {
       far:()=>{this.p={x:54,y:74};},
       finish:()=>this.finishDemon(),
       pause:()=>{this.resumeMode=this.mode==='won'?'won':'playing';this.mode='paused';},resume:()=>{this.mode=this.resumeMode;},
-      state:()=>({run:this.run,potions:this.potionCount,playerHealth:this.hp,position:{...this.p},enemyPosition:{...this.e},breath:this.breath,maxBreath:this.maxBreath,stamina:this.stamina,combo:this.combo,slash:this.slash,pattern:this.patternId,area:this.area.name,cameraX:this.cameras.main.scrollX,unlockedStage:this.unlockedStage,pendingForm:this.pendingForm,selectedForm:this.selectedForm,technique:this.technique,shrine:this.shrineRead,encounter:this.encounter,clues:this.trialClues,combat:this.trialCombat,profile:PROFILE,enemy:this.enemyState,hp:this.ehp,timer:this.finishRemaining,mode:this.mode,cinematic:this.cinematicActive,ceremony:this.presentation?.ceremonyStep,walkDistance:this.walk,demonDistance:this.demonWalk,bossEnraged:this.isBoss&&this.ehp<=this.enemyMaxHp*.5,cameraY:this.cameras.main.scrollY,costs:{surface:this.tuning.surface.stamina,wheel:this.tuning.wheel.stamina},wins:this.wins,execution:this.executionFlash,ash:this.deathFade})
+      state:()=>({run:this.run,maxHealth:this.playerStats.health,maxStamina:this.playerStats.stamina,potions:this.potionCount,playerHealth:this.hp,position:{...this.p},enemyPosition:{...this.e},breath:this.breath,maxBreath:this.maxBreath,stamina:this.stamina,combo:this.combo,slash:this.slash,pattern:this.patternId,area:this.area.name,cameraX:this.cameras.main.scrollX,unlockedStage:this.unlockedStage,pendingForm:this.pendingForm,selectedForm:this.selectedForm,technique:this.technique,shrine:this.shrineRead,encounter:this.encounter,clues:this.trialClues,combat:this.trialCombat,profile:PROFILE,enemy:this.enemyState,hp:this.ehp,timer:this.finishRemaining,mode:this.mode,cinematic:this.cinematicActive,ceremony:this.presentation?.ceremonyStep,walkDistance:this.walk,demonDistance:this.demonWalk,bossEnraged:this.isBoss&&this.ehp<=this.enemyMaxHp*.5,cameraY:this.cameras.main.scrollY,costs:{surface:this.tuning.surface.stamina,wheel:this.tuning.wheel.stamina},wins:this.wins,execution:this.executionFlash,ash:this.deathFade})
     };
     if(IS_SELECTION){this.trainingDummy=false;this.showHitboxes=false;}
     if(IS_SELECTION){
@@ -396,7 +401,10 @@ class Arena extends Phaser.Scene {
         onModal:open=>{this.cinematicActive=open;this.presses.clear();for(const id of ['start','retry','tutorial-help']){const button=document.querySelector<HTMLButtonElement>('#'+id);if(button)button.disabled=open;}},
         onStart:first=>{this.run={...this.run,introSeen:true};this.saveRun();if(first){this.reset();this.cameras.main.centerOn(this.p.x,this.p.y);}else this.mode=this.introReturnMode;document.querySelector<HTMLElement>('#game')!.focus();},
         onCrow:()=>{if(!this.run.passed){this.run=advanceRun(this.run,this.hp,this.potionCount);this.saveRun();}},
-        onReplay:()=>{this.run=newRun(PROFILE?profileKey(PROFILE):'');this.saveRun();this.openIntro(true);}});
+        onReplay:()=>{this.run=newRun(PROFILE?profileKey(PROFILE):'',this.progression);this.saveRun();this.openIntro(true);}});
+      this.statsPanel=new StatsPanel({read:()=>this.progression,spend:stat=>this.allocateStat(stat),modal:open=>{this.cinematicActive=open;this.presses.clear();for(const key of Object.values(this.keys))key.reset();if(!open){this.sync();document.querySelector<HTMLElement>('#game')!.focus();}}});
+      const statsButton=document.createElement('button');statsButton.id='open-stats';statsButton.textContent='Stats';statsButton.addEventListener('click',()=>{if(!this.cinematicActive&&this.mode!=='lost')this.statsPanel.show();});document.querySelector('#forest-actions')!.append(statsButton);
+      const xp=document.createElement('p');xp.id='progress-xp';document.querySelector('.forest-vitals')!.append(xp);
       const help=document.createElement('button');help.id='tutorial-help';help.textContent='How to play';help.addEventListener('click',()=>this.openIntro(false));document.querySelector('#forest-actions')!.append(help);
       this.potionCount=this.run.potions;if(this.run.passed)this.showPassed();else{this.p=trainingSpawn(this.run.stage);this.e=trainingDemon(this.run.stage);if(this.run.cleared)this.reset();this.player.setPosition(this.p.x,this.p.y+24);this.cameras.main.centerOn(this.p.x,this.p.y);}
     }
@@ -414,7 +422,7 @@ class Arena extends Phaser.Scene {
     if(IS_SELECTION){this.potionCount=this.run.potions;document.querySelector<HTMLElement>('#selection-passed')?.setAttribute('hidden','');}
     this.p=IS_SELECTION?trainingSpawn(Math.min(this.run.stage,3)):{x:300,y:340};this.e=IS_SELECTION?trainingDemon(Math.min(this.run.stage,3)):{x:this.trainingDummy?380:700,y:340};
     if(IS_SELECTION){this.tourIndex=0;this.shrineRead=false;this.trialClues=0;this.trialCombat=false;this.trialSaved=false;this.trialText='Follow the training path to the open clearing. No investigation is required. Press 1 / 2 or click a form card to practice.';}
-    this.executionFlash=0;this.finishRemaining=0;this.technique=null;this.formCooldowns={surface:0,wheel:0};this.labMessage='1 / 2 or click to cast · Q repeats';this.hp=IS_SELECTION?this.run.health:R.health;this.stamina=R.stamina;this.ehp=this.enemyMaxHp;
+    this.executionFlash=0;this.finishRemaining=0;this.technique=null;this.formCooldowns={surface:0,wheel:0};this.labMessage='1 / 2 or click to cast · Q repeats';this.hp=IS_SELECTION?this.run.health:R.health;this.stamina=this.playerStats.stamina;this.ehp=this.enemyMaxHp;
     this.swing=0;this.swordCooldown=0;this.dodge=0;this.dodgeCooldown=0;this.hurt=0;this.enemyTimer=0;this.enemyState='chase';this.mode='playing';
     this.hitFlash=0;this.hurtFx=0;this.ehpShown=this.enemyMaxHp;this.deathFade=0;this.endDelay=0;this.clawLife=0;this.overlayAlpha=0;this.playerFlash=0;
     this.particles=[];this.ghosts=[];this.strikeAnim=0;this.demonSprite.setCrop();for(const f of this.floaters)f.text.destroy();this.floaters=[];
@@ -424,6 +432,10 @@ class Arena extends Phaser.Scene {
     document.querySelector<HTMLElement>('#game')!.focus();
   }
   private saveRun(){try{localStorage.setItem(RUN_KEY,JSON.stringify(this.run));}catch{this.trialText='Browser save unavailable. Keep this tab open to retain your progress.';}}
+  private allocateStat(stat:Stat){
+    if(!IS_SELECTION||this.mode==='lost')return false;
+    try{const old=this.playerStats,progress=spendStat(this.progression,stat),nextStats=attributes(progress),health=Math.min(nextStats.health,this.hp+nextStats.health-old.health),next={...this.run,progress,health,potions:this.potionCount};localStorage.setItem(RUN_KEY,JSON.stringify(next));this.run=next;this.hp=health;this.stamina=Math.min(nextStats.stamina,this.stamina+nextStats.stamina-old.stamina);this.sync();return true;}catch{return false;}
+  }
   private showPassed(){
     this.mode='won';this.enemyState='dead';this.deathFade=0;this.endDelay=0;this.trialCombat=false;
     this.presentation?.showEnding(this.run.passed);
@@ -451,11 +463,11 @@ class Arena extends Phaser.Scene {
     this.moving=direction.length()>0;if(this.moving)this.lastMove.copy(direction);
     this.movePlayer(direction.x*R.speed*dt,direction.y*R.speed*dt);
     this.angle=Math.atan2(this.lastMove.y,this.lastMove.x);
-    this.breath=Math.min(this.maxBreath,this.breath+24*dt);this.stamina=Math.min(100,this.stamina+R.staminaRegen*dt);
+    this.breath=Math.min(this.maxBreath,this.breath+24*dt);this.stamina=Math.min(this.playerStats.stamina,this.stamina+R.staminaRegen*dt);
     if(this.p.x>=entry.x)this.continueTrial(true);
   }
   private usePotion(){
-    if(this.mode!=='playing'||this.cinematicActive)return;const result=heal(this.hp,this.potionCount);
+    if(this.mode!=='playing'||this.cinematicActive)return;const result=heal(this.hp,this.potionCount,this.playerStats.health);
     this.hp=result.health;this.potionCount=result.potions;
     this.trialText=result.used?'You drink a healing potion. +45 vitality.':this.potionCount===0?'No healing potions remain.':'Your vitality is already full.';
     if(result.used)this.floatText(this.p.x,this.p.y-75,'+45 HP','#bde9be','#143c23',18);
@@ -486,7 +498,7 @@ class Arena extends Phaser.Scene {
     const dx=this.e.x-this.p.x,dy=this.e.y-this.p.y;
     const a=Phaser.Math.Angle.Wrap(Math.atan2(dy,dx)-slash.angle);
     if(!slash.hit&&slash.elapsed>=f.windup&&old<f.windup+f.active&&!['downed','dead'].includes(this.enemyState)&&Math.hypot(dx,dy)<=f.reach&&Math.abs(a)<=f.arc){
-      slash.hit=true;this.ehp=Math.max(0,this.ehp-f.damage);this.onSwordHit(f.damage);if(this.ehp===0)this.downDemon();
+      const damage=Math.round(f.damage*this.playerStats.sword);slash.hit=true;this.ehp=Math.max(0,this.ehp-damage);this.onSwordHit(damage);if(this.ehp===0)this.downDemon();
     }
     const progress=active(slash.elapsed);this.swing=progress>0&&progress<1?.15*(1-progress):0;
     if(slash.elapsed>=f.windup+f.active+f.recovery){
@@ -525,7 +537,7 @@ class Arena extends Phaser.Scene {
     if(!canFinish(this.enemyState==='downed',this.finishRemaining,Phaser.Math.Distance.Between(this.p.x,this.p.y,this.e.x,this.e.y)))return;
     this.executionFlash=0.65;this.finishRemaining=0;this.enemyState='dead';this.technique=null;this.slash=null;this.swing=0.15;
     this.mode='won';this.wins++;
-    if(IS_SELECTION){this.run={...this.run,health:this.hp,potions:this.potionCount,cleared:true};this.saveRun();}
+    if(IS_SELECTION){const award=awardTrialXP(this.progression,this.run.stage);this.run={...this.run,progress:award.progress};if(award.levels){this.hp=this.playerStats.health;this.floatText(this.p.x,this.p.y-105,`LEVEL ${award.progress.level} · HEALTH RESTORED`,'#f0dda4','#243d26',18);}this.labMessage=award.gained?`+${award.gained} XP${award.levels?' · Level up! Full health · 3 stat points earned':''}`:'Practice clear · XP already earned';this.run={...this.run,health:this.hp,potions:this.potionCount,cleared:true};this.saveRun();}
     this.floatText(this.e.x,this.e.y-85,'DECAPITATED','#d6faff','#183544',18);
     this.onDemonDefeated();this.endDelay+=0.65;
   }
@@ -537,7 +549,7 @@ class Arena extends Phaser.Scene {
     if(this.formCooldowns[id]>0) {this.labMessage='This form is cooling down.';return;}
     if(this.breath<tuning.stamina) {this.labMessage='Not enough Breath — recover before casting.';return;}
     this.breath-=tuning.stamina;this.formCooldowns[id]=tuning.cooldown;
-    this.technique={id,elapsed:0,angle:this.angle,hit:false,damage:tuning.damage,reach:tuning.reach};
+    this.technique={id,elapsed:0,angle:this.angle,hit:false,damage:Math.round(tuning.damage*this.playerStats.form),reach:tuning.reach};
     this.labMessage=`${IS_SELECTION&&PROFILE?STARTERS[PROFILE.style].forms[id==='surface'?0:1]:WATER_FORMS[id].name} · windup`;
   }
   private updateTechnique(dt:number) {
@@ -609,7 +621,7 @@ class Arena extends Phaser.Scene {
       const velocity=this.technique?move.clone().scale(R.speed*.35):this.dodge>0?this.dodgeVector.clone().scale(R.dodgeSpeed):move.scale(R.speed);
       this.movePlayer(velocity.x*dt,velocity.y*dt);
       const invulnerable=this.dodge>0;
-      this.dodge=Math.max(0,this.dodge-dt);if(!invulnerable&&!this.technique)this.stamina=Math.min(100,this.stamina+R.staminaRegen*dt);
+      this.dodge=Math.max(0,this.dodge-dt);if(!invulnerable&&!this.technique)this.stamina=Math.min(this.playerStats.stamina,this.stamina+R.staminaRegen*dt);
       if(this.consumePress('J'))this.attack();
       this.comboWindow=Math.max(0,this.comboWindow-dt);
       if(!this.technique)this.breath=Math.min(this.maxBreath,this.breath+(IS_SELECTION?(this.moving?8:14):(this.moving?12:24))*dt);
@@ -716,6 +728,7 @@ class Arena extends Phaser.Scene {
 
   private sync() {
     if(IS_SELECTION&&PROFILE){
+      document.querySelector('#forest-recruit')!.textContent=`${PROFILE.name} · Level ${this.progression.level}`;const xp=document.querySelector('#progress-xp');if(xp)xp.textContent=`${this.progression.level===50?'LEVEL CAP':`${this.progression.xp} / ${nextLevelXP(this.progression.level)} XP`} · ${this.progression.points} stat points`;const stats=document.querySelector<HTMLButtonElement>('#open-stats');if(stats){stats.textContent=`Stats · ${this.progression.points}`;stats.disabled=this.cinematicActive||this.mode==='lost';}
       const title=this.run.passed?'Final Selection passed':this.mode==='won'?(this.isBoss?'The Hand Demon falls':'Encounter cleared'):this.mode==='lost'?'Your trial is not over':!this.trialCombat?'Reach the training clearing':this.enemyState==='downed'?'Finish the demon · F':'Face the demon';
       document.querySelector('#trial-objective')!.textContent=`${Math.min(this.run.stage+1,4)} / 4 · ${this.run.stage>0&&this.mode==='playing'&&this.enemyState!=='downed'?this.stage.title:title}`;
       const next=document.querySelector<HTMLButtonElement>('#continue-trial');if(next){next.hidden=!this.isBoss||this.mode!=='won'||this.endDelay>0||this.run.passed;next.textContent=this.isBoss?'Greet the dawn →':'Continue trial →';}
@@ -729,8 +742,8 @@ class Arena extends Phaser.Scene {
 
     document.querySelector<HTMLProgressElement>('#breath')!.max=this.maxBreath;document.querySelector<HTMLProgressElement>('#breath')!.value=this.breath;document.querySelector('#bp')!.textContent=`${Math.floor(this.breath)} / ${this.maxBreath}`;
     document.querySelector('#form-status')!.textContent=`${this.labMessage} · cooldown ${this.formCooldowns[this.selectedForm].toFixed(1)}s`; 
-    document.querySelector<HTMLProgressElement>('#health')!.value=this.hp;document.querySelector('#hp')!.textContent=`${this.hp} / 100`;
-    document.querySelector<HTMLProgressElement>('#stamina')!.value=this.stamina;document.querySelector('#sp')!.textContent=`${Math.floor(this.stamina)} / 100`;
+    document.querySelector<HTMLProgressElement>('#health')!.max=this.playerStats.health;document.querySelector<HTMLProgressElement>('#health')!.value=this.hp;document.querySelector('#hp')!.textContent=`${this.hp} / ${this.playerStats.health}`;
+    document.querySelector<HTMLProgressElement>('#stamina')!.max=this.playerStats.stamina;document.querySelector<HTMLProgressElement>('#stamina')!.value=this.stamina;document.querySelector('#sp')!.textContent=`${Math.floor(this.stamina)} / ${this.playerStats.stamina}`;
     const messages={ready:'Enter the arena to begin.',playing:'Read the attack pose. Dodge, strike, then approach and press F to finish.',paused:'Paused — resume when you’re ready.',lost:'You fell in training. Reset and try another approach.',won:'Encounter cleared. Reset to practice again.'};
     document.querySelector('#status')!.textContent=messages[this.mode];document.querySelector('#score')!.textContent=`DEMONS DEFEATED ${String(this.wins).padStart(2,'0')}`;
     document.querySelector('#start')!.textContent=this.mode==='playing'||this.traveling?'Pause encounter':this.mode==='paused'?'Resume':IS_SELECTION?'Enter forest':'Enter the arena ↗';

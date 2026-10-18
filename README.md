@@ -59,3 +59,7 @@ Added a short controls introduction, vertical exploration loops with two finite 
 The crow ceremony now leads to headquarters: five destination introductions, a personal room/save journal, read-only starting forms and a practice-sandbox return path. See HEADQUARTERS-CHECKPOINT.md.
 
 Headquarters artwork now includes tiled-roof/shoji detail, clustered wisteria, a stone-edged koi pond, textured room materials and a shared detailed Kasugai crow. See [art refinement notes](HEADQUARTERS-ART-01.md). Typography uses local/system fallbacks without remote font imports.
+
+## Leveling and stats
+
+Finished tutorial encounters now grant one-time XP. Level-ups restore health and grant three stat points for Vitality, Endurance, Strength or Focus. Open **Stats** in the tutorial or **Character stats** in headquarters. A new recruit reaches level 3 before the Hand Demon and level 4 after it. Replay retains growth without repeating XP rewards; older saves receive encounter credit. See [progression rules and playtest guidance](PROGRESSION-01.md). Form skill points and purchases remain future work.

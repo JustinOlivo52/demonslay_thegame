@@ -1,7 +1,7 @@
 export const INTRO_PANELS=[
  {title:'Beyond the wisteria',text:'You have trained for this night. Enter Mount Fujikasane, survive its demons, and return at dawn to join the Demon Slayer Corps. The route branches: look beyond the main trail, but choose your battles carefully.'},
  {title:'Steel, Breath, and resolve',text:'WASD moves. Aim with the mouse; click or J chains three sword cuts. Space dodges using stamina. Press 1 / 2, numpad, or a form card to cast; Q repeats your last form. Your level-one forms spend 32 / 46 Breath. Use ordinary cuts while recovering.'},
- {title:'Survive to see the dawn',text:'When a demon reaches zero vitality, approach and press F within four seconds to decapitate it. Otherwise it fully recovers. H drinks a potion; E collects nearby supplies. You start with one potion. Only two more are hidden on this mountain. Keep moving when the demon raises its claws.'},
+ {title:'Survive to see the dawn',text:'When a demon reaches zero vitality, approach and press F within four seconds to decapitate it. Otherwise it fully recovers. H drinks a potion; E collects nearby supplies. You start with one potion. Only two more are hidden on this mountain. Finished encounters grant XP. Leveling up restores health and grants three stat points; open Stats to spend them. Keep moving when the demon raises its claws.'},
 ] as const;
 export const CEREMONY_PANELS=[
  {title:'The seventh dawn',text:'The nights become a blur of cold paths and drawn steel. When dawn finally reaches the wisteria, you return to the meeting ground. Other exhausted recruits emerge beside you. For a moment, nobody speaks.'},
