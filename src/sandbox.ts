@@ -1,3 +1,6 @@
+import {FormsMenu} from './forms-menu';
+import {THUNDER_FORMS,thunderPhase,thunderProgress,thunderAdvance,thunderHits,thunderHitIndex} from './thunder';
+import {thunderImage,recruitColumn} from './recruit-palette';
 import {freshProgression,awardTrialXP,spendStat,attributes,nextLevelXP,type Stat} from './progression';
 import {StatsPanel} from './stats-panel';
 import Phaser from 'phaser';
@@ -16,12 +19,19 @@ import PIXEL_ANCHORS from './pixel-anchors.json';
 import { FINISHER, canFinish } from './finisher';
 import { RULES as R, SWORD_COMBO, comboIndex, breathCapacity } from './combat';
 import { RIG } from './rig';
-import { WATER_FORMS, phaseAt, activeProgress, advanceBetween, formHits, type WaterId } from './water';
+import { WATER_FORMS as BASE_WATER_FORMS, phaseAt as waterPhase, activeProgress as waterProgress, advanceBetween as waterAdvance, formHits as waterHits, type WaterId } from './water';
 import './style.css';
 import './forest.css';
 
 const IS_SELECTION=new URLSearchParams(location.search).has('selection');
 const PROFILE=(()=>{try{return readCharacter(localStorage.getItem(SAVE_KEY));}catch{return null;}})();
+
+const ACTIVE_STYLE=IS_SELECTION?PROFILE?.style||'water':new URLSearchParams(location.search).get('style')==='thunder'?'thunder':'water';
+const WATER_FORMS=ACTIVE_STYLE==='thunder'?THUNDER_FORMS:BASE_WATER_FORMS;
+const phaseAt=(id:WaterId,t:number)=>ACTIVE_STYLE==='thunder'?thunderPhase(id,t):waterPhase(id,t);
+const activeProgress=(id:WaterId,t:number)=>ACTIVE_STYLE==='thunder'?thunderProgress(id,t):waterProgress(id,t);
+const advanceBetween=(id:WaterId,a:number,b:number)=>ACTIVE_STYLE==='thunder'?thunderAdvance(id,a,b):waterAdvance(id,a,b);
+const formHits=(id:WaterId,t:number,px:number,py:number,a:number,ex:number,ey:number)=>ACTIVE_STYLE==='thunder'?thunderHits(id,t,px,py,a,ex,ey):waterHits(id,t,px,py,a,ex,ey);
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 <header><a class="wordmark" href="./"><span class="kanji">夜</span> <span>NIGHTFALL</span></a><span class="build">PIXEL COMPARISON / EXPERIMENT</span></header>
@@ -29,6 +39,9 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 <div class="layout"><section class="game-panel"><div class="arena-heading"><span>01 — WISTERIA TRAINING GROUNDS</span><span>NIGHT / PRACTICE</span></div><div id="game" tabindex="0" aria-label="Combat arena. WASD to move, mouse to aim, click or J to attack, Space to dodge, Escape to pause."></div><div class="arena-footer"><span id="status" role="status">Enter the arena to begin.</span><span id="score">DEMONS DEFEATED 00</span></div></section>
 <aside><section class="lab"><p class="eyebrow">WATER TECHNIQUE LAB</p><label for="form-select">Equipped form</label><select id="form-select"><option value="surface">1 · Water Surface Slash</option><option value="wheel">2 · Water Wheel</option></select><button id="cast" class="secondary">Use form · Q</button><button id="replay" class="secondary">Reset + demonstrate form</button><label><input type="checkbox" id="dummy" checked> Stationary target (no attacks)</label><label><input type="checkbox" id="hitboxes" checked> Show hitboxes</label><label><input type="checkbox" id="slow"> Slow motion · ¼ speed</label><p id="form-status" role="status"></p><details><summary>Tune selected form</summary><label>Damage <input id="tune-damage" type="number" min="1" max="125" step="1"></label><label>Reach <input id="tune-reach" type="number" min="30" max="160" step="1"></label><label>Breath cost <input id="tune-stamina" type="number" min="0" max="100" step="1"></label><label>Cooldown (s) <input id="tune-cooldown" type="number" min="0.5" max="10" step="0.1"></label><p>Timing uses fixed windup / active / recovery phases for this first test. Changes apply to the next cast.</p></details><p>Blue outline = damage area during active frames. Surface Slash uses new sprite poses. Wheel remains a motion prototype; this sheet has no somersault frames.</p></section><p class="eyebrow">YOUR LOADOUT</p><h2>Slayer recruit</h2><p class="muted">Level 1 · Combat foundation</p><div class="resource"><div>Vitality <span id="hp">100 / 100</span></div><progress id="health" max="100" value="100"></progress></div><div class="resource"><div>Stamina <span id="sp">100 / 100</span></div><progress id="stamina" max="100" value="100"></progress></div><hr><p class="eyebrow">CONTROLS</p><dl><dt><kbd>W A S D</kbd></dt><dd>Move</dd><dt><kbd>MOUSE</kbd></dt><dd>Aim</dd><dt><kbd>CLICK</kbd> / <kbd>J</kbd></dt><dd>Sword attack</dd><dt><kbd>SPACE</kbd></dt><dd>Dodge · 28 stamina</dd><dt><kbd>F</kbd></dt><dd>Finish vulnerable demon</dd><dt><kbd>ESC</kbd></dt><dd>Pause</dd></dl><button id="start">Enter the arena <span>↗</span></button><button id="retry" class="secondary">Reset encounter</button><p class="tip">Read the demon’s pose to dodge melee attacks. At zero HP, approach and press F within four seconds to finish it before full regeneration.</p></aside></div>
 <section class="notes"><div><p class="eyebrow">PLAYTEST 01</p><h3>Does the fight feel right?</h3></div><p>Try moving diagonally, dodging a strike, and attacking from different angles. Then tell us what feels responsive, confusing, or unfair.</p><span>Next checkpoint<br><strong>Breathing forms</strong></span></section></main><footer>Personal fan-game prototype · Original character art <span>Keyboard + mouse required</span></footer>`;
+
+if(!IS_SELECTION){const links=document.createElement('p');links.innerHTML='<a href="?sandbox=1">Water lab</a> · <a href="?sandbox=1&style=thunder">Thunder lab</a>';document.querySelector('.lab')!.prepend(links);}
+if(ACTIVE_STYLE==='thunder'){document.querySelector('.lab .eyebrow')!.textContent='THUNDER TECHNIQUE LAB';document.querySelectorAll<HTMLOptionElement>('#form-select option').forEach((o,i)=>o.textContent=`${i+1} · ${STARTERS.thunder.forms[i]}`);document.querySelector('.lab>p:last-child')!.textContent='Thunderclap: grounded charge, fast straight dash. Rice Spirit: five timed cuts. Test collision, Breath and hit timing.';}
 
 if(!IS_SELECTION&&new URLSearchParams(location.search).get('from')==='hub'){const back=document.createElement('a');back.href='?hub=1';back.textContent='← Return to headquarters';back.style.cssText='color:#d8d0af;margin-left:20px;font-size:12px';document.querySelector('header')!.append(back);}
 
@@ -254,9 +267,10 @@ class Arena extends Phaser.Scene {
   private strikeAnim = 0; private aim = new Phaser.Math.Vector2();
   private selectedForm: WaterId = 'surface';
   private trainingDummy = true; private showHitboxes = true; private slowMotion = false;
-  private technique: {id: WaterId; elapsed: number; angle: number; hit: boolean; damage: number; reach: number} | null = null;
+  private technique: {id: WaterId; elapsed: number; angle: number; hit: boolean; damage: number; reach: number;hitIndices:number[];origin:{x:number;y:number}} | null = null;
   private formCooldowns = {surface: 0, wheel: 0};
   private tuning = {surface: {damage: 35, reach: 95, stamina: IS_SELECTION?noviceBreathCost('surface'):20, cooldown: IS_SELECTION?1.8:1.4}, wheel: {damage: 45, reach: 70, stamina: IS_SELECTION?noviceBreathCost('wheel'):32, cooldown: IS_SELECTION?3.2:2.5}};
+  private tuneThunder(){if(ACTIVE_STYLE==='thunder')for(const id of ['surface','wheel'] as const){const f=THUNDER_FORMS[id];this.tuning[id]={damage:f.damage,reach:f.reach,stamina:f.stamina,cooldown:f.cooldown};}}
   private labMessage = '1 / 2 or click to cast · Q repeats';
   private pixelHead!: Phaser.GameObjects.Sprite;
   private finishTest = new URLSearchParams(location.search).has('finishTest');
@@ -283,6 +297,7 @@ class Arena extends Phaser.Scene {
     for (const key of ['slayer-body', 'slayer-leg-l', 'slayer-leg-r', 'slayer-full', 'demon', 'katana']) this.load.image(key, `art/${key}.png`);
   }
   create() {
+    this.tuneThunder();if(ACTIVE_STYLE==='thunder')for(const key of ['profile-idle','profile-motion','profile-run','pixel-sheet']){const source=this.textures.get(key).getSourceImage() as HTMLImageElement;const canvas=thunderImage(source);this.textures.remove(key);this.textures.addCanvas(key,canvas);}
     const sheet=this.textures.get('pixel-sheet');
     const source=sheet.getSourceImage() as HTMLImageElement;
     const cellW=Math.floor(source.width/4),cellH=Math.floor(source.height/4);
@@ -404,6 +419,7 @@ class Arena extends Phaser.Scene {
         onReplay:()=>{this.run=newRun(PROFILE?profileKey(PROFILE):'',this.progression);this.saveRun();this.openIntro(true);}});
       this.statsPanel=new StatsPanel({read:()=>this.progression,spend:stat=>this.allocateStat(stat),modal:open=>{this.cinematicActive=open;this.presses.clear();for(const key of Object.values(this.keys))key.reset();if(!open){this.sync();document.querySelector<HTMLElement>('#game')!.focus();}}});
       const statsButton=document.createElement('button');statsButton.id='open-stats';statsButton.textContent='Stats';statsButton.addEventListener('click',()=>{if(!this.cinematicActive&&this.mode!=='lost')this.statsPanel.show();});document.querySelector('#forest-actions')!.append(statsButton);
+      const forms=new FormsMenu(PROFILE?.style||'water',()=>this.progression.level,open=>{this.cinematicActive=open;this.presses.clear();for(const key of Object.values(this.keys))key.reset();if(!open){this.sync();document.querySelector<HTMLElement>('#game')!.focus();}});const formsButton=document.createElement('button');formsButton.id='open-forms';formsButton.textContent='Form catalog';formsButton.addEventListener('click',()=>{if(!this.cinematicActive&&this.mode!=='lost')forms.show();});document.querySelector('#forest-actions')!.append(formsButton);
       const xp=document.createElement('p');xp.id='progress-xp';document.querySelector('.forest-vitals')!.append(xp);
       const help=document.createElement('button');help.id='tutorial-help';help.textContent='How to play';help.addEventListener('click',()=>this.openIntro(false));document.querySelector('#forest-actions')!.append(help);
       this.potionCount=this.run.potions;if(this.run.passed)this.showPassed();else{this.p=trainingSpawn(this.run.stage);this.e=trainingDemon(this.run.stage);if(this.run.cleared)this.reset();this.player.setPosition(this.p.x,this.p.y+24);this.cameras.main.centerOn(this.p.x,this.p.y);}
@@ -549,7 +565,7 @@ class Arena extends Phaser.Scene {
     if(this.formCooldowns[id]>0) {this.labMessage='This form is cooling down.';return;}
     if(this.breath<tuning.stamina) {this.labMessage='Not enough Breath — recover before casting.';return;}
     this.breath-=tuning.stamina;this.formCooldowns[id]=tuning.cooldown;
-    this.technique={id,elapsed:0,angle:this.angle,hit:false,damage:Math.round(tuning.damage*this.playerStats.form),reach:tuning.reach};
+    this.technique={id,elapsed:0,angle:this.angle,hit:false,damage:Math.round(tuning.damage*this.playerStats.form),reach:tuning.reach,hitIndices:[],origin:{...this.p}};
     this.labMessage=`${IS_SELECTION&&PROFILE?STARTERS[PROFILE.style].forms[id==='surface'?0:1]:WATER_FORMS[id].name} · windup`;
   }
   private updateTechnique(dt:number) {
@@ -566,8 +582,9 @@ class Arena extends Phaser.Scene {
       // Scale target offsets so formHits uses the tunable reach, including in debug display.
       let hit=formHits(cast.id,sample,this.p.x,this.p.y,cast.angle,this.p.x+dx*originalReach/cast.reach,this.p.y+dy*originalReach/cast.reach);
       if(IS_SELECTION&&PROFILE?.style==='flame')hit=phaseAt(cast.id,sample)==='active'&&Math.hypot(dx,dy)<=cast.reach&&Math.abs(Phaser.Math.Angle.Wrap(Math.atan2(dy,dx)-cast.angle))<=1.15;
-      if(!cast.hit && this.enemyState!=='dead' && this.enemyState!=='downed' && hit) {
-        cast.hit=true;this.ehp=Math.max(0,this.ehp-cast.damage);this.onSwordHit(cast.damage);
+      const hitIndex=ACTIVE_STYLE==='thunder'?thunderHitIndex(cast.id,sample):0;
+      if((ACTIVE_STYLE==='thunder'?hitIndex>=0&&!cast.hitIndices.includes(hitIndex):!cast.hit) && this.enemyState!=='dead' && this.enemyState!=='downed' && hit) {
+        cast.hit=true;cast.hitIndices.push(hitIndex);this.ehp=Math.max(0,this.ehp-cast.damage);this.onSwordHit(cast.damage);
         if(this.ehp===0)this.downDemon();
       }
     }
@@ -760,6 +777,15 @@ class Arena extends Phaser.Scene {
     const cast=this.technique;if(!cast)return;
     const phase=phaseAt(cast.id,cast.elapsed), progress=activeProgress(cast.id,cast.elapsed);
     const x=this.p.x,y=this.p.y;
+    if(ACTIVE_STYLE==='thunder'){
+      if(phase==='windup'){const charge=cast.elapsed/WATER_FORMS[cast.id].windup;o.lineStyle(2,0xf5ca54,.5+charge*.4);for(let i=0;i<3;i++){const xx=x-20+i*18;o.lineBetween(xx,y+20,xx+7,y+10);o.lineBetween(xx+7,y+10,xx+3,y+3);}}
+      if(phase==='active'||phase==='recovery'){
+        const fade=phase==='active'?1:Math.max(0,1-(cast.elapsed-WATER_FORMS[cast.id].windup-WATER_FORMS[cast.id].active)/WATER_FORMS[cast.id].recovery);
+        const bolt=(ax:number,ay:number,bx:number,by:number,width:number)=>{for(const [w,color,alpha] of [[width+6,0xc68c25,.14],[width+2,0xffdb65,.7],[width,0xfff4c2,1]]){o.lineStyle(w,color,alpha*fade);o.beginPath();o.moveTo(ax,ay);for(let j=1;j<=8;j++){const t=j/8,off=j===8?0:(j%2?5:-5);o.lineTo(ax+(bx-ax)*t-Math.sin(cast.angle)*off,ay+(by-ay)*t+Math.cos(cast.angle)*off);}o.strokePath();}};
+        if(cast.id==='surface'){bolt(cast.origin.x,cast.origin.y-6,x+Math.cos(cast.angle)*cast.reach,y+Math.sin(cast.angle)*cast.reach-6,3);o.lineStyle(2,0xe8bb4f,.7*fade);for(let i=0;i<4;i++){const side=(i-1.5)*7;o.lineBetween(cast.origin.x-Math.sin(cast.angle)*side,cast.origin.y+Math.cos(cast.angle)*side,x-Math.sin(cast.angle)*side,y+Math.cos(cast.angle)*side);}}
+        else{const stroke=Math.min(4,Math.floor(progress*5));for(let i=Math.max(0,stroke-1);i<=stroke;i++){const a=cast.angle-.7+i*.35;bolt(x+Math.cos(a-.7)*20,y+Math.sin(a-.7)*20,x+Math.cos(a)*cast.reach,y+Math.sin(a)*cast.reach,2);o.lineStyle(2,0xffe69d,.8*fade);o.beginPath();o.arc(x,y,cast.reach-10,cast.angle-.9,cast.angle+.9);o.strokePath();}}
+      }return;
+    }
     if(phase==='windup') {l.lineStyle(2,0x92e7ff,0.65);l.strokeCircle(x,y,18+cast.elapsed*45);}
     if(phase==='active' && (IS_SELECTION||Boolean(cast.id==='wheel'))) {
       if(cast.id==='surface'||(IS_SELECTION&&PROFILE?.style==='flame')) {
@@ -868,7 +894,7 @@ class Arena extends Phaser.Scene {
     if(this.swing>0){
       const a=this.swing/.15,cut=this.slash?.index??0,reach=SWORD_COMBO[cut].reach;
       const direction=this.slash?.angle??this.angle;
-      const accent=IS_SELECTION&&PROFILE?.style==='flame'?0xffbd76:0xa5e2ed;
+      const accent=ACTIVE_STYLE==='thunder'?0xffdf8a:IS_SELECTION&&PROFILE?.style==='flame'?0xffbd76:0xa5e2ed;
       const visualAngle=direction+(cut===1?-.18:cut===2?.12:0);
       this.crescent(o,this.p.x,this.p.y,visualAngle,reach,cut===2?24:14,0xe8f7ff,.8*a);
       this.crescent(l,this.p.x,this.p.y,visualAngle,reach+2,8,accent,.6*a);
@@ -904,7 +930,7 @@ class Arena extends Phaser.Scene {
     this.pixelHead.setVisible(separated&&demonShown).setFrame(demonFrame).setScale(this.demonSize/SPRITE_REGIONS['pixel-demon'].cellHeight).setOrigin(SPRITE_REGIONS['pixel-demon'].frames[demonFrame].ox,1).setFlipX(demonFacing>0)
       .setPosition(Math.round(this.e.x+Math.max(0,0.4-this.executionFlash)*55),Math.round(eFeet-Math.max(0,0.4-this.executionFlash)*35))
       .setDepth(2+eFeet/1000+0.001).setAlpha(this.deathFade/1.1).setCrop(0,0,df.realWidth,df.realHeight*0.36);
-    if(this.hitFlash>0)this.pixelDemon.setTintFill(0xffffff);else this.pixelDemon.clearTint();
+    if(this.hitFlash>0){if(ACTIVE_STYLE==='thunder')this.pixelDemon.setTint(0xffe3a4);else this.pixelDemon.setTintFill(0xffffff);}else this.pixelDemon.clearTint();
     const cast=this.technique;
     let frame=this.moving ? 4+Math.floor(this.clock*10)%4 : Math.floor(this.clock*4)%4;
     if(this.swing>0)frame=8+Math.min(3,Math.floor((1-this.swing/0.15)*4));
@@ -920,10 +946,10 @@ class Arena extends Phaser.Scene {
 
     if(IS_SELECTION&&PROFILE){
       this.pixelActor.setVisible(false);this.pixelDemon.setVisible(demonShown);this.label.setVisible(this.enemyState!=='dead');
-      const col=(PROFILE.style==='flame'?2:0)+(PROFILE.body==='female'?1:0);
+      const col=recruitColumn(PROFILE.style,PROFILE.body);
       let key='profile-idle',pf=col;
       if(this.moving){key='profile-run';const cycle=[0,1,2,3,4,1];pf=cycle[gaitFrame(this.walk,6,88)]*4+col;}
-      if(cast){key='profile-motion';pf=(phaseAt(cast.id,cast.elapsed)==='windup'?2:3)*4+col;}
+      if(cast){key='profile-motion';pf=(phaseAt(cast.id,cast.elapsed)==='windup'?2:ACTIVE_STYLE==='thunder'&&cast.id==='wheel'&&phaseAt(cast.id,cast.elapsed)==='active'?(Math.floor(activeProgress(cast.id,cast.elapsed)*5)%2?2:3):3)*4+col;}
       else if(this.slash){key='profile-motion';const f=SWORD_COMBO[this.slash.index];pf=(this.slash.elapsed<f.windup?2:this.slash.elapsed<f.windup+f.active?3:0)*4+col;}
       else if(this.executionFlash>0){key='profile-motion';pf=3*4+col;}
       this.profileActor.setTexture(key,pf);
@@ -938,6 +964,7 @@ class Arena extends Phaser.Scene {
       this.profileActor.setPosition(Math.round(this.p.x),Math.round(pFeet-(this.dodge>0?2:0))).setFlipX(facing<0).setDepth(pDepth+0.002).setVisible(!lost);
       this.profileActor.setCrop();
       if(this.moving&&!cast&&!this.slash&&this.dodge===0&&this.executionFlash===0){const f=this.profileActor.frame;this.profileActor.setCrop(0,0,f.realWidth,f.realHeight*.74);this.drawGroundedLegs(u,this.p.x,pFeet,this.walk,this.lastMove,0x1b222a,true);}
+      if(ACTIVE_STYLE==='thunder'&&cast?.id==='surface'&&phaseAt(cast.id,cast.elapsed)==='active')for(let i=0;i<3;i++){this.ghostPool[i].setTexture(this.profileActor.texture.key,pf).setOrigin(this.profileActor.originX,this.profileActor.originY).setScale(this.profileActor.scaleX,this.profileActor.scaleY).setPosition(this.p.x-Math.cos(cast.angle)*(i+1)*26,pFeet-Math.sin(cast.angle)*(i+1)*26).setRotation(0).setFlipX(facing<0).setAlpha(.18-i*.04).setTint(0xe8c571).setDepth(pDepth-.01).setVisible(true);}
       if(this.playerFlash>0)this.profileActor.setTintFill(0xffffff);else this.profileActor.clearTint();
       this.interactLabel.setVisible(false);
       for(const item of SUPPLIES){if(this.run.pickups?.includes(item.id))continue;const x=regionOffset(item.stage)+item.x,y=item.y+24;u.fillStyle(0x322b24);u.fillRect(x-10,y-12,20,13);u.fillStyle(0x947754);u.fillRect(x-11,y-15,22,5);o.fillStyle(0xcbe3b1,.8);o.fillRect(x-3,y-19,6,8);if(!this.cinematicActive&&Math.hypot(this.p.x-x,this.p.y-item.y)<60)this.interactLabel.setPosition(x,item.y-4).setText('E · Collect healing potion').setVisible(true);}
@@ -952,7 +979,7 @@ class Arena extends Phaser.Scene {
       const frame=this.bossSprite.frame,cut=frame.realHeight*.34;
       this.bossHead.setVisible(separated&&demonShown).setFrame(bf).setPosition(this.e.x+(0.4-this.executionFlash)*45,eFeet).setFlipX(demonFacing>0).setDepth(2+eFeet/1000+.001).setAlpha(this.deathFade/1.1).setCrop(0,0,frame.realWidth,cut);
       if(separated)this.bossSprite.setCrop(0,cut,frame.realWidth,frame.realHeight-cut);
-      if(this.hitFlash>0)this.bossSprite.setTintFill(0xffffff);else this.bossSprite.clearTint();
+      if(this.hitFlash>0){if(ACTIVE_STYLE==='thunder')this.bossSprite.setTint(0xffe3a4);else this.bossSprite.setTintFill(0xffffff);}else this.bossSprite.clearTint();
     }else{this.bossSprite.setVisible(false);this.bossHead.setVisible(false);}
     const px=this.aim.x,py=this.aim.y;
     t.lineStyle(1.5,0xd9c8f5,0.85);t.strokeCircle(px,py,7);

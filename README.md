@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open port **5173** from the Ports tab. Create/save a recruit, choose Water or Flame and select **Enter Final Selection**. Existing recruits can enter directly at `/?selection=1`.
+Open port **5173** from the Ports tab. Create/save a recruit, choose Water, Flame or Thunder and select **Enter Final Selection**. Existing recruits can enter directly at `/?selection=1`.
 
 The condensed tutorial includes connected forest exploration, three lesser-demon encounters, a Hand Demon boss, scarce healing, timed finishing and a survivor/Kasugai-crow ceremony. Progress saves between encounters. After receiving the crow, enter the walkable Corps headquarters. See [headquarters controls and scope](HEADQUARTERS-CHECKPOINT.md).
 
@@ -63,3 +63,7 @@ Headquarters artwork now includes tiled-roof/shoji detail, clustered wisteria, a
 ## Leveling and stats
 
 Finished tutorial encounters now grant one-time XP. Level-ups restore health and grant three stat points for Vitality, Endurance, Strength or Focus. Open **Stats** in the tutorial or **Character stats** in headquarters. A new recruit reaches level 3 before the Hand Demon and level 4 after it. Replay retains growth without repeating XP rewards; older saves receive encounter credit. See [progression rules and playtest guidance](PROGRESSION-01.md). Form skill points and purchases remain future work.
+
+## Incremental breathing styles
+
+Thunder joins Water and Flame as a playable starter choice, with Thunderclap and Flash, five-strike Rice Spirit, gold cloth styling and Jigoro Kuwajima's former-Hashira introduction. Open **Form catalog** during selection to view the chosen style's remaining forms and level requirements; higher-form purchases/casts are not implemented. A separate Thunder lab is available at `/?sandbox=1&style=thunder`. See [style sequence and Thunder scope](BREATHING-STYLES-ROADMAP.md).
