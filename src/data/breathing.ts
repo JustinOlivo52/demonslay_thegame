@@ -1,4 +1,4 @@
-import catalog from './breathing-catalog.json';
+import catalog from './breathing-catalog.json' with {type:'json'};
 
 export const BREATHING_STYLES = catalog;
 export type StyleId = typeof catalog[number]['id'];

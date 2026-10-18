@@ -76,3 +76,7 @@ A crow-gated courtyard now connects the passing ceremony to Corps life. The room
 ## Character progression foundation
 
 Tutorial finishers now grant one-time XP, with level-ups after encounters two/three and the boss. Level-up restores HP and grants three character stat points; Vitality/Endurance/Strength/Focus affect real combat. The framework caps at 50, while current tutorial rewards reach level 4. Save migration credits prior clears, and replay retains progression without duplicate XP. Breathing-form skill points, purchase/upgrade budgets, further unlocks, mission XP and Hashira promotion remain separate unfinished milestones. See PROGRESSION-01.md.
+
+## Incremental style expansion
+
+Owner requested the remaining breathing styles one at a time for visual quality. Thunder is the next implemented starter after Water/Flame: two distinct forms, golden cloth treatment, former-Hashira instructor context and complete reference form list. Future first passes follow BREATHING-STYLES-ROADMAP.md, beginning with Wind after Thunder feedback. All 14 styles exist in catalog data; only reviewed starter implementations become selectable. Higher forms require the later purchase/animation work; Sun and Moon remain special-mission level-30 paths.

@@ -1,0 +1,4 @@
+/** Runtime cloth palette variant; shared poses, skin, hair and black uniform remain intact. */
+export function thunderCloth(data:Uint8ClampedArray){for(let i=0;i<data.length;i+=4){const r=data[i],g=data[i+1],b=data[i+2];if(data[i+3]&&b>r+12&&b>g-5&&g>r+2){const light=Math.max(r,g,b)/255;data[i]=Math.round(70+175*light);data[i+1]=Math.round(41+151*light);data[i+2]=Math.round(20+66*light);}}}
+export function thunderImage(image:HTMLImageElement|HTMLCanvasElement){const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const c=canvas.getContext('2d')!;c.imageSmoothingEnabled=false;c.drawImage(image,0,0);const pixels=c.getImageData(0,0,canvas.width,canvas.height);thunderCloth(pixels.data);c.putImageData(pixels,0,0);return canvas;}
+export function recruitColumn(style:string,body:string){return (style==='flame'?2:0)+(body==='female'?1:0);}

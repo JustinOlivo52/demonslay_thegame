@@ -44,3 +44,11 @@ Next personal review: intro clarity, optional-route navigation, limited supplies
 - [x] Tutorial XP, level-up health restore, three spendable stat points per level, character stats dialog, save migration and replay reward protection.
 - [ ] Justin: playtest level-3 Hand Demon difficulty and different Vitality/Endurance versus damage allocations. Replay retains stats; a new recruit identity starts at level 1.
 - [ ] Development: first mission XP/rewards, a separate breathing-form skill-point budget and purchases/upgrades. The level-50 framework is present; the playable tutorial currently ends at level 4.
+
+## Breathing-style passes
+
+- [x] Thunder: starter choice, two distinct techniques, gold runtime cloth palette, former-Hashira mentor, seven-form catalog.
+- [ ] Justin: judge Thunder's dash readability, five-cut Rice Spirit timing and outfit/effects in screenshots/video and playtest.
+- [ ] Development: apply Thunder feedback, then Wind, Mist and the remaining starter styles one at a time. See BREATHING-STYLES-ROADMAP.md.
+- [ ] Dedicated Thunder iai/sheathing frames and stronger five-cut body animation; current shared poses/palette are provisional.
+- [ ] Higher-form skill purchases and individual technique passes; Sun/Moon special paths remain reserved.
