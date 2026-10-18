@@ -80,3 +80,5 @@ Tutorial finishers now grant one-time XP, with level-ups after encounters two/th
 ## Incremental style expansion
 
 Owner requested the remaining breathing styles one at a time for visual quality. Thunder is the next implemented starter after Water/Flame: two distinct forms, golden cloth treatment, former-Hashira instructor context and complete reference form list. Future first passes follow BREATHING-STYLES-ROADMAP.md, beginning with Wind after Thunder feedback. All 14 styles exist in catalog data; only reviewed starter implementations become selectable. Higher forms require the later purchase/animation work; Sun and Moon remain special-mission level-30 paths.
+
+Wind is now implemented as the fourth starter first pass: advancing circular Dust Whirlwind Cutter and a stationary four-claw forward attack, green recruit palette, Sanemi association and nine-form catalog. Only its two granted forms are castable. Shared technique timing/geometry has been extracted to a registry with Water/Thunder regression coverage. Mist is the next style checkpoint.
