@@ -28,3 +28,7 @@ Next: owner playtest of navigation and scale, then the first crow-assigned missi
 ## Verification
 
 Pure tests cover earned-crow access, identity isolation, corrupted saves, visit uniqueness, save snapshots, collision and approaches to all five destinations. Browser verification uses completed tutorial save fixtures to check the ceremony-to-hub handoff and actual keyboard movement/interactions; it does not re-fight the tutorial. See the current team report for the final verification results.
+
+## Artwork update
+
+The initial blockout has received its first visual refinement: tiled roof depth, shoji/timber detailing, clustered wisteria, pond stones/koi, room textures and a shared detailed Kasugai crow. See HEADQUARTERS-ART-01.md. Navigation and save behavior remain the same; the camera shows more northern architecture.
