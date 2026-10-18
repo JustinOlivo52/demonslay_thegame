@@ -3,7 +3,9 @@ import {STARTERS,SAVE_KEY,createCharacter,makeBackstory,readCharacter,type Body,
 import './creation.css';
 import {RUN_KEY,readRun,profileKey} from './tutorial';
 
-if(new URLSearchParams(location.search).has('hub')) {
+if(new URLSearchParams(location.search).has('water-lab')) {
+ import('./water-lab');
+} else if(new URLSearchParams(location.search).has('hub')) {
  import('./hub');
 } else if(new URLSearchParams(location.search).has('selection')) {
  import('./selection');

@@ -3,7 +3,7 @@
 ## Agreed design
 
 - Top-down 2D action RPG; TypeScript + Phaser; browser first.
-- One active breathing style per character; choose Water or Flame in the current V1 opening.
+- One active breathing style per character; choose Water, Flame, Thunder or Wind in the current opening.
 - Two forms granted at level 1. All remaining forms become eligible at evenly spaced levels through 30. Eligibility is not ownership: spend skill points to purchase them.
 - Levels 31–50 emphasize increasingly expensive upgrades. A planned point budget and level-50 final upgrade requirement support maxing one style.
 - Level 50 unlocks a Hashira promotion trial; promotion is earned.
@@ -82,3 +82,7 @@ Tutorial finishers now grant one-time XP, with level-ups after encounters two/th
 Owner requested the remaining breathing styles one at a time for visual quality. Thunder is the next implemented starter after Water/Flame: two distinct forms, golden cloth treatment, former-Hashira instructor context and complete reference form list. Future first passes follow BREATHING-STYLES-ROADMAP.md, beginning with Wind after Thunder feedback. All 14 styles exist in catalog data; only reviewed starter implementations become selectable. Higher forms require the later purchase/animation work; Sun and Moon remain special-mission level-30 paths.
 
 Wind is now implemented as the fourth starter first pass: advancing circular Dust Whirlwind Cutter and a stationary four-claw forward attack, green recruit palette, Sanemi association and nine-form catalog. Only its two granted forms are castable. Shared technique timing/geometry has been extracted to a registry with Water/Thunder regression coverage. Mist is the next style checkpoint.
+
+## Full existing-style sets — current priority
+
+Complete Water, Flame, Thunder and Wind before adding Mist. Water now has eleven functional techniques in an isolated `?water-lab=1` sandbox. Normal play retains two granted forms. Later connect the stable catalog IDs to level eligibility through 30 and skill-point purchases/upgrades through 50. See [Water scope](../WATER-FORMS-COMPLETE.md).

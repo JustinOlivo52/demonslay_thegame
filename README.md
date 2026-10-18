@@ -26,6 +26,7 @@ WASD move · mouse aim · click/J sword · 1/2 cast form · Q repeat selected fo
 - `/`: character creation and saved recruit review.
 - `/?selection=1`: player-controlled tutorial.
 - `/?sandbox=1`: independent developer combat/technique sandbox.
+- `/?water-lab=1`: all eleven Water forms for independent testing; no character unlock/save changes.
 - `/?hub=1`: headquarters, unlocked by the current recruit’s completed selection save.
 - `/?selection=1&demo=1`: scripted tutorial demonstration; not normal player control.
 
@@ -38,7 +39,7 @@ Build output is in `dist/`. Codespaces configuration installs dependencies and f
 
 ## Current limits
 
-The tutorial uses four connected authored forest regions with optional branches; it is not a full campaign or seven-night simulation. Headquarters has a walkable courtyard and room/save journal; crow assignments, estate/Swordsmith travel, crafting and loadout editing remain future work. Backstories use local templates and enemy variety uses seeded rules; live AI services are not connected. No sound, accounts, cloud saves, weapon upgrades, XP progression or blocking yet. Browser-local progress can be lost if site data is cleared. Several animations still need dedicated directional frames.
+The tutorial uses four connected authored forest regions with optional branches; it is not a full campaign or seven-night simulation. Headquarters has a walkable courtyard and room/save journal; crow assignments, estate/Swordsmith travel, crafting and loadout editing remain future work. Backstories use local templates and enemy variety uses seeded rules; live AI services are not connected. No sound, accounts, cloud saves, weapon upgrades or general blocking yet. Browser-local progress can be lost if site data is cleared. Several animations still need dedicated directional frames.
 
 See [team report](report.md), [roadmap](docs/ROADMAP.md), [art direction](docs/ART-DIRECTION.md), and [next tasks](TO-DO.md). Older checkpoint notes record the project's earlier state.
 
@@ -68,4 +69,8 @@ Finished tutorial encounters now grant one-time XP. Level-ups restore health and
 
 Thunder joins Water and Flame as a playable starter choice, with Thunderclap and Flash, five-strike Rice Spirit, gold cloth styling and Jigoro Kuwajima's former-Hashira introduction. Open **Form catalog** during selection to view the chosen style's remaining forms and level requirements; higher-form purchases/casts are not implemented. A separate Thunder lab is available at `/?sandbox=1&style=thunder`. See [style sequence and Thunder scope](BREATHING-STYLES-ROADMAP.md).
 
-Wind is now the fourth starter: Dust Whirlwind Cutter and Claws-Purifying Wind, green recruit styling, Sanemi’s mentor introduction and nine-form reference list. Its independent lab is `/?sandbox=1&style=wind`. Mist is next in the incremental queue.
+Wind is now the fourth starter: Dust Whirlwind Cutter and Claws-Purifying Wind, green recruit styling, Sanemi’s mentor introduction and nine-form reference list. Its independent lab is `/?sandbox=1&style=wind`. Complete Water, Flame, Thunder and Wind before resuming Mist.
+
+## Complete Water prototype
+
+Open `/?water-lab=1` directly, or use **All eleven Water forms** in the sandbox navigation. Choose a form in the sidebar, aim with the mouse and press Q. This lab uses 1–9 to select, 0 for X and minus for XI; J attacks, Space dodges and F finishes. Enable AI attacks to test defense, or Yielding target for form V. Normal character ownership remains unchanged. See [all eleven rules and remaining animation work](WATER-FORMS-COMPLETE.md).

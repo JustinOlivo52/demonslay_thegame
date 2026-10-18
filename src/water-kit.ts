@@ -1,0 +1,30 @@
+import {WATER_FORMS} from './water.ts';
+export const WATER_ORDER=['surface','wheel','dance','tide','rain','whirlpool','ripple','basin','turbulent','flux','calm'] as const;
+export type WaterTechnique=typeof WATER_ORDER[number];
+export type Point={x:number;y:number};
+export type WaterDefinition={number:number;name:string;windup:number;active:number;recovery:number;stamina:number;cooldown:number;reach:number;halfArc:number;advance:number;hits:readonly number[];geometry:'fan'|'circle'|'impact'|'defense';note:string};
+export const WATER_KIT:Record<WaterTechnique,WaterDefinition>={
+ surface:{...WATER_FORMS.surface,number:1,hits:[35],geometry:'fan',note:'One clean horizontal cut across the forward arc.'},
+ wheel:{...WATER_FORMS.wheel,number:2,hits:[45],geometry:'circle',note:'An advancing circular cut. Somersault body frames remain a later art pass.'},
+ dance:{number:3,name:'Flowing Dance',windup:.18,active:.72,recovery:.28,stamina:34,cooldown:3,reach:85,halfArc:1.8,advance:200,hits:[16,16,16],geometry:'fan',note:'Three flowing cuts along an S-shaped advancing path. Each cut can connect once.'},
+ tide:{number:4,name:'Striking Tide',windup:.18,active:.64,recovery:.3,stamina:38,cooldown:3.6,reach:110,halfArc:1.3,advance:80,hits:[14,14,14,14],geometry:'fan',note:'Four rhythmic forward cuts with measured advancing steps.'},
+ rain:{number:5,name:'Blessed Rain After the Drought',windup:.25,active:.22,recovery:.32,stamina:28,cooldown:3,reach:80,halfArc:.9,advance:25,hits:[55],geometry:'fan',note:'A gentle, yielding-target-only cut. It cannot execute hostile demons; the normal F finish is still required at zero HP.'},
+ whirlpool:{number:6,name:'Whirlpool',windup:.2,active:.66,recovery:.34,stamina:42,cooldown:4,reach:100,halfArc:Math.PI,advance:0,hits:[12,12,12],geometry:'circle',note:'Three rotating close-range cuts. This grounded adaptation does not implement swimming.'},
+ ripple:{number:7,name:'Drop Ripple Thrust',windup:.1,active:.14,recovery:.25,stamina:26,cooldown:2.2,reach:150,halfArc:.16,advance:45,hits:[42],geometry:'fan',note:'A fast, narrow thrust. Long reach rewards precise aim; this is not a projectile.'},
+ basin:{number:8,name:'Waterfall Basin',windup:.35,active:.22,recovery:.4,stamina:48,cooldown:4.2,reach:58,halfArc:Math.PI,advance:0,hits:[60],geometry:'impact',note:'A downward impact 70 units ahead, with a bounded splash. The visual lift grants no invulnerability.'},
+ turbulent:{number:9,name:'Splashing Water Flow, Turbulent',windup:.12,active:.8,recovery:.3,stamina:42,cooldown:5,reach:85,halfArc:Math.PI,advance:180,hits:[11,11,11,11],geometry:'circle',note:'Zigzag footwork and four short cuts. Two brief evasive steps, not full-cast invulnerability.'},
+ flux:{number:10,name:'Constant Flux',windup:.3,active:.96,recovery:.45,stamina:52,cooldown:5.8,reach:110,halfArc:Math.PI,advance:120,hits:[14,20,28],geometry:'circle',note:'Three turning cuts grow stronger, traced by a water-dragon ribbon. Ramp resets on each cast.'},
+ calm:{number:11,name:'Dead Calm',windup:.22,active:1.25,recovery:.4,stamina:55,cooldown:7,reach:95,halfArc:Math.PI,advance:0,hits:[],geometry:'defense',note:'Giyu’s personal form, available here for development only. Neutralizes nearby melee during its active stance; no damage or permanent invulnerability.'},
+};
+export function waterPhase(id:WaterTechnique,t:number){const f=WATER_KIT[id];return t<f.windup?'windup':t<f.windup+f.active?'active':t<f.windup+f.active+f.recovery?'recovery':'done';}
+export function waterProgress(id:WaterTechnique,t:number){const f=WATER_KIT[id];return Math.max(0,Math.min(1,(t-f.windup)/f.active));}
+export function waterWindow(id:WaterTechnique,t:number){const f=WATER_KIT[id];return waterPhase(id,t)!=='active'||!f.hits.length?-1:Math.min(f.hits.length-1,Math.floor(waterProgress(id,t)*f.hits.length));}
+function path(id:WaterTechnique,p:number):Point{let y=0;if(id==='dance')y=Math.sin(p*Math.PI*2)*32;if(id==='flux')y=Math.sin(p*Math.PI)*18;if(id==='turbulent'){const keys=[0,34,-38,30,0],slot=Math.min(3,Math.floor(p*4)),t=p*4-slot;y=keys[slot]+(keys[slot+1]-keys[slot])*t;}return {x:WATER_KIT[id].advance*p,y};}
+export function waterMotion(id:WaterTechnique,from:number,to:number){const a=path(id,waterProgress(id,from)),b=path(id,waterProgress(id,to));return {x:b.x-a.x,y:b.y-a.y};}
+export function waterImpact(origin:Point,angle:number){return {x:origin.x+Math.cos(angle)*70,y:origin.y+Math.sin(angle)*70};}
+export function waterContact(id:WaterTechnique,t:number,p:Point,angle:number,target:Point,impact=waterImpact(p,angle),yielding=false){const f=WATER_KIT[id];if(waterWindow(id,t)<0||id==='rain'&&!yielding)return false;if(f.geometry==='impact')return Math.hypot(target.x-impact.x,target.y-impact.y)<=f.reach;const dx=target.x-p.x,dy=target.y-p.y,a=Math.atan2(dy,dx)-angle;return Math.hypot(dx,dy)<=f.reach&&(f.geometry==='circle'||Math.abs(Math.atan2(Math.sin(a),Math.cos(a)))<=f.halfArc);}
+export function waterDefends(id:WaterTechnique,t:number,p:Point,attacker:Point){if(waterPhase(id,t)!=='active')return false;if(id==='calm')return Math.hypot(attacker.x-p.x,attacker.y-p.y)<=WATER_KIT.calm.reach;const q=waterProgress(id,t);return id==='turbulent'&&((q>=.12&&q<=.28)||(q>=.58&&q<=.74));}
+export function waterCastReason(id:WaterTechnique,breath:number,cooldown:number,yielding:boolean){if(id==='rain'&&!yielding)return 'This merciful form requires a yielding demon.';if(cooldown>0)return 'This form is cooling down.';if(breath<WATER_KIT[id].stamina)return 'Not enough Breath.';return '';}
+/** Stable bridge to owned-form IDs; eligibility and purchases remain outside the lab. */
+export function waterCatalogId(id:WaterTechnique){return `water-${String(WATER_KIT[id].number).padStart(2,'0')}`;}
+export function waterTechniqueForCatalog(id:string):WaterTechnique|null{const match=/^water-(\d{2})$/.exec(id);const n=match?Number(match[1]):0;return n>=1&&n<=WATER_ORDER.length?WATER_ORDER[n-1]:null;}

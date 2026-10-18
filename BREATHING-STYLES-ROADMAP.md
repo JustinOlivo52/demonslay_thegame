@@ -2,15 +2,19 @@
 
 The canon catalog contains 14 styles. A catalog entry does not make a style playable. Add and review one playable style at a time, preserving the character's one chosen active style. Sun and Moon remain level-30 special-mission paths, not starter choices.
 
+## Current priority — complete existing styles first
+
+Finish the full Water set, then Flame, Thunder and Wind before starting Mist. All higher forms first live in an independent developer lab. Normal recruits keep two granted starting forms; level eligibility through 30, skill purchases and upgrades require their later progression integration.
+
 ## First-pass sequence
 
 | Order | Style | Playable status |
 | --- | --- | --- |
-| 1 | Water | Two starting forms, approved pixel direction; further polish remains |
+| 1 | Water | Two starting forms in normal play; all eleven functional prototypes in the Water lab |
 | 2 | Flame | Two starting forms, shared timing adaptation; further polish remains |
 | 3 | Thunder | Current new-style checkpoint: two starting forms, gold cloth palette, lightning effects and former-Hashira mentor introduction |
 | 4 | Wind | Two starting forms, green cloth palette, vortex/claw effects and Sanemi mentor introduction |
-| 5 | Mist | Next style pass |
+| 5 | Mist | After completing the four existing style sets |
 | 6 | Stone | Planned |
 | 7 | Sound | Planned |
 | 8 | Beast | Planned |
@@ -43,3 +47,7 @@ Check both recruit bodies, preview and playable outfit, windup/active/recovery r
 - Sanemi Shinazugawa is the assigned Wind Hashira. Estate travel and mentor lessons remain future work.
 - Nine reference forms list levels 1, 1, 5, 9, 13, 18, 22, 26, 30. Only the first two are owned/castable. The lab is `?sandbox=1&style=wind`.
 - A shared starting-technique registry now supplies phase, active-time travel, hit geometry and strike-window indices. Water/Flame retain their existing timing adaptations; Thunder retains its five distinct Rice Spirit strike windows.
+
+## Complete Water checkpoint
+
+All eleven forms have distinct timing, movement/hit rules and water effects in `?water-lab=1`. Form V requires a yielding target; XI is Giyu’s developer-only timed melee defense. The lab has no save/progression writes. See [full rules and limits](WATER-FORMS-COMPLETE.md). Dedicated body choreography and progression integration remain future work. Next full-set pass: Flame.
