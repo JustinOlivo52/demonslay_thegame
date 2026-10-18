@@ -3,21 +3,21 @@
 ## Agreed design
 
 - Top-down 2D action RPG; TypeScript + Phaser; browser first.
-- One active breathing style per character; choose from two starting styles in V1 (specific choices pending).
+- One active breathing style per character; choose Water or Flame in the current V1 opening.
 - Two forms granted at level 1. All remaining forms become eligible at evenly spaced levels through 30. Eligibility is not ownership: spend skill points to purchase them.
 - Levels 31–50 emphasize increasingly expensive upgrades. A planned point budget and level-50 final upgrade requirement support maxing one style.
 - Level 50 unlocks a Hashira promotion trial; promotion is earned.
 - Future special missions can permit a style change. Upgrade transfer rules are undecided.
 - Future Sun and Moon unlock paths require level 30 plus their special missions. Neither is a starting choice.
 - Demons emerge at night. Demons level 10+ have Blood Demon Arts. Sunrise behaviour remains undecided.
-- Later combat adds a timed, close-range decapitation input after enemy health reaches zero.
+- Combat includes a timed, close-range decapitation input after enemy health reaches zero.
 - Missions award XP, items, currency and equipment. Skill-point award rules must respect the progression budget.
 - Procedural missions first; AI-generated narrative later with validated structured objectives.
 - Muzan is the eventual final story boss, with Hashira allies and/or other players. Multiplayer is not yet committed.
 
 ## Workflow
 
-At each checkpoint: implement, verify, player playtest, collect feedback, fix blockers, obtain checkpoint approval, then proceed. Initial development authorization covers foundation and prototype 01; stop for its playtest before prototype 02.
+At each checkpoint: implement, verify, player playtest, collect feedback, fix blockers, obtain checkpoint approval, then proceed. The owner has authorized continued development, tests, GitHub updates, merges and deployments (October 18). Keep personal playtest checkpoints; routine work does not require renewed permission.
 
 ## V1 milestones
 
@@ -55,7 +55,7 @@ The development sandbox remains a separate entry throughout and shares tested ga
 
 ## Tutorial playtest milestone
 
-Character creation is approved. The condensed Final Selection tutorial now implements the three lesser-demon lessons, Hand Demon encounter, checkpoint progression, potion healing and passing/crow scene for owner playtesting. It reuses one forest region. The explorable Corps hub remains the next checkpoint. Tune trial pacing and animation from Justin's feedback before expanding the world or adding live AI services.
+Character creation is approved. The condensed Final Selection tutorial now implements the three lesser-demon lessons, Hand Demon encounter, checkpoint progression, potion healing and passing/crow scene for owner playtesting. It reuses one forest region. The first explorable Corps headquarters foundation is now implemented; destination content will expand incrementally. Tune trial pacing and animation from Justin's feedback before expanding the world or adding live AI services.
 
 ### Personal playtest revision 01
 
@@ -68,3 +68,7 @@ Connected training traversal, direct form casts and another scale pass precede f
 ## Playtest revision 03
 
 Playtest revision 03 expands and polishes onboarding before hub development: short controls intro, a larger branching mountain, finite supplies, novice resource pressure, boss aggression, planted running and a survivor ceremony. Future training will integrate Breath capacity/control helpers.
+
+## Headquarters foundation — October 18
+
+A crow-gated courtyard now connects the passing ceremony to Corps life. The room provides a save journal and read-only starting-form rack. Crow, training, Swordsmith and mentor destinations have introductions; practice opens the preserved sandbox. There are no generated assignments, progression rewards, estate travel or crafting yet. See HEADQUARTERS-CHECKPOINT.md. Next checkpoint: validate hub navigation and visuals, then deliver the first crow mission and a persistent reward loop.

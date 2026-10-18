@@ -1,7 +1,10 @@
 import {STARTERS,SAVE_KEY,createCharacter,makeBackstory,readCharacter,type Body,type StarterStyle} from './character';
 import './creation.css';
+import {RUN_KEY,readRun,profileKey} from './tutorial';
 
-if(new URLSearchParams(location.search).has('selection')) {
+if(new URLSearchParams(location.search).has('hub')) {
+ import('./hub');
+} else if(new URLSearchParams(location.search).has('selection')) {
  import('./selection');
 } else if(new URLSearchParams(location.search).has('sandbox')||new URLSearchParams(location.search).has('demo')||new URLSearchParams(location.search).has('finishTest')) {
  import('./sandbox');
@@ -19,6 +22,7 @@ if(new URLSearchParams(location.search).has('selection')) {
  <div id="complete" class="step" hidden><p class="kicker">YOUR RECRUIT IS READY</p><h1>The mountain<br>awaits.</h1><p class="lead" id="saved-message"></p><div class="checkpoint-note">FINAL SELECTION · TUTORIAL<br><span>Your character is saved in this browser. Survive the forest lessons and Hand Demon, then receive your crow. Progress saves between encounters.</span></div><a class="primary-button" href="?selection=1" style="text-decoration:none;margin-bottom:14px">Enter Final Selection <span>→</span></a><button id="edit" class="primary-button">Review your recruit <span>↶</span></button><a class="secondary-link" href="?sandbox=1">Visit the developer combat sandbox ↗</a></div>
  <p id="error" role="alert"></p><div class="navigation"><button id="back" class="quiet-button" hidden>← Back</button><button id="next" class="primary-button">Write your origin <span>→</span></button></div><div id="resume-banner" hidden><p>A recruit is already saved in this browser.</p><button id="resume" class="quiet-button">Review saved recruit</button></div></section></main><footer class="creation-footer"><span>PERSONAL FAN PROJECT · PIXEL ART DEVELOPMENT BUILD</span><span>Character creation / Checkpoint 01</span></footer></div>`;
  const $=<T extends HTMLElement=HTMLElement>(selector:string)=>document.querySelector<T>(selector)!;
+ if(saved){let crow=false;try{crow=readRun(localStorage.getItem(RUN_KEY),profileKey(saved)).crow;}catch{}if(crow){const link=document.createElement('a');link.className='secondary-link';link.href='?hub=1';link.textContent='Continue to Corps headquarters →';$('#resume-banner').append(link);}}
  const canvas=$<HTMLCanvasElement>('#recruit'),ctx=canvas.getContext('2d')!;ctx.imageSmoothingEnabled=false;ctx.setTransform(0.25,0,0,0.25,0,0);
  const image=new Image();image.src='art/recruit-creation-sheet.png';
  image.onload=()=>drawRecruit();
