@@ -38,3 +38,9 @@ Next personal review: intro clarity, optional-route navigation, limited supplies
 - [ ] Justin: judge the new courtyard/room scale and palette alongside the approved recruit sprites.
 - [ ] Development: replace simple building/garden blockout art with richer consistent tiles and NPC sprites after layout feedback.
 - [ ] Development: implement the first mission loop before adding live AI.
+
+## Progression checkpoint
+
+- [x] Tutorial XP, level-up health restore, three spendable stat points per level, character stats dialog, save migration and replay reward protection.
+- [ ] Justin: playtest level-3 Hand Demon difficulty and different Vitality/Endurance versus damage allocations. Replay retains stats; a new recruit identity starts at level 1.
+- [ ] Development: first mission XP/rewards, a separate breathing-form skill-point budget and purchases/upgrades. The level-50 framework is present; the playable tutorial currently ends at level 4.

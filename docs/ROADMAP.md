@@ -72,3 +72,7 @@ Playtest revision 03 expands and polishes onboarding before hub development: sho
 ## Headquarters foundation — October 18
 
 A crow-gated courtyard now connects the passing ceremony to Corps life. The room provides a save journal and read-only starting-form rack. Crow, training, Swordsmith and mentor destinations have introductions; practice opens the preserved sandbox. There are no generated assignments, progression rewards, estate travel or crafting yet. See HEADQUARTERS-CHECKPOINT.md. Next checkpoint: validate hub navigation and visuals, then deliver the first crow mission and a persistent reward loop.
+
+## Character progression foundation
+
+Tutorial finishers now grant one-time XP, with level-ups after encounters two/three and the boss. Level-up restores HP and grants three character stat points; Vitality/Endurance/Strength/Focus affect real combat. The framework caps at 50, while current tutorial rewards reach level 4. Save migration credits prior clears, and replay retains progression without duplicate XP. Breathing-form skill points, purchase/upgrade budgets, further unlocks, mission XP and Hashira promotion remain separate unfinished milestones. See PROGRESSION-01.md.
