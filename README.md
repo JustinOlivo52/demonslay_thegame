@@ -79,3 +79,7 @@ Open `/?water-lab=1` directly, or use **All eleven Water forms** in the sandbox 
 ## Complete Flame prototype
 
 Open `/?flame-lab=1` directly, or use **Complete Flame forms** in sandbox navigation. All six revealed forms (I–V and IX) have distinct effects and combat behavior. VI–VIII are unrevealed in canon and remain unavailable. **1–5** select those forms, **9** selects Rengoku, and **Q** casts; movement, dodge and finishing match the Water lab. Enable AI attacks to test Blooming Flame Undulation’s frontal melee defense. No save/ownership changes or XP rewards. See [Flame rules and art limits](FLAME-FORMS-COMPLETE.md). Thunder’s complete set is next.
+
+## Water/Flame choreography candidate
+
+The complete technique labs now default to a new 48-cell body-pose atlas with somersault, turning, thrust, still guard, rising/descending and charge poses. A **Compare previous body poses** setting enables the old shared-body preview with the same revised mechanics/effects. Water IX is corrected to non-damaging footwork. This is a description-led candidate, not frame-exact anime choreography; normal tutorial animation remains unchanged pending review. See [reference review, corrections and limits](SOURCE-FIDELITY-01.md).

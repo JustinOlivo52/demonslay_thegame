@@ -55,3 +55,7 @@ All eleven forms have distinct timing, movement/hit rules and water effects in `
 ## Complete Flame checkpoint
 
 All six revealed forms (I–V and IX) have distinct functional prototypes in `?flame-lab=1`: straight rush, rising cut, descending cut, frontal defensive sweeps, tiger-shaped three-cut flourish and Rengoku’s committed ultimate charge. VI–VIII are unavailable unrevealed canon slots, not invented techniques. A shared technique-lab scene now serves Water and Flame, with Water’s timing/behavior retained. Normal characters still own only two starter forms. See [Flame scope and limits](FLAME-FORMS-COMPLETE.md). Next full-set pass: Thunder, then Wind before Mist.
+
+## Source-fidelity review before Thunder
+
+The complete Water/Flame labs now use a 48-cell pose atlas and authored per-form sequences, with the source-led corrections in SOURCE-FIDELITY-01.md. Water IX is mobility rather than an invented attack combo. This is a description-led candidate for visual review, not frame-exact anime reproduction. Review and refine these candidates before resuming Thunder; tutorial animation stays unchanged until that integration checkpoint.

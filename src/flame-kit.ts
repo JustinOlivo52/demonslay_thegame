@@ -13,7 +13,7 @@ export const FLAME_KIT:Record<FlameTechnique,TechniqueDefinition>={
 };
 export function flamePhase(id:FlameTechnique,t:number){const f=FLAME_KIT[id];return t<f.windup?'windup':t<f.windup+f.active?'active':t<f.windup+f.active+f.recovery?'recovery':'done';}
 export function flameProgress(id:FlameTechnique,t:number){const f=FLAME_KIT[id];return Math.max(0,Math.min(1,(t-f.windup)/f.active));}
-export function flameWindow(id:FlameTechnique,t:number){const f=FLAME_KIT[id];return flamePhase(id,t)!=='active'?-1:Math.min(f.hits.length-1,Math.floor(flameProgress(id,t)*f.hits.length));}
+export function flameWindow(id:FlameTechnique,t:number){if(flamePhase(id,t)!=='active')return -1;const beats=id==='undulation'?[.12,.42,.72]:id==='tiger'?[.24,.53,.82]:[id==='universe'?.58:id==='sun'?.52:.38];const q=flameProgress(id,t);let index=-1;for(let i=0;i<beats.length;i++)if(q>=beats[i])index=i;return index;}
 export function flameMotion(id:FlameTechnique,from:number,to:number){return {x:FLAME_KIT[id].advance*(flameProgress(id,to)-flameProgress(id,from)),y:0};}
 export function flameImpact(p:Point,angle:number){return {x:p.x+Math.cos(angle)*70,y:p.y+Math.sin(angle)*70};}
 function inFan(p:Point,angle:number,target:Point,reach:number,halfArc:number){const dx=target.x-p.x,dy=target.y-p.y,a=Math.atan2(dy,dx)-angle;return Math.hypot(dx,dy)<=reach&&Math.abs(Math.atan2(Math.sin(a),Math.cos(a)))<=halfArc;}

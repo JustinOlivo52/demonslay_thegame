@@ -90,3 +90,7 @@ Complete Water, Flame, Thunder and Wind before adding Mist. Water now has eleven
 ## Complete Flame lab
 
 All six revealed Flame forms (I–V and IX) now have functional combat/VFX prototypes at `?flame-lab=1`; VI–VIII remain unavailable canon slots. The independent Water and Flame entries share a tested practice-scene engine, while normal tutorial/ownership stays unchanged. Next: complete Thunder, then Wind, before Mist. See [Flame mechanics, validation and limits](../FLAME-FORMS-COMPLETE.md).
+
+## Description-led choreography review
+
+Pause new-style expansion for the Water/Flame candidate review: 48-cell pose atlas, all 17 form sequences, corrected Water IX mobility, strike-aligned contact and matched elemental motifs. Review in the independent labs, improve remaining directional/in-between limitations, then integrate reviewed starters and resume Thunder/Wind. See [source-fidelity pass](../SOURCE-FIDELITY-01.md).

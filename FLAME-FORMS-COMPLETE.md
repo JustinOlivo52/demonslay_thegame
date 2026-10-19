@@ -2,7 +2,7 @@
 
 Open `/?flame-lab=1`, or choose **Complete Flame forms** in the developer sandbox. All six revealed canon forms (I–V and IX) now have functional combat/VFX prototypes. **Forms VI–VIII have not been revealed in canon:** their numbered slots are visible but disabled, with no invented names, abilities or purchase options.
 
-This is a personal-project gameplay adaptation using the approved pixel recruits and demon. Bespoke body animation and production balancing remain later passes.
+This is a personal-project gameplay adaptation using the approved pixel recruits and demon. The later description-led pass adds dedicated guard/cut/turn/charge poses; full directional in-betweens and production balancing remain later passes.
 
 ## Controls and practice
 
@@ -54,6 +54,10 @@ Water and Flame share the independent practice-scene engine, with separate pure 
 
 Production build and all 16 test files / 49 defined test cases pass. The existing large-chunk warning remains. Chromium checks exercised all six forms via actual Q input and verified exact damage/travel, Breath use, cooldown rejection, insufficient-Breath rejection after Rengoku, canon-number selection, unavailable unknown slots, live frontal AI deflection, damage from behind and after expiration, charge collision, pause, target/full reset behavior, finish timeout/full recovery and success, both body selectors and unchanged local storage, with no page errors. All eleven Water-form browser checks passed after extracting the shared practice scene.
 
-The recorded preview uses prepared target positions, actual casts and hit calculations, a live melee guard and its expiration, and a real sword/form/F finish sequence. It is not a new full tutorial playthrough or a claim of final balance. Male and female Flame outfits are the existing approved sprite columns, not new hand-drawn per-form sheets. Dedicated uppercut, descending, defensive and ultimate body poses, directional attacks and sound remain art work. Review feel and readability with Justin before calling this production-complete animation.
+The recorded preview uses prepared target positions, actual casts and hit calculations, a live melee guard and its expiration, and a real sword/form/F finish sequence. It is not a new full tutorial playthrough or a claim of final balance. Male and female Flame outfits are the existing approved sprite columns, not new hand-drawn per-form sheets. The description-led pass now supplies uppercut, descending, turning and charging body poses. Additional in-betweens, full directional body art and sound remain unfinished. Review feel and readability with Justin before calling this production-complete animation.
 
 Next full-set checkpoint: **Thunder**, then **Wind**, before adding Mist or the other remaining styles.
+
+## Choreography pass
+
+The latest Flame lab uses the 48-cell body-pose atlas and per-form guard/strike/recovery sequences. Rising Scorching Sun starts low; Blazing Universe starts high. Tiger advances into a high guard and an enveloping flourish; Rengoku prepares high and rushes with a flame-dragon motif. Contact timing follows the strike rather than the first active frame. See [references, all corrections and limits](SOURCE-FIDELITY-01.md).
