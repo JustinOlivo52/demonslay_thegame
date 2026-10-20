@@ -98,3 +98,7 @@ Pause new-style expansion for the Water/Flame candidate review: 48-cell pose atl
 ## Maintenance before further styles
 
 Repair practice access/inputs and add optional fullscreen before continuing animation integration or Thunder. The normal sandbox entry now reaches complete Water/Flame practice with direct casts, combat/reset/refill and explicit pause recovery. Fullscreen is available in practice, tutorial and headquarters. Build/unit checks pass; native browser checks remain blocked by the execution sandbox. Follow [application verification](../MAINTENANCE-01.md).
+
+## Complete Thunder / Wind developer kits
+
+Implemented all 7 numbered Thunder forms and all 9 Wind forms in the full practice scene, with per-form body choreography, elemental effects, combat geometry and shared maintenance controls. These join Water 11 and Flame 6 for 33 sandbox techniques. Next gate: visual/gameplay review, fixes, and a later campaign purchase integration. Two tutorial starters and saved progression remain unchanged. See [kit report](../THUNDER-WIND-FORMS-COMPLETE.md).

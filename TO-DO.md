@@ -95,3 +95,12 @@ Next personal review: intro clarity, optional-route navigation, limited supplies
 - [x] Optional native fullscreen in practice, tutorial and headquarters, with unsupported/rejected feedback.
 - [x] Production build and 19 test files pass.
 - [ ] Justin: run the application checks in MAINTENANCE-01.md after deployment. Native browser testing remains blocked here; do not call these UI changes browser-verified.
+
+## Thunder / Wind full-kit review
+
+- [ ] Justin: test all 7 Thunder and 9 Wind forms, both recruit sprites, normal/slow motion and moving targets.
+- [ ] Justin: report any visual, input or combat issues using the form number and browser.
+- [ ] Development: resolve playtest feedback, then plan campaign purchase integration and personal-form acquisition rules.
+- [ ] Later: audio and custom directional in-between poses.
+
+Build/automated checks pass; real browser verification remains blocked in the development runtime. Full details: [THUNDER-WIND-FORMS-COMPLETE.md](THUNDER-WIND-FORMS-COMPLETE.md).

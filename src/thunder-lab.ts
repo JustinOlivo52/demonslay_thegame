@@ -1,0 +1,4 @@
+import {startTechniqueLab} from './technique-lab';
+import {THUNDER_ORDER,THUNDER_KIT,thunderKit} from './thunder-kit';
+import {paintThunderTechnique} from './storm-effects';
+startTechniqueLab({...thunderKit,style:'thunder',title:'Thunder Breathing · Seven-form lab',heading:'Seven forms. One lightning-fast resolve.',note:'All seven numbered forms for developer testing. II–VI are human sword adaptations of Kaigaku’s demonstrations, without damaging blood-art electricity. VII is Zenitsu’s personal creation; story acquisition remains future work. First-form variants are not separate numbered forms. Shared pixel poses are adapted to each technique; sound remains off.',order:THUNDER_ORDER,forms:THUNDER_KIT,column:body=>body==='female'?1:0,paint:paintThunderTechnique,pose:(_id,phase,beat)=>phase==='windup'?2:phase==='recovery'?0:beat%2?2:3,lift:()=>0,guardLabel:'THUNDER · DEFLECTED',hitTint:0xffe5a1});

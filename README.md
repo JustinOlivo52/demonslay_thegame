@@ -91,3 +91,7 @@ The complete technique labs now default to a new 48-cell body-pose atlas with so
 The main sandbox now opens the full Water/Flame labs. Number/numpad keys cast directly; Q repeats the selected form. Use **Fight demon**, **New round**, refill and the visible pause/resume controls. **Free forms** defaults on for repeat testing; disable it to test costs/cooldowns. Stationary free-form targets line up for the selected technique. **Auto-aim practice target** can be disabled. Thunder/Wind remain two-form previews.
 
 **Fullscreen** is optional in practice, Final Selection and headquarters. Use the exit button or Escape to leave; unsupported/blocked requests show feedback. See [maintenance notes and application checks](MAINTENANCE-01.md). Build/unit checks pass; this maintenance UI has not been browser-verified because the execution sandbox blocks Chromium.
+
+## Complete Thunder and Wind practice kits
+
+All seven numbered Thunder forms and all nine Wind forms are available in Developer sandbox. Use `?sandbox=1&style=thunder` or `?sandbox=1&style=wind`; cast with 1–7 / 1–9, or select a form and press Q. Free forms, slow motion, fight/reset, resource tests and fullscreen are shared across all four complete labs. Campaign unlocks remain unchanged. See [THUNDER-WIND-FORMS-COMPLETE.md](THUNDER-WIND-FORMS-COMPLETE.md) for controls, adaptation limits and the playtest checklist.

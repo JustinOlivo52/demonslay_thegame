@@ -1,5 +1,7 @@
 # Maintenance 01 — practice access, controls and fullscreen
 
+Follow-up: Thunder/Wind now also have complete 7/9-form labs. See [THUNDER-WIND-FORMS-COMPLETE.md](THUNDER-WIND-FORMS-COMPLETE.md). Two-form references below describe the original maintenance checkpoint; those older scenes remain behind `legacy=1`.
+
 ## Problems found
 
 The main `?sandbox=1` link opened the older arena, which contained only two starter forms. The complete Water/Flame scenes lived behind separate links, making the normal training entry look incomplete. The legacy form dropdown also kept focus after selection; its keyboard handler deliberately ignores select/input elements, so Q was ignored until focus returned to the arena.

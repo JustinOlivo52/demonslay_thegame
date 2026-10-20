@@ -176,3 +176,9 @@ The main sandbox link previously opened the old two-form arena; complete Water/F
 Full labs add direct numeric/numpad casting, visible cast/Fight demon/New round/refill controls, free-form resource mode, optional auto-aim and stationary-target lineup, mouse-click sword input and an explicit blur-pause/resume overlay. No saved ownership, XP or normal progression changes. Optional native fullscreen is shared across labs, the legacy arena, tutorial and headquarters; focus/scale refresh, Escape handling and unsupported/denied feedback are implemented.
 
 Validation: build and all 19 test files / 58 defined cases pass. New fullscreen tests use a mocked DOM/native API; they are not native-browser rendering tests. Chromium launch is blocked by sandbox socket restrictions and extra-permission requests stalled/cancelled, so these maintenance UI changes are not browser-verified. MAINTENANCE-01.md records causes, scope, limits and the application checklist. Do not reuse earlier animation browser results as proof for this pass.
+
+## Full Thunder / Wind practice pass
+
+The developer sandbox now routes all four starter styles to complete numbered kits: Water 11, Flame 6 revealed, Thunder 7 and Wind 9. Thunder/Wind receive distinct strike sequences, terrain-aware movement, authored pose timing and procedural elemental effects; their runtime palettes cover every recruit sheet. Wind III offers finite nearby-melee defense; IX locks its forward impact area. Thunder II–VI use bounded human sword adaptations rather than Kaigaku's Blood Demon Art. Tutorial ownership/purchases are unchanged.
+
+Production build and 21 test files pass; Chromium still fails to launch, so no browser playtest or recording is claimed. [THUNDER-WIND-FORMS-COMPLETE.md](THUNDER-WIND-FORMS-COMPLETE.md) contains technique details, source-reference limitations and today's owner checklist.

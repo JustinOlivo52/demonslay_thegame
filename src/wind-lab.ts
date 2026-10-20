@@ -1,0 +1,4 @@
+import {startTechniqueLab} from './technique-lab';
+import {WIND_ORDER,WIND_KIT,windKit} from './wind-kit';
+import {paintWindTechnique} from './storm-effects';
+startTechniqueLab({...windKit,style:'wind',title:'Wind Breathing · Nine-form lab',heading:'Nine forms. Become the storm.',note:'All nine numbered forms, adapted to top-down sword combat. III deflects nearby melee only during active sweeps. VII–IX use leap/inverted/landing poses, but airtime grants no invulnerability. IX locks its strike area on cast. Shared pixel poses and procedural gusts await your visual review; sound remains off.',order:WIND_ORDER,forms:WIND_KIT,column:body=>body==='female'?1:0,paint:paintWindTechnique,pose:(_id,phase,beat)=>phase==='windup'?2:phase==='recovery'?0:beat%2?2:3,lift:()=>0,guardLabel:'WIND · DEFLECTED',hitTint:0xb7e2b3});
