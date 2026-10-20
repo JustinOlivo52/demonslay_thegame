@@ -3,7 +3,11 @@ import {STARTERS,SAVE_KEY,createCharacter,makeBackstory,readCharacter,type Body,
 import './creation.css';
 import {RUN_KEY,readRun,profileKey} from './tutorial';
 
-if(new URLSearchParams(location.search).has('flame-lab')) {
+if(new URLSearchParams(location.search).has('thunder-lab')) {
+ import('./thunder-lab');
+} else if(new URLSearchParams(location.search).has('wind-lab')) {
+ import('./wind-lab');
+} else if(new URLSearchParams(location.search).has('flame-lab')) {
  import('./flame-lab');
 } else if(new URLSearchParams(location.search).has('water-lab')) {
  import('./water-lab');
