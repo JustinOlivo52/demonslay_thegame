@@ -87,3 +87,11 @@ Next personal review: intro clarity, optional-route navigation, limited supplies
 - [ ] Refine in-betweens, directional body art, anatomy/cloth consistency and exact shoulder/hip timing against selected manga/anime shots.
 - [ ] Carry reviewed candidates into normal tutorial/starter animation; current changes are isolated to technique labs.
 - [ ] Apply feedback before resuming the full Thunder set, then Wind. See SOURCE-FIDELITY-01.md.
+
+## Practice/fullscreen maintenance
+
+- [x] Route the normal sandbox entry into complete Water/Flame practice; repair legacy form-dropdown focus.
+- [x] Direct number/numpad casting, visible cast/fight/new-round/refill/pause controls and free-form practice.
+- [x] Optional native fullscreen in practice, tutorial and headquarters, with unsupported/rejected feedback.
+- [x] Production build and 19 test files pass.
+- [ ] Justin: run the application checks in MAINTENANCE-01.md after deployment. Native browser testing remains blocked here; do not call these UI changes browser-verified.
