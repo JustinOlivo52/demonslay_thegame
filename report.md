@@ -168,3 +168,11 @@ Source evidence is indexed secondary technique descriptions, not a measured offi
 Validation: production build and 18 test files / 55 defined cases pass; focused Chromium checks cover all 17 techniques, key new poses, all four recruit variants, finite defense, strike results, resources, terrain, pause, comparison, timed finishing and unchanged saves. New complete Water/Flame recordings show the candidate in prepared encounters, not a full tutorial playthrough. See SOURCE-FIDELITY-01.md before continuing Thunder/Wind.
 
 Final visual refinement: `public/art/technique-motifs.png` contains three generated, inspected pixel heads (water dragon, flame tiger, flame dragon). The lab binds them to the corresponding blade trails; they have no independent movement, collision or damage. This replaces the earlier geometric placeholder faces.
+
+## Latest maintenance — practice and fullscreen
+
+The main sandbox link previously opened the old two-form arena; complete Water/Flame scenes were separate. Legacy dropdown focus caused Q to be ignored after selection. The new practice entry routes to full Water/Flame and labels Thunder/Wind as two-form previews. Legacy mode remains accessible with `legacy=1` and now restores keyboard focus.
+
+Full labs add direct numeric/numpad casting, visible cast/Fight demon/New round/refill controls, free-form resource mode, optional auto-aim and stationary-target lineup, mouse-click sword input and an explicit blur-pause/resume overlay. No saved ownership, XP or normal progression changes. Optional native fullscreen is shared across labs, the legacy arena, tutorial and headquarters; focus/scale refresh, Escape handling and unsupported/denied feedback are implemented.
+
+Validation: build and all 19 test files / 58 defined cases pass. New fullscreen tests use a mocked DOM/native API; they are not native-browser rendering tests. Chromium launch is blocked by sandbox socket restrictions and extra-permission requests stalled/cancelled, so these maintenance UI changes are not browser-verified. MAINTENANCE-01.md records causes, scope, limits and the application checklist. Do not reuse earlier animation browser results as proof for this pass.

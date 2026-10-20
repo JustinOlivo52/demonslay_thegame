@@ -11,6 +11,8 @@ if(new URLSearchParams(location.search).has('flame-lab')) {
  import('./hub');
 } else if(new URLSearchParams(location.search).has('selection')) {
  import('./selection');
+} else if(new URLSearchParams(location.search).has('sandbox')&&!new URLSearchParams(location.search).has('legacy')&&!new URLSearchParams(location.search).has('finishTest')) {
+ import('./practice');
 } else if(new URLSearchParams(location.search).has('sandbox')||new URLSearchParams(location.search).has('demo')||new URLSearchParams(location.search).has('finishTest')) {
  import('./sandbox');
 } else {

@@ -94,3 +94,7 @@ All six revealed Flame forms (I–V and IX) now have functional combat/VFX proto
 ## Description-led choreography review
 
 Pause new-style expansion for the Water/Flame candidate review: 48-cell pose atlas, all 17 form sequences, corrected Water IX mobility, strike-aligned contact and matched elemental motifs. Review in the independent labs, improve remaining directional/in-between limitations, then integrate reviewed starters and resume Thunder/Wind. See [source-fidelity pass](../SOURCE-FIDELITY-01.md).
+
+## Maintenance before further styles
+
+Repair practice access/inputs and add optional fullscreen before continuing animation integration or Thunder. The normal sandbox entry now reaches complete Water/Flame practice with direct casts, combat/reset/refill and explicit pause recovery. Fullscreen is available in practice, tutorial and headquarters. Build/unit checks pass; native browser checks remain blocked by the execution sandbox. Follow [application verification](../MAINTENANCE-01.md).

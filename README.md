@@ -25,7 +25,9 @@ WASD move · mouse aim · click/J sword · 1/2 cast form · Q repeat selected fo
 
 - `/`: character creation and saved recruit review.
 - `/?selection=1`: player-controlled tutorial.
-- `/?sandbox=1`: independent developer combat/technique sandbox.
+- `/?sandbox=1`: full Water/Flame practice, choosing the saved recruit style where available.
+- `/?sandbox=1&style=water` or `style=flame`: explicit complete practice style.
+- `/?sandbox=1&legacy=1`: preserved two-form arena for older developer tools.
 - `/?water-lab=1`: all eleven Water forms for independent testing; no character unlock/save changes.
 - `/?flame-lab=1`: all six revealed Flame forms; VI–VIII stay unavailable canon slots.
 - `/?hub=1`: headquarters, unlocked by the current recruit’s completed selection save.
@@ -83,3 +85,9 @@ Open `/?flame-lab=1` directly, or use **Complete Flame forms** in sandbox naviga
 ## Water/Flame choreography candidate
 
 The complete technique labs now default to a new 48-cell body-pose atlas with somersault, turning, thrust, still guard, rising/descending and charge poses. A **Compare previous body poses** setting enables the old shared-body preview with the same revised mechanics/effects. Water IX is corrected to non-damaging footwork. This is a description-led candidate, not frame-exact anime choreography; normal tutorial animation remains unchanged pending review. See [reference review, corrections and limits](SOURCE-FIDELITY-01.md).
+
+## Practice and fullscreen maintenance
+
+The main sandbox now opens the full Water/Flame labs. Number/numpad keys cast directly; Q repeats the selected form. Use **Fight demon**, **New round**, refill and the visible pause/resume controls. **Free forms** defaults on for repeat testing; disable it to test costs/cooldowns. Stationary free-form targets line up for the selected technique. **Auto-aim practice target** can be disabled. Thunder/Wind remain two-form previews.
+
+**Fullscreen** is optional in practice, Final Selection and headquarters. Use the exit button or Escape to leave; unsupported/blocked requests show feedback. See [maintenance notes and application checks](MAINTENANCE-01.md). Build/unit checks pass; this maintenance UI has not been browser-verified because the execution sandbox blocks Chromium.
