@@ -557,7 +557,7 @@ class Arena extends Phaser.Scene {
     this.executionFlash=0.65;this.finishRemaining=0;this.enemyState='dead';this.technique=null;this.slash=null;this.swing=0.15;
     this.mode='won';this.wins++;
     if(IS_SELECTION){const award=awardTrialXP(this.progression,this.run.stage);this.run={...this.run,progress:award.progress};if(award.levels){this.hp=this.playerStats.health;this.floatText(this.p.x,this.p.y-105,`LEVEL ${award.progress.level} · HEALTH RESTORED`,'#f0dda4','#243d26',18);}this.labMessage=award.gained?`+${award.gained} XP${award.levels?' · Level up! Full health · 3 stat points earned':''}`:'Practice clear · XP already earned';this.run={...this.run,health:this.hp,potions:this.potionCount,cleared:true};this.saveRun();}
-    this.floatText(this.e.x,this.e.y-85,'DECAPITATED','#d6faff','#183544',18);
+    this.floatText(this.e.x,this.e.y-85,'滅','#d6faff','#183544',32);
     this.onDemonDefeated();this.endDelay+=0.65;
   }
   private castForm() {

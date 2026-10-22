@@ -108,3 +108,12 @@ Build/automated checks pass; real browser verification remains blocked in the de
 ## Sandbox cast-position repair
 
 Removed automatic target repositioning on form selection and arena resets when starting a fight or repeating a legacy form. Optional Place target ahead moves only an idle target; normal casting stays in place apart from authored technique motion. Flame exposes six playable forms (I–V, IX), with VI–VIII explicitly disabled. See [MAINTENANCE-02.md](MAINTENANCE-02.md) for validation and the browser retest checklist.
+
+## Future mobile landscape play
+
+- [ ] Prototype touch movement, attack/dodge/forms and contextual finishing in the sandbox.
+- [ ] Adapt HUD/menus for landscape phones, safe areas and simultaneous touches; retain desktop inputs.
+- [ ] Justin: test combat readability and effects performance on a real phone before campaign rollout.
+- [ ] Later: evaluate optional PWA installation.
+
+Successful demon finishes now display 滅 in tutorial/legacy combat and the complete technique labs. Verify the glyph renders on the test device.
