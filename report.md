@@ -182,3 +182,7 @@ Validation: build and all 19 test files / 58 defined cases pass. New fullscreen 
 The developer sandbox now routes all four starter styles to complete numbered kits: Water 11, Flame 6 revealed, Thunder 7 and Wind 9. Thunder/Wind receive distinct strike sequences, terrain-aware movement, authored pose timing and procedural elemental effects; their runtime palettes cover every recruit sheet. Wind III offers finite nearby-melee defense; IX locks its forward impact area. Thunder II–VI use bounded human sword adaptations rather than Kaigaku's Blood Demon Art. Tutorial ownership/purchases are unchanged.
 
 Production build and 21 test files pass; Chromium still fails to launch, so no browser playtest or recording is claimed. [THUNDER-WIND-FORMS-COMPLETE.md](THUNDER-WIND-FORMS-COMPLETE.md) contains technique details, source-reference limitations and today's owner checklist.
+
+## Sandbox cast-position repair
+
+Removed automatic target repositioning on form selection and arena resets when starting a fight or repeating a legacy form. Optional Place target ahead moves only an idle target; normal casting stays in place apart from authored technique motion. Flame exposes six playable forms (I–V, IX), with VI–VIII explicitly disabled. See [MAINTENANCE-02.md](MAINTENANCE-02.md) for validation and the browser retest checklist.
