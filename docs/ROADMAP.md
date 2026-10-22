@@ -102,3 +102,11 @@ Repair practice access/inputs and add optional fullscreen before continuing anim
 ## Complete Thunder / Wind developer kits
 
 Implemented all 7 numbered Thunder forms and all 9 Wind forms in the full practice scene, with per-form body choreography, elemental effects, combat geometry and shared maintenance controls. These join Water 11 and Flame 6 for 33 sandbox techniques. Next gate: visual/gameplay review, fixes, and a later campaign purchase integration. Two tutorial starters and saved progression remain unchanged. See [kit report](../THUNDER-WIND-FORMS-COMPLETE.md).
+
+## Future platform target: mobile landscape
+
+Keep landscape phone play as a future development requirement alongside desktop browser play. Prototype in the developer sandbox before adapting the campaign: left-thumb movement joystick; right-thumb attack, dodge and form controls; a small equipped-form selector; contextual finish control; optional target assist; touch-sized menus and a compact responsive HUD. Test simultaneous movement/attacks, safe areas, orientation guidance and effects performance on real phones. Mobile implementation and optional PWA installation are future work, not enabled in this checkpoint.
+
+## Finishing presentation
+
+Use **滅** (destroy/annihilate), matching the Corps uniform character, for the successful finish callout in tutorial/legacy combat and all technique labs. Keep the timed finish input, recovery window and ash animation unchanged.
