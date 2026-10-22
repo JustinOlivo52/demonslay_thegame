@@ -104,3 +104,7 @@ Next personal review: intro clarity, optional-route navigation, limited supplies
 - [ ] Later: audio and custom directional in-between poses.
 
 Build/automated checks pass; real browser verification remains blocked in the development runtime. Full details: [THUNDER-WIND-FORMS-COMPLETE.md](THUNDER-WIND-FORMS-COMPLETE.md).
+
+## Sandbox cast-position repair
+
+Removed automatic target repositioning on form selection and arena resets when starting a fight or repeating a legacy form. Optional Place target ahead moves only an idle target; normal casting stays in place apart from authored technique motion. Flame exposes six playable forms (I–V, IX), with VI–VIII explicitly disabled. See [MAINTENANCE-02.md](MAINTENANCE-02.md) for validation and the browser retest checklist.

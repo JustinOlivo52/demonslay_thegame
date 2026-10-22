@@ -95,3 +95,7 @@ The main sandbox now opens the full Water/Flame labs. Number/numpad keys cast di
 ## Complete Thunder and Wind practice kits
 
 All seven numbered Thunder forms and all nine Wind forms are available in Developer sandbox. Use `?sandbox=1&style=thunder` or `?sandbox=1&style=wind`; cast with 1–7 / 1–9, or select a form and press Q. Free forms, slow motion, fight/reset, resource tests and fullscreen are shared across all four complete labs. Campaign unlocks remain unchanged. See [THUNDER-WIND-FORMS-COMPLETE.md](THUNDER-WIND-FORMS-COMPLETE.md) for controls, adaptation limits and the playtest checklist.
+
+## Sandbox cast-position repair
+
+Removed automatic target repositioning on form selection and arena resets when starting a fight or repeating a legacy form. Optional Place target ahead moves only an idle target; normal casting stays in place apart from authored technique motion. Flame exposes six playable forms (I–V, IX), with VI–VIII explicitly disabled. See [MAINTENANCE-02.md](MAINTENANCE-02.md) for validation and the browser retest checklist.
