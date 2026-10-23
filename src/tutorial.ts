@@ -5,7 +5,7 @@ export const TUTORIAL_STAGES=[
  {id:'trail',title:'Beyond the wisteria',lesson:'Follow the training path to the open clearing. Read the demon’s pose, strike, then press F to finish.',health:125,damage:16},
  {id:'breathing',title:'Trust your breathing',lesson:'Press 1 / 2 or click a form card to cast. Forms spend Breath; dodges spend stamina. Q repeats the selected form.',health:145,damage:18},
  {id:'survival',title:'Survive the night',lesson:'Dodge with Space. Press H to drink a healing potion when hurt. Explore the side routes for scarce supplies.',health:160,damage:20},
- {id:'hand-demon',title:'The Hand Demon',lesson:'Watch its arms. A longer windup precedes its heavy strike. Dodge, recover, and finish before it regenerates.',health:430,damage:28},
+ {id:'hand-demon',title:'The Hand Demon',lesson:'Watch its arms. A longer windup precedes its heavy strike. Dodge, recover, and finish before it regenerates.',health:330,damage:20},
 ] as const;
 export const RUN_KEY='nightfall.selection.run.v1';
 export type TutorialRun={version:1;profileKey:string;stage:number;health:number;potions:number;passed:boolean;crow:boolean;cleared?:boolean;introSeen?:boolean;pickups?:string[];progress?:Progression};
