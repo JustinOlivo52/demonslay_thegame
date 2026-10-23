@@ -186,3 +186,7 @@ Production build and 21 test files pass; Chromium still fails to launch, so no b
 ## Sandbox cast-position repair
 
 Removed automatic target repositioning on form selection and arena resets when starting a fight or repeating a legacy form. Optional Place target ahead moves only an idle target; normal casting stays in place apart from authored technique motion. Flame exposes six playable forms (I–V, IX), with VI–VIII explicitly disabled. See [MAINTENANCE-02.md](MAINTENANCE-02.md) for validation and the browser retest checklist.
+
+## Hand Demon novice balance
+
+Reduced first-boss health/burst damage and improved tells, escape speed and recovery windows. Ordinary demons, saves, rewards and finishing rules are unchanged. Build and all 22 test files pass; Justin should retest the fight. See [BOSS-BALANCE-01.md](BOSS-BALANCE-01.md) for before/after tuning and the next work agenda.

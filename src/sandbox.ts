@@ -8,7 +8,7 @@ import Phaser from 'phaser';
 import {TrialPresentation} from './presentation';
 import {noviceBreathCost,collectPotion,gaitFrame} from './trial-content';
 import {TRAINING_WIDTH,TRAINING_HEIGHT,BASE_Y,SUPPLIES,LANDMARKS,regionOffset,regionEntry,trainingSpawn,trainingDemon,moveTraining,createTrainingScenery} from './training-world';
-import {MELEE_PATTERNS,meleeFor,meleeHits,bossPattern,type MeleeId} from './encounters';
+import {MELEE_PATTERNS,meleeFor,meleeHits,bossPattern,bossDamage,type MeleeId} from './encounters';
 import {TUTORIAL_STAGES,RUN_KEY,profileKey,readRun,advanceRun,newRun,heal} from './tutorial';
 import RUN_REGIONS from './recruit-run-regions.json';
 import SPRITE_REGIONS from './sprite-regions.json';
@@ -250,7 +250,7 @@ class Arena extends Phaser.Scene {
   private encounter=initialEncounter();
   private encounterSeed=this.encounter.seed;
   private get enemyMaxHp(){return IS_SELECTION?this.stage.health:this.encounter.maxHealth;}
-  private get enemyDamage(){return IS_SELECTION?(this.stage.damage+(this.bossHeavy?6:0)+(this.isBoss&&this.ehp<=this.enemyMaxHp*.5?4:0)):this.encounter.damage;}
+  private get enemyDamage(){return this.isBoss?bossDamage(this.patternId,this.ehp/this.enemyMaxHp,this.stage.damage):IS_SELECTION?this.stage.damage:this.encounter.damage;}
   private p = {x: 300, y: 340}; private e = {x: 700, y: 340};
   private hp = IS_SELECTION?this.run.health:R.health; private stamina = this.playerStats.stamina; private ehp = this.enemyMaxHp;
   private angle = 0; private swing = 0; private swordCooldown = 0;
@@ -657,7 +657,7 @@ class Arena extends Phaser.Scene {
             this.target={...this.p};this.enemyAngle=Phaser.Math.Angle.Between(this.e.x,this.e.y,this.target.x,this.target.y);this.enemyHits.clear();
           }else{const a=Phaser.Math.Angle.Between(this.e.x,this.e.y,this.p.x,this.p.y)+(this.isBoss&&distance<350?Math.sin(this.clock*2)*.28:0);this.moveEnemy(Math.cos(a)*plan.speed*dt,Math.sin(a)*plan.speed*dt);}
         }else if(this.enemyState==='windup'){
-          if(this.isBoss&&this.enemyTimer>.38){this.target={...this.p};this.enemyAngle=Phaser.Math.Angle.Between(this.e.x,this.e.y,this.p.x,this.p.y);}
+          if(this.isBoss&&this.enemyTimer>.55){this.target={...this.p};this.enemyAngle=Phaser.Math.Angle.Between(this.e.x,this.e.y,this.p.x,this.p.y);}
           this.enemyTimer-=dt;if(this.enemyTimer<=0){this.enemyState='strike';this.strikeElapsed=0;this.enemyHits.clear();}
         }else if(this.enemyState==='strike'){
           const before=this.strikeElapsed;this.strikeElapsed+=dt;const plan=this.pattern;

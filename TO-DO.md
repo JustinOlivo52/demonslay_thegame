@@ -117,3 +117,7 @@ Removed automatic target repositioning on form selection and arena resets when s
 - [ ] Later: evaluate optional PWA installation.
 
 Successful demon finishes now display 滅 in tutorial/legacy combat and the complete technique labs. Verify the glyph renders on the test device.
+
+## Hand Demon novice balance
+
+Reduced first-boss health/burst damage and improved tells, escape speed and recovery windows. Ordinary demons, saves, rewards and finishing rules are unchanged. Build and all 22 test files pass; Justin should retest the fight. See [BOSS-BALANCE-01.md](BOSS-BALANCE-01.md) for before/after tuning and the next work agenda.
