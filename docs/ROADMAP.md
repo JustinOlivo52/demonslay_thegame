@@ -1,5 +1,7 @@
 # Nightfall roadmap
 
+For current implementation status, remaining V1 work, owners and checkpoint exit criteria, use the [V1 completion checklist](../TO-DO.md). The [implementation work packages](V1-IMPLEMENTATION.md) detail dependencies, saved data, UI/art requirements and verification per checkpoint. Later checkpoint notes below describe historical stages and may be superseded by that checklist.
+
 ## Agreed design
 
 - Top-down 2D action RPG; TypeScript + Phaser; browser first.

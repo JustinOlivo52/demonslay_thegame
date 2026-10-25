@@ -2,6 +2,10 @@
 
 Personal Demon Slayer fan-game project built with TypeScript, Phaser and Vite. Pixel-art gameplay, browser first, single-player.
 
+## V1 development status
+
+The current [V1 completion checklist](TO-DO.md) tracks implemented foundations, remaining systems, personal playtest gates and later-version scope. The [detailed implementation work packages](docs/V1-IMPLEMENTATION.md) explain what each part needs: dependencies, data, UI/art, integration, failure handling and verification. The next implementation checkpoint is saved breathing-form purchases/upgrades; sandbox access is not campaign ownership. Older task notes are archived in [docs/TO-DO-HISTORY.md](docs/TO-DO-HISTORY.md).
+
 ## Playtest the tutorial
 
 Use Node.js 24. In Codespaces, select `main`, open a Codespace and run:
