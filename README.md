@@ -4,7 +4,7 @@ Personal Demon Slayer fan-game project built with TypeScript, Phaser and Vite. P
 
 ## V1 development status
 
-The current [V1 completion checklist](TO-DO.md) tracks implemented foundations, remaining systems, personal playtest gates and later-version scope. The [detailed implementation work packages](docs/V1-IMPLEMENTATION.md) explain what each part needs: dependencies, data, UI/art, integration, failure handling and verification. The next implementation checkpoint is saved breathing-form purchases/upgrades; sandbox access is not campaign ownership. Older task notes are archived in [docs/TO-DO-HISTORY.md](docs/TO-DO-HISTORY.md).
+The current [V1 completion checklist](TO-DO.md) tracks implemented foundations, remaining systems, personal playtest gates and later-version scope. The [detailed implementation work packages](docs/V1-IMPLEMENTATION.md) explain what each part needs: dependencies, data, UI/art, integration, failure handling and verification. The first saved starter-form upgrade slice is implemented; higher-form purchases/casts can be tested separately in the progression preview. Full campaign loadout/casting integration remains pending. Sandbox access is not campaign ownership. Older task notes are archived in [docs/TO-DO-HISTORY.md](docs/TO-DO-HISTORY.md).
 
 ## Playtest the tutorial
 
@@ -103,3 +103,9 @@ All seven numbered Thunder forms and all nine Wind forms are available in Develo
 ## Sandbox cast-position repair
 
 Removed automatic target repositioning on form selection and arena resets when starting a fight or repeating a legacy form. Optional Place target ahead moves only an idle target; normal casting stays in place apart from authored technique motion. Flame exposes six playable forms (I–V, IX), with VI–VIII explicitly disabled. See [MAINTENANCE-02.md](MAINTENANCE-02.md) for validation and the browser retest checklist.
+
+## Saved breathing upgrades and isolated preview
+
+Open **Form catalog** in Final Selection or **Breathing upgrades** at headquarters. Earn 3 separate skill points per level; upgrade either starter form to rank 2 from level 2 for +8% base form damage. Higher ranks require levels 10, 25 and 50 with rising costs. Old recruits retain their stats/checkpoints and receive their earned skill budget.
+
+Use `?progression-lab=1&style=water` (or flame/thunder/wind) to test higher-level purchases and upgraded full-kit casts in memory without changing your recruit. Higher forms are not sold in campaign play yet. See [FORM-PROGRESSION-01.md](FORM-PROGRESSION-01.md) for complete rules, restrictions and the owner playtest.

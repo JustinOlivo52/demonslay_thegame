@@ -190,3 +190,9 @@ Removed automatic target repositioning on form selection and arena resets when s
 ## Hand Demon novice balance
 
 Reduced first-boss health/burst damage and improved tells, escape speed and recovery windows. Ordinary demons, saves, rewards and finishing rules are unchanged. Build and all 22 test files pass; Justin should retest the fight. See [BOSS-BALANCE-01.md](BOSS-BALANCE-01.md) for before/after tuning and the next work agenda.
+
+## Saved form upgrades — first playable slice
+
+Separate level-derived skill points, owned ranks, increasing upgrade costs, level gates through 50, save-before-spend transactions and a functional form menu now support starter upgrades in tutorial/HQ. Starter form damage applies rank and Focus bonuses together in actual combat. Old saves retain existing progression/stat allocations. An isolated in-memory progression preview permits ordinary higher-form purchases/upgrades/casts using the complete style kits; campaign higher-form sales remain disabled until loadout/casting integration. Personal and unrevealed forms remain gated; Water IX cannot sell a nonexistent damage upgrade.
+
+Build and 25 test files pass, including actual scene/menu methods under rendering/DOM stubs and preview ownership/resource checks. Chromium launch still fails, so browser layout/feel need owner verification. See [FORM-PROGRESSION-01.md](FORM-PROGRESSION-01.md).
