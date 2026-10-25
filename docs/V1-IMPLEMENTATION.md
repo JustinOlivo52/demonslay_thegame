@@ -6,7 +6,7 @@ Use this alongside the [V1 checklist](../TO-DO.md). The checklist tracks status;
 
 Complete a small working slice, run relevant checks, deploy it and collect Justin's playtest notes. Record blockers before adding more content. Keep the independent sandbox available. Routine development and publishing are authorized; major scope choices and the final release candidate still receive a concrete review.
 
-Each feature needs its gameplay rules, saved data, UI, art/content, integration and failure handling. A menu mockup or a passing pure-function test alone does not complete a gameplay package. The latest gameplay baseline is PR #19; breathing purchases/upgrades have been inspected but not implemented.
+Each feature needs its gameplay rules, saved data, UI, art/content, integration and failure handling. A menu mockup or a passing pure-function test alone does not complete a gameplay package. The latest gameplay baseline is PR #19; the first starter-upgrade slice is now implemented, with higher-form purchases/casts in an isolated preview. Full campaign equipment/casting and mastery remain pending. See [FORM-PROGRESSION-01.md](../FORM-PROGRESSION-01.md).
 
 ## Dependencies and order
 

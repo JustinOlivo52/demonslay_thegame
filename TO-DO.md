@@ -27,7 +27,7 @@ Carry forward the four existing playable styles: Water, Flame, Thunder and Wind.
 - [x] Sandbox casting/reset-position fixes published in PR #17; finish text/mobile roadmap in PR #18.
 - [x] Novice Hand Demon rebalance published in PR #19: 330 HP, lower burst damage and clearer openings.
 
-**Still missing:** a complete sandbox kit is not campaign ownership, training, purchases or a level-1–50 adventure. Destination introductions are not playable mission/training/crafting systems. The current tutorial reward path reaches level 4; the level-50 cap is a framework, not yet a full campaign.
+**Still missing:** a complete sandbox kit is not campaign ownership, training, purchases or a level-1–50 adventure. Destination introductions are not playable mission/training/crafting systems. The first saved starter-upgrade slice is implemented; higher-form purchases/casts are currently limited to the isolated progression preview. The current tutorial reward path reaches level 4; the level-50 cap is a framework, not yet a full campaign.
 
 ## Checkpoint 1 — close tutorial and sandbox feedback
 
@@ -51,30 +51,30 @@ Done when: the opening can be completed and resumed without a blocking issue, wi
 
 Rules and saves:
 
-- [ ] Define a skill-point award/budget separate from existing character stat points; show both clearly.
-- [ ] Keep exactly two starting forms granted for the chosen style.
-- [ ] Use the existing evenly spaced eligibility levels through 30. A level unlock alone must not grant ownership.
+- [x] Define a skill-point award/budget separate from existing character stat points; show both clearly.
+- [x] Keep exactly two starting forms granted for the chosen style.
+- [x] Use the existing evenly spaced eligibility levels through 30. A level unlock alone must not grant ownership.
 - [ ] Set purchase prices, upgrade ranks and increasing upgrade costs; make the full intended style affordable by 50 while requiring level 50 for final completion.
 - [ ] Decide how use-based mastery and earned training interact with purchased ranks before adding either; do not silently substitute stat points or free sandbox practice.
 - [ ] Define campaign access for personal techniques such as Dead Calm and Thunder VII; keep unavailable/unrevealed forms disabled.
 - [ ] Persist ownership, rank, skill points and equipped forms; migrate existing recruits without deleting progress or duplicating points.
-- [ ] Reject invalid/duplicate purchases, wrong-style ownership, insufficient points and out-of-range ranks.
-- [ ] Commit saves before confirming spending; storage failure must leave points and ownership intact.
+- [x] Reject invalid/duplicate purchases, wrong-style ownership, insufficient points and out-of-range ranks.
+- [x] Commit saves before confirming spending; storage failure must leave points and ownership intact.
 
 Menu and combat:
 
-- [ ] Replace the reference-only catalog with level requirements, owned/locked states, costs, rank, benefits and purchase/upgrade actions.
+- [x] Replace the reference-only catalog with level requirements, owned/locked states, costs, rank, benefits and purchase/upgrade actions.
 - [ ] Let players equip owned forms and identify their cast controls without relying on sandbox links.
 - [ ] Integrate approved complete technique mechanics, poses and elemental effects into campaign encounters for all four V1 styles.
 - [ ] Apply rank benefits to actual combat and display the resulting values consistently.
-- [ ] Pause combat/input while the form menu is open; restore focus cleanly on close.
-- [ ] Provide an isolated progression test fixture for representative levels, including 30 and 50, without granting campaign rewards.
+- [x] Pause combat/input while the form menu is open; restore focus cleanly on close.
+- [x] Provide an isolated progression test fixture for representative levels, including 30 and 50, without granting campaign rewards.
 
 Justin's checkpoint: purchase an eligible form, equip/cast it, upgrade it, reload and confirm the same points/ownership/benefits; try locked and unaffordable actions.
 
 Done when: earned progression changes usable campaign forms and survives save/reload; sandbox access remains independent.
 
-Current state: authorized and inspected, **not implemented yet**. This checklist does not mark the pending progression work as complete.
+Current state: the first saved-upgrade slice is implemented. Normal recruits earn separate skill points and can upgrade their two starter forms with actual tutorial damage/save integration. Higher-form purchase/casting works in an isolated progression preview; normal campaign loadouts/full-kit casting, personal acquisition and mastery remain pending. See [FORM-PROGRESSION-01.md](FORM-PROGRESSION-01.md) for rules, test limits and the playtest checklist.
 
 ## Checkpoint 3 — first complete crow mission loop
 

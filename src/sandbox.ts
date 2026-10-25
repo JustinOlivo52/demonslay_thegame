@@ -1,3 +1,4 @@
+import {commitFormAction,formMultiplier,starterCatalogId,type FormAction} from './form-progression';
 import {mountFullscreen,fullscreenEscape,fullscreenTransition} from './fullscreen';
 import {FormsMenu} from './forms-menu';
 import {startingTechniques,techniquePhase,techniqueProgress,techniqueAdvance,techniqueHits,techniqueHitIndex} from './techniques';
@@ -422,7 +423,7 @@ class Arena extends Phaser.Scene {
         onReplay:()=>{this.run=newRun(PROFILE?profileKey(PROFILE):'',this.progression);this.saveRun();this.openIntro(true);}});
       this.statsPanel=new StatsPanel({read:()=>this.progression,spend:stat=>this.allocateStat(stat),modal:open=>{this.cinematicActive=open;this.presses.clear();for(const key of Object.values(this.keys))key.reset();if(!open){this.sync();document.querySelector<HTMLElement>('#game')!.focus();}}});
       const statsButton=document.createElement('button');statsButton.id='open-stats';statsButton.textContent='Stats';statsButton.addEventListener('click',()=>{if(!this.cinematicActive&&this.mode!=='lost')this.statsPanel.show();});document.querySelector('#forest-actions')!.append(statsButton);
-      const forms=new FormsMenu(PROFILE?.style||'water',()=>this.progression.level,open=>{this.cinematicActive=open;this.presses.clear();for(const key of Object.values(this.keys))key.reset();if(!open){this.sync();document.querySelector<HTMLElement>('#game')!.focus();}});const formsButton=document.createElement('button');formsButton.id='open-forms';formsButton.textContent='Form catalog';formsButton.addEventListener('click',()=>{if(!this.cinematicActive&&this.mode!=='lost')forms.show();});document.querySelector('#forest-actions')!.append(formsButton);
+      const forms=new FormsMenu({style:ACTIVE_STYLE,read:()=>this.progression,spend:(id,action)=>this.spendForm(id,action),modal:open=>{this.cinematicActive=open;this.presses.clear();for(const key of Object.values(this.keys))key.reset();if(!open){this.sync();document.querySelector<HTMLElement>('#game')!.focus({preventScroll:true});}}});const formsButton=document.createElement('button');formsButton.id='open-forms';formsButton.textContent='Form catalog';formsButton.addEventListener('click',()=>{if(!this.cinematicActive&&this.mode!=='lost')forms.show();});document.querySelector('#forest-actions')!.append(formsButton);
       const xp=document.createElement('p');xp.id='progress-xp';document.querySelector('.forest-vitals')!.append(xp);
       const help=document.createElement('button');help.id='tutorial-help';help.textContent='How to play';help.addEventListener('click',()=>this.openIntro(false));document.querySelector('#forest-actions')!.append(help);
       this.potionCount=this.run.potions;if(this.run.passed)this.showPassed();else{this.p=trainingSpawn(this.run.stage);this.e=trainingDemon(this.run.stage);if(this.run.cleared)this.reset();this.player.setPosition(this.p.x,this.p.y+24);this.cameras.main.centerOn(this.p.x,this.p.y);}
@@ -451,6 +452,13 @@ class Arena extends Phaser.Scene {
     document.querySelector<HTMLElement>('#game')!.focus();
   }
   private saveRun(){try{localStorage.setItem(RUN_KEY,JSON.stringify(this.run));}catch{this.trialText='Browser save unavailable. Keep this tab open to retain your progress.';}}
+  private spendForm(id:string,action:FormAction){
+    if(!IS_SELECTION||this.mode==='lost')return {ok:false,message:'Form upgrades are unavailable here.'};
+    if(action==='purchase')return {ok:false,message:'Additional campaign forms arrive in the next checkpoint.'};
+    const result=commitFormAction(this.progression,ACTIVE_STYLE,id,action,progress=>localStorage.setItem(RUN_KEY,JSON.stringify({...this.run,progress,health:this.hp,potions:this.potionCount})));
+    if(result.ok){this.run={...this.run,progress:result.progress,health:this.hp,potions:this.potionCount};this.sync();}
+    return result;
+  }
   private allocateStat(stat:Stat){
     if(!IS_SELECTION||this.mode==='lost')return false;
     try{const old=this.playerStats,progress=spendStat(this.progression,stat),nextStats=attributes(progress),health=Math.min(nextStats.health,this.hp+nextStats.health-old.health),next={...this.run,progress,health,potions:this.potionCount};localStorage.setItem(RUN_KEY,JSON.stringify(next));this.run=next;this.hp=health;this.stamina=Math.min(nextStats.stamina,this.stamina+nextStats.stamina-old.stamina);this.sync();return true;}catch{return false;}
@@ -556,7 +564,7 @@ class Arena extends Phaser.Scene {
     if(!canFinish(this.enemyState==='downed',this.finishRemaining,Phaser.Math.Distance.Between(this.p.x,this.p.y,this.e.x,this.e.y)))return;
     this.executionFlash=0.65;this.finishRemaining=0;this.enemyState='dead';this.technique=null;this.slash=null;this.swing=0.15;
     this.mode='won';this.wins++;
-    if(IS_SELECTION){const award=awardTrialXP(this.progression,this.run.stage);this.run={...this.run,progress:award.progress};if(award.levels){this.hp=this.playerStats.health;this.floatText(this.p.x,this.p.y-105,`LEVEL ${award.progress.level} · HEALTH RESTORED`,'#f0dda4','#243d26',18);}this.labMessage=award.gained?`+${award.gained} XP${award.levels?' · Level up! Full health · 3 stat points earned':''}`:'Practice clear · XP already earned';this.run={...this.run,health:this.hp,potions:this.potionCount,cleared:true};this.saveRun();}
+    if(IS_SELECTION){const award=awardTrialXP(this.progression,this.run.stage);this.run={...this.run,progress:award.progress};if(award.levels){this.hp=this.playerStats.health;this.floatText(this.p.x,this.p.y-105,`LEVEL ${award.progress.level} · HEALTH RESTORED`,'#f0dda4','#243d26',18);}this.labMessage=award.gained?`+${award.gained} XP${award.levels?' · Level up! Full health · 3 stat points + 3 skill points earned':''}`:'Practice clear · XP already earned';this.run={...this.run,health:this.hp,potions:this.potionCount,cleared:true};this.saveRun();}
     this.floatText(this.e.x,this.e.y-85,'滅','#d6faff','#183544',32);
     this.onDemonDefeated();this.endDelay+=0.65;
   }
@@ -568,7 +576,7 @@ class Arena extends Phaser.Scene {
     if(this.formCooldowns[id]>0) {this.labMessage='This form is cooling down.';return;}
     if(this.breath<tuning.stamina) {this.labMessage='Not enough Breath — recover before casting.';return;}
     this.breath-=tuning.stamina;this.formCooldowns[id]=tuning.cooldown;
-    this.technique={id,elapsed:0,angle:this.angle,hit:false,damage:Math.round(tuning.damage*this.playerStats.form),reach:tuning.reach,hitIndices:[],origin:{...this.p}};
+    this.technique={id,elapsed:0,angle:this.angle,hit:false,damage:Math.round(tuning.damage*this.playerStats.form*(IS_SELECTION?formMultiplier(this.progression,ACTIVE_STYLE,starterCatalogId(ACTIVE_STYLE,id)):1)),reach:tuning.reach,hitIndices:[],origin:{...this.p}};
     this.labMessage=`${IS_SELECTION&&PROFILE?STARTERS[PROFILE.style].forms[id==='surface'?0:1]:WATER_FORMS[id].name} · windup`;
   }
   private updateTechnique(dt:number) {
