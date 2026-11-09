@@ -212,3 +212,8 @@ Done when: the complete adventure is playable, recoverable and documented on the
 **Justin:** playtest the checkpoint, report browser/device + steps + expected/actual behavior, judge art/feel/difficulty and supply audio later when ready. Routine implementation, tests, pushes, merges and deployments are already authorized; keep progress checkpoints without repeatedly asking for routine permission.
 
 **Next order:** boss feedback → breathing purchases/upgrades → first crow mission → equipment/world/training → full progression/Hashira trial → release checks. Independent preparation can continue while feedback is pending. This checklist consolidates scope; it does not itself implement the remaining systems.
+
+
+## Dead Calm and Mist sandbox review
+
+See [the implementation note](DEAD-CALM-MIST-01.md) and [individual Mist task](docs/style-tasks/01-MIST.md). Water XI now has a ten-second planted melee guard with a droplet/water-circle opening. All seven Mist forms have a first sandbox adaptation at `?sandbox=1&style=mist`; campaign access and player visual approval remain pending. Remaining style order: Mist → Flower → Serpent → Insect → Beast → Sound → Stone → Love → Sun → Moon.
