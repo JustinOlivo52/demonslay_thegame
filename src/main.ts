@@ -5,6 +5,8 @@ import {RUN_KEY,readRun,profileKey} from './tutorial';
 
 if(new URLSearchParams(location.search).has('progression-lab')) {
  import('./progression-lab');
+} else if(new URLSearchParams(location.search).has('mist-lab')) {
+ import('./mist-lab');
 } else if(new URLSearchParams(location.search).has('thunder-lab')) {
  import('./thunder-lab');
 } else if(new URLSearchParams(location.search).has('wind-lab')) {

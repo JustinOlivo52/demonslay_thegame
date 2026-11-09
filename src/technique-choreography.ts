@@ -32,6 +32,13 @@ export const CHOREOGRAPHY:Record<string,Choreography>={
  'water:basin':{windup:[R,H,H],active:[H,H,D,D],recovery:[D,R,Q],intent:'Lifted high guard into a descending two-handed cut'},
  'water:turbulent':{windup:[R,C],active:[C,R,C,R,C,R,C,R],recovery:[R,Q],intent:'Light zigzag stepping, not a damaging combo'},
  'water:flux':{windup:[R,H],active:[S,B,R,H,S,B,R,H,S,B,R,H],recovery:[S,R,Q],intent:'Three continuous turning cycles build momentum'},
+ 'mist:haze':{windup:[R,R],active:[R,P,P],recovery:[P,R,Q],intent:'A forward point-first thrust'},
+ 'mist:layers':{windup:[R,H],active:[S,B,S,B,S,B,S,B],recovery:[B,R,Q],intent:'Eight alternating connected cuts'},
+ 'mist:scatter':{windup:[R,H],active:[S,B,H,S],recovery:[S,R,Q],intent:'Circular interception sweep'},
+ 'mist:shift':{windup:[Q,D,D],active:[C,C,S],recovery:[S,R,Q],intent:'Low draw, sudden grounded dash and cut'},
+ 'mist:sea':{windup:[R,H],active:[C,S,B,C,S,B,C,S,B],recovery:[B,R,Q],intent:'Traveling sweeping cuts'},
+ 'mist:lunar':{windup:[R,H],active:[U,H,D,H,D,D,L],recovery:[L,R,Q],intent:'Leap, repeated downward cuts, grounded landing'},
+ 'mist:obscure':{windup:[Q,D],active:[R,C,S,R,R,C,S,R,R,C,S],recovery:[S,R,Q],intent:'Slow steps alternate with abrupt cutting bursts'},
  'water:calm':{windup:[Q,Q],active:[Q,Q],recovery:[Q,Q],intent:'Still feet, quiet posture; rapid blade response only on contact'},
  'flame:fire':{windup:[R,H],active:[C,C,S,S],recovery:[S,R,Q],intent:'Burst forward into one horizontal cut'},
  'flame:sun':{windup:[D,D],active:[D,R,U,U],recovery:[U,H,R,Q],intent:'Tail guard into rising vertical arc'},
@@ -44,6 +51,7 @@ export function choreographyCell(pose:Pose,variant:number){if(!Number.isInteger(
 export function sampleChoreography(style:string,id:string,phase:TechniquePhase,phaseProgress:number){const key=style+':'+id,spec=CHOREOGRAPHY[key];if(!spec)throw Error('Missing choreography: '+key);const q=Math.max(0,Math.min(1,phaseProgress)),sequence=phase==='done'?spec.recovery:spec[phase],pose=sequence[Math.min(sequence.length-1,Math.floor(q*sequence.length))];let lift=0;if(phase==='active'){
  if(key==='wind:gusts'||key==='wind:gale'||key==='wind:typhoon')lift=Math.sin(q*Math.PI)*28;
  else if(key==='wind:cold')lift=Math.sin(q*Math.PI)*12;
+ else if(key==='mist:lunar')lift=Math.sin(q*Math.PI)*25;
  else if(key==='water:wheel')lift=Math.sin(q*Math.PI)*25;
  else if(key==='water:basin'||key==='flame:universe')lift=q<.55?Math.sin(q/.55*Math.PI)*18:0;
  else if(key==='water:turbulent')lift=Math.max(0,Math.sin(q*Math.PI*8))*5;

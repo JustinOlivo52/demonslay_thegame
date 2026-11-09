@@ -7,6 +7,15 @@ export function paintWaterTechnique(g:Phaser.GameObjects.Graphics,light:Phaser.G
  const arc=(center:Point,r:number,a:number,length:number,width=8)=>line(Array.from({length:33},(_,i)=>{const t=i/32,angle=a+length*t;return {x:center.x+Math.cos(angle)*r,y:center.y+Math.sin(angle)*r};}),width);
  const ray=(length:number,side=0):Point=>({x:p.x+Math.cos(cast.angle)*length-Math.sin(cast.angle)*side,y:p.y+Math.sin(cast.angle)*length+Math.cos(cast.angle)*side});
  const slash=(r=f.reach,angle=cast.angle,width=9)=>arc(p,r-8,angle-1.1,2.2*Math.min(1,q*2+.15),width);
+ if(cast.id==='calm'){
+  const feet=p.y+18,r=WATER_KIT.calm.reach;
+  if(phase==='windup'){const t=Math.min(1,cast.elapsed/f.windup),y=feet-85*(1-t*t);g.fillStyle(0xbceff4,.95);g.fillEllipse(p.x,y,4+4*t,9);light.lineStyle(1,0x8cdce9,.3);light.strokeEllipse(p.x,feet,12+28*t,5+9*t);return;}
+  if(phase==='done')return;
+  const opening=Math.min(1,(cast.elapsed-f.windup)/.45);
+  g.fillStyle(0x408ea9,.18*fade);g.fillEllipse(p.x,feet,r*2,r*.65);
+  for(let i=0;i<3;i++){const ripple=(clock*.2+i/3)%1;g.lineStyle(i===0?2:1,0xb9eff4,(.8-.35*ripple)*fade*opening);g.strokeEllipse(p.x,feet,r*2*(.65+.35*ripple)*opening,r*.65*(.65+.35*ripple)*opening);}
+  light.lineStyle(1,0xe5ffff,.45*fade*opening);light.strokeEllipse(p.x,feet,r*2*opening,r*.65*opening);return;
+ }
  if(phase==='windup'){light.lineStyle(1,0x96dce5,.4);light.strokeCircle(p.x,p.y,13+cast.elapsed/f.windup*9);if(cast.id==='basin'){g.lineStyle(1,0x96dce5,.4);g.strokeEllipse(cast.impact.x,cast.impact.y,f.reach*2,f.reach*1.2);}return;}
  if(phase==='done')return;
  switch(cast.id){
@@ -20,6 +29,5 @@ export function paintWaterTechnique(g:Phaser.GameObjects.Graphics,light:Phaser.G
  case 'basin':{const a=cast.impact;for(let i=0;i<6;i++){const dx=(i-2.5)*10,height=(1-q)*70+18;line([{x:a.x+dx,y:a.y-height},{x:a.x+dx+Math.sin(i+q*8)*4,y:a.y}],4,.8);}for(let i=0;i<3;i++)arc(a,Math.max(8,f.reach*(q*.7+.3)-i*10),0,Math.PI*2,4);for(let i=0;i<14;i++){const angle=i*Math.PI/7,r=20+q*40;g.fillStyle(0xc6f5f1,.75*fade);g.fillRect(a.x+Math.cos(angle)*r,a.y+Math.sin(angle)*r*.7-10*Math.sin(q*Math.PI),3,3);}break;}
  case 'turbulent':{line(cast.path,3,.3);for(let i=0;i<cast.path.length;i+=5){const v=cast.path[i];g.lineStyle(1,0x9de5f1,.4*fade);g.strokeEllipse(v.x,v.y+12,20,6);g.fillStyle(0xd4f7ef,.65*fade);g.fillRect(v.x-7,v.y+5,2,4);g.fillRect(v.x+8,v.y+7,2,3);}break;}
  case 'flux':{const spin=q*Math.PI*6,pts=Array.from({length:65},(_,i)=>{const t=i/64,a=cast.angle+spin-3.8+t*3.8,r=28+t*72;return {x:p.x+Math.cos(a)*r,y:p.y+Math.sin(a)*r};});line(pts,9+q*7);line(cast.path,4,.4);break;}
- case 'calm':{g.fillStyle(0x4797ad,.035*fade);g.fillEllipse(p.x,p.y+18,100,24);g.lineStyle(1,0xb9e8e5,.16*fade);g.strokeEllipse(p.x,p.y+18,110,25);break;}
  }
 }

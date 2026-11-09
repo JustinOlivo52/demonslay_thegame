@@ -109,3 +109,8 @@ Removed automatic target repositioning on form selection and arena resets when s
 Open **Form catalog** in Final Selection or **Breathing upgrades** at headquarters. Earn 3 separate skill points per level; upgrade either starter form to rank 2 from level 2 for +8% base form damage. Higher ranks require levels 10, 25 and 50 with rising costs. Old recruits retain their stats/checkpoints and receive their earned skill budget.
 
 Use `?progression-lab=1&style=water` (or flame/thunder/wind) to test higher-level purchases and upgraded full-kit casts in memory without changing your recruit. Higher forms are not sold in campaign play yet. See [FORM-PROGRESSION-01.md](FORM-PROGRESSION-01.md) for complete rules, restrictions and the owner playtest.
+
+
+## Dead Calm and Mist sandbox review
+
+See [the implementation note](DEAD-CALM-MIST-01.md) and [individual Mist task](docs/style-tasks/01-MIST.md). Water XI now has a ten-second planted melee guard with a droplet/water-circle opening. All seven Mist forms have a first sandbox adaptation at `?sandbox=1&style=mist`; campaign access and player visual approval remain pending. Remaining style order: Mist → Flower → Serpent → Insect → Beast → Sound → Stone → Love → Sun → Moon.

@@ -59,3 +59,8 @@ All six revealed forms (I–V and IX) have distinct functional prototypes in `?f
 ## Source-fidelity review before Thunder
 
 The complete Water/Flame labs now use a 48-cell pose atlas and authored per-form sequences, with the source-led corrections in SOURCE-FIDELITY-01.md. Water IX is mobility rather than an invented attack combo. This is a description-led candidate for visual review, not frame-exact anime reproduction. Review and refine these candidates before resuming Thunder; tutorial animation stays unchanged until that integration checkpoint.
+
+
+## Dead Calm and Mist sandbox review
+
+See [the implementation note](DEAD-CALM-MIST-01.md) and [individual Mist task](docs/style-tasks/01-MIST.md). Water XI now has a ten-second planted melee guard with a droplet/water-circle opening. All seven Mist forms have a first sandbox adaptation at `?sandbox=1&style=mist`; campaign access and player visual approval remain pending. Remaining style order: Mist → Flower → Serpent → Insect → Beast → Sound → Stone → Love → Sun → Moon.
